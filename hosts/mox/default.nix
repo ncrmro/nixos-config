@@ -12,6 +12,10 @@
     ./hardware-configuration.nix
     ./common.nix
     ../common/users/ncrmro
+    ../common/optional/hyprland-desktop.nix
+    ../common/optional/thunar.nix
+    ../common/optional/virt-manager.nix
+
     # <home-manager/nixos>
     # ./home.nix
   ];

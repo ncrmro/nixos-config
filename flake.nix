@@ -32,6 +32,8 @@
         specialArgs = {inherit inputs outputs;};
       };
   in {
+    formatter = forEachPkgs (pkgs: pkgs.alejandra);
+
     nixosConfigurations = {
       mox = mkNixos [./hosts/mox];
     };
