@@ -11,6 +11,7 @@
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
     ./common.nix
+    ../common/users/ncrmro
     # <home-manager/nixos>
     # ./home.nix
   ];
