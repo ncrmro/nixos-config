@@ -10,12 +10,13 @@
   imports = [
     # inputs.nix-colors.homeManagerModule
     ../common/global
+    ../common/features/desktop/common
     # ../common/global/impermanence.nix
     # ../common/features/cli/gh.nix
     # ../common/features/cli/ssh.nix
     # ../common/features/nvim
     # ../common/features/helix
-    # ../common/features/desktop/hyprland
+    ../common/features/desktop/hyprland
   ];
 
   home = {
