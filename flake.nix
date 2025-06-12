@@ -20,6 +20,7 @@
   outputs = {
     self,
     nixpkgs,
+    home-manager,
     ...
   } @ inputs: let
     inherit (self) outputs;
@@ -31,11 +32,20 @@
         inherit modules;
         specialArgs = {inherit inputs outputs;};
       };
+    mkHome = modules: pkgs:
+      home-manager.lib.homeManagerConfiguration {
+        inherit modules pkgs;
+        extraSpecialArgs = {inherit inputs outputs;};
+      };
   in {
     formatter = forEachPkgs (pkgs: pkgs.alejandra);
 
     nixosConfigurations = {
       mox = mkNixos [./hosts/mox];
+    };
+
+    homeConfigurations = {
+      "ncrmro@mox" = mkHome [./home-manager/ncrmro/mox.nix] nixpkgs.legacyPackages."x86_64-linux";
     };
   };
 }

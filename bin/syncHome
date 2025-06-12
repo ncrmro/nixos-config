@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-git add .
-nix flake check
 /home/ncrmro/.nix-profile/bin/alejandra .
 rsync --recursive --verbose --delete --exclude .git ./ root@192.168.1.118:/etc/nixos/flake/
-ssh root@192.168.1.118 nixos-rebuild build --flake /etc/nixos/flake/#mox
 ssh ncrmro@192.168.1.118 home-manager switch --flake /etc/nixos/flake/#ncrmro@mox
