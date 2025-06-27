@@ -10,7 +10,7 @@
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    ./common.nix
+    ../common/global
     ../common/users/ncrmro
     ../common/optional/hyprland-desktop.nix
     ../common/optional/thunar.nix
