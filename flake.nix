@@ -48,6 +48,7 @@
 
     nixosConfigurations = {
       mox = mkNixos [./hosts/mox];
+      maia = mkNixos [./hosts/maia];
     };
 
     homeConfigurations = {

@@ -1,12 +1,67 @@
 #!/bin/bash
 set -e
 
+# Function to display usage
+usage() {
+    echo "Usage: $0 <host> <ip_address>"
+    echo "Available hosts:"
+    for host in hosts/*/; do
+        host_name=$(basename "$host")
+        if [[ "$host_name" != "common" ]]; then
+            echo "  - $host_name"
+        fi
+    done
+    exit 1
+}
+
+# Function to validate IP address format
+validate_ip() {
+    local ip=$1
+    if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        IFS='.' read -ra ADDR <<< "$ip"
+        for i in "${ADDR[@]}"; do
+            if [[ $i -gt 255 || $i -lt 0 ]]; then
+                return 1
+            fi
+        done
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Check if exactly 2 arguments are provided
+if [[ $# -ne 2 ]]; then
+    echo "Error: Exactly 2 arguments required."
+    usage
+fi
+
+HOST=$1
+IP_ADDRESS=$2
+
+# Validate host exists and is not 'common'
+if [[ ! -d "hosts/$HOST" ]]; then
+    echo "Error: Host '$HOST' does not exist in hosts directory."
+    usage
+elif [[ "$HOST" == "common" ]]; then
+    echo "Error: Cannot use 'common' as a host target."
+    usage
+fi
+
+# Validate IP address format
+if ! validate_ip "$IP_ADDRESS"; then
+    echo "Error: Invalid IP address format: $IP_ADDRESS"
+    exit 1
+fi
+
+echo "Syncing to $HOST at $IP_ADDRESS"
+
 git add .
 nix flake check
 /home/ncrmro/.nix-profile/bin/alejandra .
-echo "Syncing to mox"
-rsync --recursive --verbose --delete --exclude .git ./ root@192.168.1.118:/etc/nixos/flake/
-echo "Rebuilding mox"
-ssh root@192.168.1.118 nixos-rebuild switch --flake /etc/nixos/flake/#mox
-echo "Switching home-manager on mox"
-ssh ncrmro@192.168.1.118 home-manager switch --flake /etc/nixos/flake/#ncrmro@mox
+echo "Syncing to $HOST"
+rsync --recursive --verbose --delete --exclude .git ./ root@$IP_ADDRESS:/etc/nixos/flake/
+echo "Rebuilding $HOST"
+ssh root@$IP_ADDRESS nixos-rebuild switch --flake /etc/nixos/flake/#$HOST
+echo "Switching home-manager on $HOST"
+ssh ncrmro@$IP_ADDRESS home-manager switch --flake /etc/nixos/flake/#ncrmro@$HOST

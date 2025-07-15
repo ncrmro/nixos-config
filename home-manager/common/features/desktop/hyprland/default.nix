@@ -133,7 +133,7 @@
       bind = let
         # wlogout = lib.getExe pkgs.wlogout;
         # wofi = lib.getExe pkgs.wofi;
-        # alacritty = lib.getExe pkgs.alacritty;
+        alacritty = lib.getExe pkgs.alacritty;
         # firefox = lib.getExe pkgs.firefox;
         thunar = lib.getExe pkgs.xfce.thunar;
         # grimblast = lib.getExe inputs.hyprwm-contrib.packages.${pkgs.system}.grimblast;
@@ -141,7 +141,7 @@
       in
         [
           "$mod,M,exit,"
-          #   "$mod,Return,exec,${alacritty}"
+          "$mod,Return,exec,${alacritty}"
           "$mod,Q,killactive,"
           #   "$mod SHIFT,W,exec,${firefox}"
           "$mod,E,exec,${thunar}"
