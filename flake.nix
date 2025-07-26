@@ -1,5 +1,5 @@
 {
-  description = "NixOS config";
+  description = "NCRMRO's NixOS config";
 
   # Define external dependencies (inputs) for this flake
   inputs = {
@@ -61,6 +61,8 @@
   in {
     # Code formatter for this flake (alejandra is a Nix code formatter)
     formatter = forEachPkgs (pkgs: pkgs.alejandra);
+    nixosModules = import ./modules/nixos;
+    homeManagerModules = import ./modules/home-manager;
 
     # NixOS system configurations
     # Each entry represents a complete NixOS system that can be built and deployed

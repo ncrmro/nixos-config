@@ -23,14 +23,14 @@
     # '';
   };
 
-  #   programs.git = {
-  #     enable = true;
-  #     # userName = "Henry Sipp";
-  #     # userEmail = "henry.sipp@hey.com";
-  #     extraConfig = {
-  #       credential.helper = "store";
-  #     };
-  #   };
+  programs.git = {
+    enable = true;
+    userName = "Nicholas Romero";
+    userEmail = "ncrmro@gmail.com";
+    extraConfig = {
+      credential.helper = "store";
+    };
+  };
 
   #   programs.gh = {
   #     enable = true;
