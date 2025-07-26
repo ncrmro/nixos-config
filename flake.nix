@@ -5,15 +5,8 @@
   inputs = {
     # Nixpkgs - The main package repository for Nix/NixOS
     # Using the stable 24.11 release branch
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
     # nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    
-    # You can access packages and modules from different nixpkgs revs
-    # at the same time. Here's an working example
-    # Unstable nixpkgs for bleeding-edge packages when needed
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
-    # Also see the 'unstable-packages' overlay at 'overlays/default.nix'.
-
     # Disko - Declarative disk partitioning for NixOS
     # Useful for automated disk setup and formatting
     disko = {
@@ -24,16 +17,13 @@
     # Home Manager - Declarative user environment management
     # Manages dotfiles, user packages, and user-specific configurations
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.11";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # Hyprland - Dynamic tiling Wayland compositor
-    # Building from git source for latest features
-    hyprland = {
-      type = "git";
-      url = "https://github.com/hyprwm/hyprland";
-      submodules = true;
+    omarchy-nix = {
+      url = "github:henrysipp/omarchy-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
     };
   };
 
@@ -41,12 +31,13 @@
   outputs = {
     self,
     nixpkgs,
-    home-manager,
+    omarchy-nix,
     disko,
+    home-manager,
     ...
   } @ inputs: let
     inherit (self) outputs;
-    
+
     # Helper function to apply a function across supported systems
     forEachSystem = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-darwin"];
     # Helper function to apply a function across package sets for each system
@@ -59,7 +50,7 @@
         inherit modules;
         specialArgs = {inherit inputs outputs;};
       };
-      
+
     # Helper function to create Home Manager configurations
     # Takes modules and pkgs, creates a homeManagerConfiguration with shared extraSpecialArgs
     mkHome = modules: pkgs:
@@ -81,12 +72,13 @@
       # Virtual machine configuration for testing
       test-vm = mkNixos [
         disko.nixosModules.disko
-        { 
+        {
           disko.devices.disk.disk1.device = "/dev/disk/by-id/virtio-virtio-rando123";
           boot.initrd.systemd.emergencyAccess = true;
         }
         ./hosts/test-vm
       ];
+      testbox = mkNixos [./hosts/testbox];
     };
 
     # Home Manager configurations for user environments

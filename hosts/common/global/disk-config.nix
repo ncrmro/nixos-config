@@ -1,5 +1,9 @@
-{ lib, config, utils, ... }:
 {
+  lib,
+  config,
+  utils,
+  ...
+}: {
   disko.devices = {
     disk.disk1 = {
       type = "disk";
@@ -9,7 +13,7 @@
         partitions = {
           esp = {
             name = "ESP";
-            size = "500M";
+            size = "1G";
             type = "EF00";
             content = {
               type = "filesystem";
@@ -18,10 +22,17 @@
             };
           };
           zfs = {
-            size = "100%";
+            end = "-4G";
             content = {
               type = "zfs";
               pool = "rpool";
+            };
+          };
+          encryptedSwap = {
+            size = "100%";
+            content = {
+              type = "swap";
+              randomEncryption = true;
             };
           };
         };
@@ -93,23 +104,23 @@
         config.disko.devices.disk.disk1.device
       ];
     in {
-      after = [ "modprobe@zfs.service" ] ++ devices;
-      requires = [ "modprobe@zfs.service" ];
+      after = ["modprobe@zfs.service"] ++ devices;
+      requires = ["modprobe@zfs.service"];
 
       # Devices are added to 'wants' instead of 'requires' so that a
       # degraded import may be attempted if one of them times out.
       # 'cryptsetup-pre.target' is wanted because it isn't pulled in
       # normally and we want this service to finish before
       # 'systemd-cryptsetup@.service' instances begin running.
-      wants = [ "cryptsetup-pre.target" ] ++ devices;
-      before = [ "cryptsetup-pre.target" ];
+      wants = ["cryptsetup-pre.target"] ++ devices;
+      before = ["cryptsetup-pre.target"];
 
       unitConfig.DefaultDependencies = false;
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
       };
-      path = [ config.boot.zfs.package ];
+      path = [config.boot.zfs.package];
       enableStrictShellChecks = true;
       script = let
         # Check that the FSes we're about to mount actually come from
@@ -147,11 +158,11 @@
       # the TPM2 enters a state where the LUKS volume can no longer be
       # decrypted. That way if we accidentally boot an untrustworthy
       # OS somehow, they can't decrypt the LUKS volume.
-      crypttabExtraOpts = [ "tpm2-measure-pcr=yes" "tpm2-device=auto" ];
+      crypttabExtraOpts = ["tpm2-measure-pcr=yes" "tpm2-device=auto"];
     };
     # Adding an fstab is the easiest way to add file systems whose
     # purpose is solely in the initrd and aren't a part of '/sysroot'.
-    # The 'x-systemd.after=' might seem unnecessary, since the mount                                                                                                
+    # The 'x-systemd.after=' might seem unnecessary, since the mount
     # unit will already be ordered after the mapped device, but it
     # helps when stopping the mount unit and cryptsetup service to
     # make sure the LUKS device can close, thanks to how systemd
@@ -162,8 +173,8 @@
     '';
     # Add some conflicts to ensure the credstore closes before leaving initrd.
     systemd.targets.initrd-switch-root = {
-      conflicts = [ "etc-credstore.mount" "systemd-cryptsetup@credstore.service" ];
-      after = [ "etc-credstore.mount" "systemd-cryptsetup@credstore.service" ];
+      conflicts = ["etc-credstore.mount" "systemd-cryptsetup@credstore.service"];
+      after = ["etc-credstore.mount" "systemd-cryptsetup@credstore.service"];
     };
 
     # After the pool is imported and the credstore is mounted, finally
@@ -175,10 +186,10 @@
     # 'WantsMountsFor' instead and allow providing the key through any
     # of the numerous other systemd credential provision mechanisms.
     systemd.services.rpool-load-key = {
-      requiredBy = [ "initrd.target" ];
-      before = [ "sysroot.mount" "initrd.target" ];
-      requires = [ "import-rpool-bare.service" ];
-      after = [ "import-rpool-bare.service" ];
+      requiredBy = ["initrd.target"];
+      before = ["sysroot.mount" "initrd.target"];
+      requires = ["import-rpool-bare.service"];
+      after = ["import-rpool-bare.service"];
       unitConfig.RequiresMountsFor = "/etc/credstore";
       unitConfig.DefaultDependencies = false;
       serviceConfig = {
@@ -200,9 +211,9 @@
   # '/var' datasets.
   #
   # All of that is incorrect if you just use 'mountpoint=legacy'
-  fileSystems = lib.genAttrs [ "/" "/nix" "/var" ] (fs: {
+  fileSystems = lib.genAttrs ["/" "/nix" "/var"] (fs: {
     device = "rpool/crypt/system${lib.optionalString (fs != "/") fs}";
     fsType = "zfs";
-    options = [ "zfsutil" ];
+    options = ["zfsutil"];
   });
 }
