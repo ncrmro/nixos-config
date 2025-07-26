@@ -15,7 +15,6 @@
 
   programs.home-manager.enable = true;
 
-
   programs.ssh = {
     enable = true;
     # extraConfig = ''

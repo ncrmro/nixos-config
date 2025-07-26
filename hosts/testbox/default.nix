@@ -37,7 +37,7 @@
       ];
     };
   };
-    omarchy = {
+  omarchy = {
     full_name = "Nicholas Romero";
     email_address = "ncrmro@gmail.com";
     theme = "tokyo-night";
