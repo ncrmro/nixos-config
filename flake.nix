@@ -14,6 +14,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v0.4.2";
+
+      # Optional but recommended to limit the size of your system closure.
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Home Manager - Declarative user environment management
     # Manages dotfiles, user packages, and user-specific configurations
     home-manager = {
@@ -25,6 +32,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+    alejandra.url = "github:kamadorueda/alejandra/4.0.0";
+    alejandra.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   # Define what this flake provides (outputs)
@@ -81,6 +90,7 @@
         ./hosts/test-vm
       ];
       testbox = mkNixos [./hosts/testbox];
+      ncrmro-laptop = mkNixos [./hosts/ncrmro-laptop];
     };
 
     # Home Manager configurations for user environments

@@ -41,3 +41,11 @@ nixos-rebuild switch --flake .#testbox --target-host "root@192.168.1.123"
 ```shell
 home-manager switch --flake /etc/nixos/flake/#ncrmro@mox
 ```
+
+---
+
+See [lanzaboote Quickstart](https://github.com/nix-community/lanzaboote/blob/master/docs/QUICK_START.md)
+
+```shell
+sudo sbctl create-keys
+```

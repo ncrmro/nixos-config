@@ -31,6 +31,11 @@
       credential.helper = "store";
     };
   };
+  programs.chromium.extensions = [
+    { id = "nngceckbapebfimnlniiiahkandclblb" } # bitwarden
+    { id = "nkbihfbeogaeaoehlefnkodbefgpgknn" } # metamask
+    { id = "einnioafmpimabjcddiinlhmijaionap" } # wander wallet 
+  ];
 
   #   programs.gh = {
   #     enable = true;

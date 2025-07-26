@@ -8,6 +8,6 @@
   imports = [
     ./openssh.nix
   ];
-  users.mutableUsers = false;
+  nix.settings.experimental-features = ["nix-command" "flakes"];
   time.timeZone = "America/Chicago";
 }
