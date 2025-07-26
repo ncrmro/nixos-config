@@ -29,6 +29,10 @@
     userEmail = "ncrmro@gmail.com";
     extraConfig = {
       credential.helper = "store";
+      push.autoSetupRemote = true;
+      gpg.format = "ssh";
+      commit.gpgsign = true;
+      user.signingkey = "~/.ssh/id_ed25519";
     };
   };
   programs.chromium.extensions = [
