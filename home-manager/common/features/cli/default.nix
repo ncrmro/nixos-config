@@ -12,13 +12,15 @@
   #   ];
 
   home.packages = with pkgs; [
-    bottom # System viewer
-    # unstable.eza # Better ls
-    ripgrep # Better grep
-    # fd # Better find
-    httpie # Better curl
-    # diffsitter # Better diff
-    jq # JSON pretty printer and manipulator
+    # Does not support Network Manager
+    # impala # TUI for managing wifi
+    # bottom # System viewer
+    # # unstable.eza # Better ls
+    # ripgrep # Better grep
+    # # fd # Better find
+    # httpie # Better curl
+    # # diffsitter # Better diff
+    # jq # JSON pretty printer and manipulator
   ];
 
   # home.packages = with pkgs.unstable; [
