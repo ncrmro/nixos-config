@@ -49,3 +49,19 @@ See [lanzaboote Quickstart](https://github.com/nix-community/lanzaboote/blob/mas
 ```shell
 sudo sbctl create-keys
 ```
+
+## Enrolling Finger print
+
+Add the following to the config 
+
+```nix
+systemd.services.fprintd = {
+  wantedBy = [ "multi-user.target" ];
+  serviceConfig.Type = "simple";
+};
+services.fprintd.enable = true;
+```
+
+```shell
+fprintd-enroll
+```

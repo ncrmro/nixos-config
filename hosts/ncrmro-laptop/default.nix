@@ -46,9 +46,15 @@
     enable = true;
     pkiBundle = "/var/lib/sbctl";
   };
-  # omarchy = {
-  #   scale = 1;
-  # };
+  systemd.services.fprintd = {
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig.Type = "simple";
+  };
+  services.fprintd.enable = true;
+
+  omarchy = {
+    scale = 1;
+  };
 
   networking.hostId = "cac44b47";
   system.stateVersion = "25.05";
