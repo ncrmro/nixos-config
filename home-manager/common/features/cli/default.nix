@@ -10,7 +10,8 @@
   #     ./starship.nix
   #     ./zoxide.nix
   #   ];
-
+  programs.uv.enable = true;
+  programs.k9s.enable = true;
   home.packages = with pkgs; [
     # Does not support Network Manager
     # impala # TUI for managing wifi

@@ -6,6 +6,7 @@
   ...
 }: {
 
+  programs.chromium.enable = true;
   programs.chromium.extensions = [
     { id = "nngceckbapebfimnlniiiahkandclblb"; } # bitwarden
     { id = "nkbihfbeogaeaoehlefnkodbefgpgknn"; } # metamask
