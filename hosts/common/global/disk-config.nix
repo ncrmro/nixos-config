@@ -78,6 +78,10 @@
           "crypt/system/nix" = {
             type = "zfs_fs";
             mountpoint = "/nix";
+            options = {
+              "com.sun:auto-snapshot" = "false";
+              "syncoid:no-sync" = "true";
+            };
           };
           "crypt/system/var" = {
             type = "zfs_fs";

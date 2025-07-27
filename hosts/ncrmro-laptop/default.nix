@@ -26,6 +26,24 @@
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-laptop.nix;
   services.hardware.bolt.enable = true;
   services.fwupd.enable = true;
+  services.zfs.trim.enable = true;
+  services.zfs.autoScrub.enable = true;
+  services.zfs.autoSnapshot.enable = true;
+  # services.sanoid = {
+  #   enable = true;
+  #   datasets = {
+  #     "rpool" = {
+  #       recursive = true;
+  #       processChildrenOnly = true;
+  #       hourly = 36;
+  #       daily = 30;
+  #       monthly = 3;
+  #       yearly = 0;
+  #       autosnap = "yes";
+  #       autoprune = "yes";
+  #     };
+  #   };
+  # };
 
   environment.systemPackages = [
     # For debugging and troubleshooting Secure Boot.
