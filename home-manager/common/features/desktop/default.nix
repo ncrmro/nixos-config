@@ -15,7 +15,10 @@
     # Environment variables
     # https://wiki.hyprland.org/Configuring/Variables/#input
     input = {
+      # maps caps lock to ctrl
       kb_options = "compose:caps,ctrl:nocaps";
+      # sensitivity for mouse/trackpack (default: 0)
+      sensitivity = 0.35;
     };
   };
   home.packages = with pkgs; [
