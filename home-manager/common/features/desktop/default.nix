@@ -17,7 +17,7 @@
     # https://wiki.hyprland.org/Configuring/Variables/#input
     input = {
       # maps caps lock to ctrl
-      kb_options = "compose:caps,ctrl:nocaps";
+      kb_options = "compose:caps,ctrl:nocaps,altwin:swap_alt_win";
       # sensitivity for mouse/trackpack (default: 0)
       sensitivity = 0.35;
     };
