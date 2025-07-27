@@ -11,13 +11,6 @@
     { id = "nkbihfbeogaeaoehlefnkodbefgpgknn"; } # metamask
     { id = "einnioafmpimabjcddiinlhmijaionap"; } # wander wallet 
   ];
-
-  #   programs.gh = {
-  #     enable = true;
-  #     gitCredentialHelper = {
-  #       enable = true;
-  #     };
-  #   };
   wayland.windowManager.hyprland.settings = {
     # Environment variables
     # https://wiki.hyprland.org/Configuring/Variables/#input
@@ -27,6 +20,7 @@
   };
   home.packages = with pkgs; [
     bitwarden-desktop
+    code-cursor
   ];
 
 }

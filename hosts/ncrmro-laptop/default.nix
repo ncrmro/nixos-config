@@ -49,7 +49,6 @@
     # For debugging and troubleshooting Secure Boot.
     pkgs.sbctl
     inputs.alejandra.defaultPackage."x86_64-linux"
-    pkgs.code-cursor
   ];
 
   # Lanzaboote currently replaces the systemd-boot module.
