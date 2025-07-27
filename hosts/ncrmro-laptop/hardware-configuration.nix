@@ -12,6 +12,7 @@
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     inputs.disko.nixosModules.disko
+    inputs.nixos-hardware.nixosModules.framework-13-7040-amd
   ];
   disko.devices.disk.disk1.device = "/dev/disk/by-id/nvme-Samsung_SSD_990_PRO_2TB_S7KHNJ0Y507142D";
 

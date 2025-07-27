@@ -34,6 +34,7 @@
     };
     alejandra.url = "github:kamadorueda/alejandra/4.0.0";
     alejandra.inputs.nixpkgs.follows = "nixpkgs";
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   };
 
   # Define what this flake provides (outputs)
@@ -43,6 +44,7 @@
     omarchy-nix,
     disko,
     home-manager,
+    nixos-hardware,
     ...
   } @ inputs: let
     inherit (self) outputs;
