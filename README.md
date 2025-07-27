@@ -65,3 +65,19 @@ services.fprintd.enable = true;
 ```shell
 fprintd-enroll
 ```
+
+## ZFS Snapshotting
+
+```
+zfs set com.sun:auto-snapshot=false rpool/crypt/system/nix
+zfs set syncoid:no-sync=true rpool/crypt/system/nix
+```
+
+## Mounting old ubuntu disk
+
+```
+sudo cryptsetup luksOpen /dev/disk/by-id/ata-Samsung_SSD_980_PRO_2TB_S6B0NL0W127373V-part3 oldroot
+sudo vgscan 
+mkdir -p /media/oldroot
+sudo mount /dev/mapper/vgubuntu-root /media/oldroot/
+```
