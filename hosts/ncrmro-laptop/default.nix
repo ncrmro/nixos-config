@@ -7,7 +7,7 @@
   ...
 } @ args: {
   imports = [
-    inputs.disko.nixosModules.disko
+    
     inputs.lanzaboote.nixosModules.lanzaboote
     # inputs.omarchy-nix.nixosModules.default
     inputs.home-manager.nixosModules.default
@@ -27,8 +27,6 @@
   services.hardware.bolt.enable = true;
   services.fwupd.enable = true;
 
-  disko.devices.disk.disk1.device = "/dev/disk/by-id/nvme-Samsung_SSD_990_PRO_2TB_S7KHNJ0Y507142D";
-  boot.initrd.systemd.emergencyAccess = true;
   environment.systemPackages = [
     # For debugging and troubleshooting Secure Boot.
     pkgs.sbctl
