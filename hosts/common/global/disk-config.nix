@@ -80,13 +80,34 @@
             mountpoint = "/nix";
             options = {
               "com.sun:auto-snapshot" = "false";
-              "syncoid:no-sync" = "true";
             };
           };
           "crypt/system/var" = {
             type = "zfs_fs";
             mountpoint = "/var";
           };
+          # Adding this after an install causes the system to crash ?
+          # "rpool/crypt/system/docker" = {
+          #   type = "zfs_fs";
+          #   mountpoint = "/var/lib/containers/storage";
+          #   options = {
+          #     "com.sun:auto-snapshot" = "false";
+          #   };
+          # };
+          # "crypt/system/containers-storage" = {
+          #   type = "zfs_fs";
+          #   mountpoint = "/var/lib/containers/storage";
+          #   options = {
+          #     "com.sun:auto-snapshot" = "false";
+          #   };
+          # };
+          # "crypt/system/ncrmro-docker" = {
+          #   type = "zfs_fs";
+          #   mountpoint = "/home/ncrmro/.local/share/docker";
+          #   options = {
+          #     "com.sun:auto-snapshot" = "false";
+          #   };
+          # };
         };
       };
     };

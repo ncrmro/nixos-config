@@ -17,6 +17,7 @@
     ../common/global
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
+    ../common/optional/docker-rootless.nix
   ];
   
   users.mutableUsers=true;
