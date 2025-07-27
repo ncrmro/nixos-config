@@ -1,23 +1,57 @@
 {
   inputs,
-  lib,
-  pkgs,
   config,
-  outputs,
+  pkgs,
+  lib,
   ...
 }: {
   imports = [
-    ../features/cli
+    inputs.omarchy-nix.homeManagerModules.default
   ];
-  # ++ (builtins.attrValues outputs.homeManagerModules);
 
-  home = {
-    homeDirectory = lib.mkDefault "/home/${config.home.username}";
-    stateVersion = "24.05";
-    sessionPath = ["$HOME/.local/bin"];
+  home.username = "ncrmro";
+  home.homeDirectory = "/home/ncrmro";
+  home.stateVersion = "25.05";
+
+  programs.home-manager.enable = true;
+
+  programs.ssh = {
+    enable = true;
+    # extraConfig = ''
+    #   Host *
+    #     IdentityAgent ~/.1password/agent.sock
+    # '';
   };
-  programs = {
-    home-manager.enable = true;
-    git.enable = true;
+
+  programs.git = {
+    enable = true;
+    userName = "Nicholas Romero";
+    userEmail = "ncrmro@gmail.com";
+    extraConfig = {
+      credential.helper = "store";
+      push.autoSetupRemote = true;
+      gpg.format = "ssh";
+      commit.gpgsign = true;
+      user.signingkey = "~/.ssh/id_ed25519";
+    };
+  };
+  programs.chromium.extensions = [
+    { id = "nngceckbapebfimnlniiiahkandclblb"; } # bitwarden
+    { id = "nkbihfbeogaeaoehlefnkodbefgpgknn"; } # metamask
+    { id = "einnioafmpimabjcddiinlhmijaionap"; } # wander wallet 
+  ];
+
+  #   programs.gh = {
+  #     enable = true;
+  #     gitCredentialHelper = {
+  #       enable = true;
+  #     };
+  #   };
+  wayland.windowManager.hyprland.settings = {
+    # Environment variables
+    # https://wiki.hyprland.org/Configuring/Variables/#input
+    input = {
+      kb_options = "compose:caps,ctrl:nocaps";
+    };
   };
 }
