@@ -7,6 +7,7 @@
 }: {
   imports = [
     ../common/global
+    ../common/features/desktop
   ];
 
   wayland.windowManager.hyprland.settings = {
