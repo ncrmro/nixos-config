@@ -13,6 +13,7 @@
   programs.uv.enable = true;
   programs.k9s.enable = true;
   home.packages = with pkgs; [
+    devbox
     # Does not support Network Manager
     # impala # TUI for managing wifi
     # bottom # System viewer

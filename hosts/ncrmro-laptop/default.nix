@@ -17,6 +17,7 @@
     ../common/global
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
+    ../common/optional/podman.nix
     ../common/optional/docker-rootless.nix
   ];
   
@@ -71,6 +72,7 @@
   omarchy = {
     scale = 1;
   };
+  
   networking.hostName = "ncrmro-laptop";
   networking.hostId = "cac44b47";
   system.stateVersion = "25.05";
