@@ -13,6 +13,12 @@
       "tty"
       "wheel"
       "docker"
+      "podman"
     ];
+  };
+
+  services.greetd = {
+    enable = true;
+    settings.default_session.user = "ncrmro";
   };
 }

@@ -4,12 +4,9 @@
   virtualisation.containers.enable = true;
   virtualisation = {
     docker = {
-      enable = lib.mkForce false;
-      rootless = {
-        enable = true;
-        setSocketVariable = true;
+      enable = lib.mkForce true;
         daemon.settings = {
-          # dns = [ "1.1.1.1" "8.8.8.8" ];
+          dns = [ "1.1.1.1" "8.8.8.8" ];
           #registry-mirrors = [ "https://mirror.gcr.io" ];
           experimental = true;
           features = {
@@ -17,7 +14,6 @@
             
           };
         };
-      };
       
     };
   };
