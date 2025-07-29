@@ -35,6 +35,10 @@
     alejandra.url = "github:kamadorueda/alejandra/4.0.0";
     alejandra.inputs.nixpkgs.follows = "nixpkgs";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   # Define what this flake provides (outputs)
@@ -45,6 +49,7 @@
     disko,
     home-manager,
     nixos-hardware,
+    nix-index-database,
     ...
   } @ inputs: let
     inherit (self) outputs;

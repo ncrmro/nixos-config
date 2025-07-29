@@ -9,6 +9,7 @@
     ../common/global
     ../common/features/cli
     ../common/features/desktop
+    inputs.nix-index-database.homeModules.nix-index
   ];
 
   wayland.windowManager.hyprland.settings = {
