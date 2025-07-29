@@ -22,11 +22,16 @@
     # ../common/optional/docker-root.nix
   ];
   
+  programs.zsh.enable = true;
   users.mutableUsers=true;
+  users.users.ncrmro.shell = pkgs.zsh;
+  
+  
   home-manager.useGlobalPkgs = true;
   home-manager.backupFileExtension = "backup";
   home-manager.extraSpecialArgs = {inherit inputs outputs;};
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-laptop.nix;
+  
   services.hardware.bolt.enable = true;
   services.fwupd.enable = true;
   services.zfs.trim.enable = true;

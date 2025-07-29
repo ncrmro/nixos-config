@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{lib,pkgs, ...}: {
   #   imports = [
   #     ./bash.nix
   #     ./bat.nix
@@ -29,4 +29,22 @@
   # home.packages = with pkgs.unstable; [
   #   eza # better ls, temporary whilst as eza is not on stable yet
   # ]
+  programs.zsh = {
+    enable = true;
+    # enableCompletions = true;
+    # autosuggestions.enable = true;
+    # syntaxHighlighting.enable = true;
+
+    shellAliases = {
+      ll = "ls -l";
+      # update = "sudo nixos-rebuild switch";
+    };
+    history.size = 100000;
+    zplug.enable = lib.mkForce false;
+    oh-my-zsh = { # "ohMyZsh" without Home Manager
+      enable = true;
+      plugins = [ "git" ];
+      theme = "robbyrussell";
+    };
+  };
 }
