@@ -14,6 +14,7 @@
   programs.k9s.enable = true;
   home.packages = with pkgs; [
     devbox
+    kubectl
     # Does not support Network Manager
     # impala # TUI for managing wifi
     # bottom # System viewer
