@@ -25,6 +25,6 @@
   home.packages = with pkgs; [
     bitwarden-desktop
     code-cursor
+    zoom-us
   ];
-
 }
