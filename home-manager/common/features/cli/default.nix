@@ -17,6 +17,7 @@
   home.packages = with pkgs; [
     devbox
     kubectl
+    kubernetes-helm
     # Does not support Network Manager
     # impala # TUI for managing wifi
     # bottom # System viewer
