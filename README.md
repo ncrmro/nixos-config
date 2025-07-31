@@ -81,3 +81,10 @@ sudo vgscan
 mkdir -p /media/oldroot
 sudo mount /dev/mapper/vgubuntu-root /media/oldroot/
 ```
+
+```
+sudo umount /media/oldroot
+sudo vgexport vgubuntu
+sudo cryptsetup luksClose oldroot
+
+```
