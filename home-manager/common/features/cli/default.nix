@@ -12,6 +12,8 @@
   #   ];
   programs.uv.enable = true;
   programs.k9s.enable = true;
+  programs.git.lfs.enable = true;
+  programs.awscli.enable = true;
   home.packages = with pkgs; [
     devbox
     kubectl
@@ -37,6 +39,10 @@
 
     shellAliases = {
       ll = "ls -l";
+      "docker comppose" = "docker-compose";
+      dc = "docker-compose";
+      k = "kubectl";
+
       # update = "sudo nixos-rebuild switch";
     };
     history.size = 100000;
