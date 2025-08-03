@@ -26,5 +26,6 @@
     bitwarden-desktop
     code-cursor
     zoom-us
+    postman
   ];
 }
