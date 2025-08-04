@@ -18,6 +18,7 @@
     devbox
     kubectl
     kubernetes-helm
+    railway
     # Does not support Network Manager
     # impala # TUI for managing wifi
     # bottom # System viewer
