@@ -19,6 +19,7 @@
     kubectl
     kubernetes-helm
     railway
+    traceroute
     # Does not support Network Manager
     # impala # TUI for managing wifi
     # bottom # System viewer
