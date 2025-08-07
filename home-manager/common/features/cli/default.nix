@@ -20,6 +20,7 @@
     kubernetes-helm
     railway
     traceroute
+    sqlite
     # Does not support Network Manager
     # impala # TUI for managing wifi
     # bottom # System viewer
