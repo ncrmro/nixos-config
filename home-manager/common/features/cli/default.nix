@@ -21,6 +21,7 @@
     railway
     traceroute
     sqlite
+    turso-cli
     # Does not support Network Manager
     # impala # TUI for managing wifi
     # bottom # System viewer
