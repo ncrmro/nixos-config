@@ -88,6 +88,3 @@ sudo vgexport vgubuntu
 sudo cryptsetup luksClose oldroot
 ```
 
-# docker-compose cant pull images even thought logged in.
-
-`ln -s ${XDG_RUNTIME_DIR}/containers/auth.json ~/.docker/config.json`
