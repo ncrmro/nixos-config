@@ -22,6 +22,7 @@
     traceroute
     sqlite
     turso-cli
+    htop
     # Does not support Network Manager
     # impala # TUI for managing wifi
     # bottom # System viewer
