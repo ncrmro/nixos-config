@@ -23,6 +23,7 @@
     sqlite
     turso-cli
     htop
+    corepack
     # Does not support Network Manager
     # impala # TUI for managing wifi
     # bottom # System viewer
