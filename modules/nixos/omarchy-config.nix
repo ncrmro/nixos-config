@@ -11,6 +11,7 @@
     full_name = "Nicholas Romero";
     email_address = "ncrmro@gmail.com";
     theme = "tokyo-night";
+    username = "ncrmro";
     # primary_font = "Berkeley Mono";
     # exclude_packages = with pkgs; [
     #   signal-desktop
