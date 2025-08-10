@@ -24,6 +24,10 @@
     turso-cli
     htop
     corepack
+    fnm
+    zip
+    unzip
+    nodejs_24
     # Does not support Network Manager
     # impala # TUI for managing wifi
     # bottom # System viewer
