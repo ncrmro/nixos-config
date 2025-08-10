@@ -29,8 +29,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     omarchy-nix = {
-      url = "github:henrysipp/omarchy-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # url = "git+https://github.com/ncrmro/omarchy-nix.git?ref=feat/submodule-omarchy-arch";
+      url = "git+file:///home/ncrmro/code/omarchy/omarchy-nix/";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
       inputs.home-manager.follows = "home-manager";
     };
     alejandra.url = "github:kamadorueda/alejandra/4.0.0";

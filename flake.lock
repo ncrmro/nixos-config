@@ -708,6 +708,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1747542820,
+        "narHash": "sha256-GaOZntlJ6gPPbbkTLjbd8BMWaDYafhuuYRNrxCGnPJw=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "292fa7d4f6519c074f0a50394dbbe69859bb6043",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "omarchy-nix": {
       "inputs": {
         "home-manager": [
@@ -716,21 +732,23 @@
         "hyprland": "hyprland",
         "nix-colors": "nix-colors",
         "nixpkgs": [
-          "nixpkgs"
-        ]
+          "nixpkgs-unstable"
+        ],
+        "walker": "walker"
       },
       "locked": {
-        "lastModified": 1753407722,
-        "narHash": "sha256-AyAVHW9kYMLpE+gQcHkAirAkJkvcRSmrXtZUncl0Pwg=",
-        "owner": "henrysipp",
-        "repo": "omarchy-nix",
-        "rev": "e22477bb580bf242b33d13d4a27eff6bd14d0ebf",
-        "type": "github"
+        "lastModified": 1754770282,
+        "narHash": "sha256-c37w+MJwqmfaDtypFsYgnbySim7TIKiXwIG0tHlmPCU=",
+        "ref": "refs/heads/feat/submodule-omarchy-arch",
+        "rev": "a5203d26d3244f1f3d3799bb7d0b32c201525a4d",
+        "revCount": 82,
+        "submodules": true,
+        "type": "git",
+        "url": "file:///home/ncrmro/code/omarchy/omarchy-nix/"
       },
       "original": {
-        "owner": "henrysipp",
-        "repo": "omarchy-nix",
-        "type": "github"
+        "type": "git",
+        "url": "file:///home/ncrmro/code/omarchy/omarchy-nix/"
       }
     },
     "pre-commit-hooks": {
@@ -847,6 +865,41 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default-linux",
+        "type": "github"
+      }
+    },
+    "systems_2": {
+      "locked": {
+        "lastModified": 1689347949,
+        "narHash": "sha256-12tWmuL2zgBgZkdoB6qXZsgJEH9LR3oUgpaQq2RbI80=",
+        "owner": "nix-systems",
+        "repo": "default-linux",
+        "rev": "31732fcf5e8fea42e59c2488ad31a0e651500f68",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default-linux",
+        "type": "github"
+      }
+    },
+    "walker": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_3",
+        "systems": "systems_2"
+      },
+      "locked": {
+        "lastModified": 1754498210,
+        "narHash": "sha256-JTj7vQWxx/b4ov3/T/3uNcbINcifizIhjE4yzvhg5nw=",
+        "owner": "abenz1267",
+        "repo": "walker",
+        "rev": "4fc6626a28b08b444d3eea97002b5ad20a4497f1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "abenz1267",
+        "ref": "v0.13.22",
+        "repo": "walker",
         "type": "github"
       }
     },
