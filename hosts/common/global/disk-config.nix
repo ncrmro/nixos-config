@@ -108,6 +108,20 @@
           #     "com.sun:auto-snapshot" = "false";
           #   };
           # };
+          # "crypt/system/var/lib/libvirt/storage" = {
+          #   type = "zfs_fs";
+          #   mountpoint = "/var/lib/libvirt/storage";
+          #   options = {
+          #     "com.sun:auto-snapshot" = "false";
+          #   };
+          # };
+          # "crypt/system/var/lib/libvirt/images" = {
+          #   type = "zfs_fs";
+          #   mountpoint = "/var/lib/libvirt/images";
+          #   options = {
+          #     "com.sun:auto-snapshot" = "false";
+          #   };
+          # };
         };
       };
     };
