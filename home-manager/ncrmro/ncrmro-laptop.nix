@@ -9,6 +9,7 @@
     ../common/global
     ../common/features/cli
     ../common/features/desktop
+    ../common/features/virtualization.nix
     inputs.nix-index-database.homeModules.nix-index
   ];
 
