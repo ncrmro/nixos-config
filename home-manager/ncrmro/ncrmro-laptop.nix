@@ -28,6 +28,21 @@
       "5, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
       "6, monitor:desc:BOE 0x0BCA, persistent:true, default:true"
     ];
+    windowrule = [
+      # Tag messaging apps
+      "tag +messaging, class:Signal"
+      "tag +messaging, title:.*WhatsApp.*"
+      "tag +messaging, class:discord"
+      "tag +messaging, class:telegram"
+      
+      # Apply rules to all messaging apps
+      "noscreenshare, tag:messaging"
+      "workspace special:magic, tag:messaging"
+      "tile, tag:messaging"
+
+      "workspace special:magic, title:.*YouTube Music.*"
+      "tile, title:.*YouTube Music.*"
+    ];
   };
   home.packages = with pkgs; [
     google-chrome
