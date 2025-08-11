@@ -53,8 +53,7 @@
       "docker comppose" = "docker-compose";
       dc = "docker-compose";
       k = "kubectl";
-
-      # update = "sudo nixos-rebuild switch";
+      g = "git";
     };
     history.size = 100000;
     zplug.enable = lib.mkForce false;

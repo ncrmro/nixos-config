@@ -46,6 +46,7 @@
   };
   home.packages = with pkgs; [
     google-chrome
+    zig
   ];
   programs.git.extraConfig = {
       credential.helper = "store";
@@ -57,4 +58,10 @@
         path = "~/code/unsupervised/.gitconfig";
       };
   };
+    programs.zsh = {
+
+    shellAliases = {
+      update = "sudo nixos-rebuild switch --flake ~/nixos-config#ncrmro-laptop";
+    };
+    };
 }

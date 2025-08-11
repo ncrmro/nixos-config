@@ -34,6 +34,15 @@
       commit.gpgsign = true;
       user.signingkey = "~/.ssh/id_ed25519";
       lfs.enable = true;
+      alias = {
+        b = "branch";
+        p = "pull";
+        co = "checkout";
+        c = "commit";
+        ci = "commit -a";
+        a = "add";
+        st = "status -sb";
+      };
     };
   };
 
