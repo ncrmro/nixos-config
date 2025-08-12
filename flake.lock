@@ -737,18 +737,19 @@
         "walker": "walker"
       },
       "locked": {
-        "lastModified": 1754770282,
-        "narHash": "sha256-c37w+MJwqmfaDtypFsYgnbySim7TIKiXwIG0tHlmPCU=",
-        "ref": "refs/heads/feat/submodule-omarchy-arch",
-        "rev": "a5203d26d3244f1f3d3799bb7d0b32c201525a4d",
-        "revCount": 82,
+        "lastModified": 1754987528,
+        "narHash": "sha256-K/LxQ2AM1cdEiPp/OFI/+0ColiuOnaz9GLW8hcvkYN0=",
+        "ref": "feat/submodule-omarchy-arch",
+        "rev": "9cec790206af6ebc384dc44e3b2778c76eaa0d18",
+        "revCount": 85,
         "submodules": true,
         "type": "git",
-        "url": "file:///home/ncrmro/code/omarchy/omarchy-nix/"
+        "url": "https://github.com/ncrmro/omarchy-nix.git"
       },
       "original": {
+        "ref": "feat/submodule-omarchy-arch",
         "type": "git",
-        "url": "file:///home/ncrmro/code/omarchy/omarchy-nix/"
+        "url": "https://github.com/ncrmro/omarchy-nix.git"
       }
     },
     "pre-commit-hooks": {
