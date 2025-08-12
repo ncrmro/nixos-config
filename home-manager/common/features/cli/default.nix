@@ -1,4 +1,8 @@
-{lib,pkgs, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: {
   #   imports = [
   #     ./bash.nix
   #     ./bat.nix
@@ -63,13 +67,13 @@
       "docker comppose" = "docker-compose";
       dc = "docker-compose";
       k = "kubectl";
-      
     };
     history.size = 100000;
     zplug.enable = lib.mkForce false;
-    oh-my-zsh = { # "ohMyZsh" without Home Manager
+    oh-my-zsh = {
+      # "ohMyZsh" without Home Manager
       enable = true;
-      plugins = [ "git" ];
+      plugins = ["git"];
       theme = "robbyrussell";
     };
   };

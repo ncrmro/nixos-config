@@ -6,7 +6,7 @@
     # Nixpkgs - The main package repository for Nix/NixOS
     # Using the stable 24.11 release branch
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable"; 
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     # nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     # Disko - Declarative disk partitioning for NixOS
     # Useful for automated disk setup and formatting

@@ -7,7 +7,6 @@
   ...
 } @ args: {
   imports = [
-    
     inputs.lanzaboote.nixosModules.lanzaboote
     # inputs.omarchy-nix.nixosModules.default
     inputs.home-manager.nixosModules.default
@@ -22,17 +21,16 @@
     ../common/optional/virt-manager.nix
     # ../common/optional/docker-root.nix
   ];
-  
+
   programs.zsh.enable = true;
-  users.mutableUsers=true;
+  users.mutableUsers = true;
   users.users.ncrmro.shell = pkgs.zsh;
-  
-  
+
   home-manager.useGlobalPkgs = true;
   home-manager.backupFileExtension = "backup";
   home-manager.extraSpecialArgs = {inherit inputs outputs;};
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-laptop.nix;
-  
+
   services.hardware.bolt.enable = true;
   services.fwupd.enable = true;
   services.zfs.trim.enable = true;
@@ -56,7 +54,6 @@
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.greetd.enableGnomeKeyring = true;
 
-
   environment.systemPackages = [
     # For debugging and troubleshooting Secure Boot.
     pkgs.sbctl
@@ -74,7 +71,7 @@
     pkiBundle = "/var/lib/sbctl";
   };
   systemd.services.fprintd = {
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = ["multi-user.target"];
     serviceConfig.Type = "simple";
   };
   services.fprintd.enable = true;
@@ -87,7 +84,6 @@
 
   # networking.firewall.enable = true;
   # networking.firewall.logRefusedConnections = true;
-  
 
   networking.hostName = "ncrmro-laptop";
   networking.hostId = "cac44b47";

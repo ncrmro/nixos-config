@@ -5,12 +5,11 @@
   lib,
   ...
 }: {
-
   programs.chromium.enable = true;
   programs.chromium.extensions = [
-    { id = "nngceckbapebfimnlniiiahkandclblb"; } # bitwarden
-    { id = "nkbihfbeogaeaoehlefnkodbefgpgknn"; } # metamask
-    { id = "einnioafmpimabjcddiinlhmijaionap"; } # wander wallet 
+    {id = "nngceckbapebfimnlniiiahkandclblb";} # bitwarden
+    {id = "nkbihfbeogaeaoehlefnkodbefgpgknn";} # metamask
+    {id = "einnioafmpimabjcddiinlhmijaionap";} # wander wallet
   ];
   wayland.windowManager.hyprland.settings = {
     # Environment variables

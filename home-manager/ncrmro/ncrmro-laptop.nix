@@ -34,7 +34,7 @@
       "tag +messaging, title:.*WhatsApp.*"
       "tag +messaging, class:discord"
       "tag +messaging, class:telegram"
-      
+
       # Apply rules to all messaging apps
       "noscreenshare, tag:messaging"
       "workspace special:magic, tag:messaging"
@@ -49,19 +49,18 @@
     zig
   ];
   programs.git.extraConfig = {
-      credential.helper = "store";
-      push.autoSetupRemote = true;
-      gpg.format = "ssh";
-      commit.gpgsign = true;
-      user.signingkey = "~/.ssh/id_ed25519";
-      includeIf."gitdir:~/code/unsupervised/" = {
-        path = "~/code/unsupervised/.gitconfig";
-      };
+    credential.helper = "store";
+    push.autoSetupRemote = true;
+    gpg.format = "ssh";
+    commit.gpgsign = true;
+    user.signingkey = "~/.ssh/id_ed25519";
+    includeIf."gitdir:~/code/unsupervised/" = {
+      path = "~/code/unsupervised/.gitconfig";
+    };
   };
-    programs.zsh = {
-
+  programs.zsh = {
     shellAliases = {
       update = "sudo nixos-rebuild switch --flake ~/nixos-config#ncrmro-laptop";
     };
-    };
+  };
 }
