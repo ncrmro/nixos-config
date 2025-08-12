@@ -28,11 +28,13 @@
     zip
     unzip
     nodejs_24
+    devenv
+    kind
     # Does not support Network Manager
     # impala # TUI for managing wifi
-    # bottom # System viewer
-    # # unstable.eza # Better ls
-    # ripgrep # Better grep
+    bottom # System viewer
+    eza # Better ls
+    ripgrep # Better grep
     # # fd # Better find
     # httpie # Better curl
     # # diffsitter # Better diff
@@ -41,7 +43,7 @@
 
   # home.packages = with pkgs.unstable; [
   #   eza # better ls, temporary whilst as eza is not on stable yet
-  # ]
+  # ];
   programs.zsh = {
     enable = true;
     # enableCompletions = true;
@@ -49,7 +51,8 @@
     # syntaxHighlighting.enable = true;
 
     shellAliases = {
-      ll = "ls -l";
+      l = "eza -1l";
+      grep = "rg";
       "docker comppose" = "docker-compose";
       dc = "docker-compose";
       k = "kubectl";
