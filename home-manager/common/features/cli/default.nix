@@ -30,6 +30,7 @@
     nodejs_24
     devenv
     kind
+    chart-testing
     # Does not support Network Manager
     # impala # TUI for managing wifi
     bottom # System viewer
@@ -51,12 +52,18 @@
     # syntaxHighlighting.enable = true;
 
     shellAliases = {
+      # Better unix commands
       l = "eza -1l";
+      ls = "eza -1l";
       grep = "rg";
+      cd = "z";
+      # Local Development
+      g = "git";
+      lzg = "lazygit";
       "docker comppose" = "docker-compose";
       dc = "docker-compose";
       k = "kubectl";
-      g = "git";
+      
     };
     history.size = 100000;
     zplug.enable = lib.mkForce false;
