@@ -45,58 +45,62 @@
   networking.hostId = "22386ca6";
 
   # Enable wireguard
-  # networking.firewall = {
-  #   allowedUDPPorts = [51820];
-  # };
-  # networking.wireguard.interfaces = {
-  #   # "wg0" is the network interface name. You can name the interface arbitrarily.
-  #   wg0 = {
-  #     # Determines the IP address and subnet of the server's end of the tunnel interface.
-  #     ips = ["10.13.13.4/24"];
+  networking.firewall = {
+    allowedUDPPorts = [51820];
+  };
+  networking.wireguard.interfaces = {
+    # "wg0" is the network interface name. You can name the interface arbitrarily.
+    wg0 = {
+      # Determines the IP address and subnet of the server's end of the tunnel interface.
+      ips = ["10.13.13.4/24"];
 
-  #     # The port that WireGuard listens to. Must be accessible by the client.
-  #     listenPort = 51820;
+      # The port that WireGuard listens to. Must be accessible by the client.
+      listenPort = 51820;
 
-  #     # This allows the wireguard server to route your traffic to the internet and hence be like a VPN
-  #     # For this to work you have to set the dnsserver IP of your router (or dnsserver of choice) in your clients
-  #     #postSetup = ''
-  #     #  ${pkgs.iptables}/bin/iptables -t nat -A POSTROUTING -s 10.13.13.0/24 -o enp3s0 -j MASQUERADE
-  #     #'';
+      # This allows the wireguard server to route your traffic to the internet and hence be like a VPN
+      # For this to work you have to set the dnsserver IP of your router (or dnsserver of choice) in your clients
+      #postSetup = ''
+      #  ${pkgs.iptables}/bin/iptables -t nat -A POSTROUTING -s 10.13.13.0/24 -o enp3s0 -j MASQUERADE
+      #'';
 
-  #     # This undoes the above command
-  #     #postShutdown = ''
-  #     #  ${pkgs.iptables}/bin/iptables -t nat -D POSTROUTING -s 10.13.13.0/24 -o enp3s0 -j MASQUERADE
-  #     #'';
+      # This undoes the above command
+      #postShutdown = ''
+      #  ${pkgs.iptables}/bin/iptables -t nat -D POSTROUTING -s 10.13.13.0/24 -o enp3s0 -j MASQUERADE
+      #'';
 
-  #     # Path to the private key file.
-  #     #
-  #     # Note: The private key can also be included inline via the privateKey option,
-  #     # but this makes the private key world-readable; thus, using privateKeyFile is
-  #     # recommended.
-  #     privateKeyFile = "/etc/wireguard/private.key";
+      # Path to the private key file.
+      #
+      # Note: The private key can also be included inline via the privateKey option,
+      # but this makes the private key world-readable; thus, using privateKeyFile is
+      # recommended.
+      privateKeyFile = "/etc/wireguard/private.key";
 
-  #     peers = [
-  #       {
-  #         endpoint = "107.143.74.118:51820";
-  #         publicKey = "KOb09l0R69ZnHTs5RuGKBJgAN4AHGW8gfnIIErCOjWE=";
-  #         allowedIPs = ["10.13.13.0/24"];
-  #         presharedKeyFile = "/etc/wireguard/ocean.psk";
-  #         persistentKeepalive = 25;
-  #       }
-  #     ];
-  #   };
-  # };
+      peers = [
+        {
+          endpoint = "192.168.1.10:51820";
+          publicKey = "KOb09l0R69ZnHTs5RuGKBJgAN4AHGW8gfnIIErCOjWE=";
+          allowedIPs = ["10.13.13.0/24"];
+          presharedKeyFile = "/etc/wireguard/ocean.psk";
+          persistentKeepalive = 25;
+        }
+      ];
+    };
+  };
   # Enable ZFS backup and NAS
-  # users.users.ocean-sync = {
-  #   isSystemUser = true;
-  #   shell = pkgs.bash;
-  #   group = "zfs-sync";
-  #   openssh.authorizedKeys.keys = [
-  #     "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCYpB2eDinPg/QrRH6MQXq7SIQpnywmtuFKTAYRibY5Pezkz+eJFYvL/edXID0vo4NeGOGSRtSrPlhICZPnR2U06CFnWG6Wr9qwxIizRG3iMFLVKT9K3ZmXslwBDXYe2Mnnd6KN05DTSUUwCTuUBnTxslfVI3/AU/KkaAinQ9J78i9C4ibPIMPqhgaRum4y3VDWkpJVnuXHLK11fbVKnevP+4KzYuL8/moJCD4sdAmsezdYaNO0Fl+3kPwK0mYmOzWeZTalRAHdPxLSyltIolYHqW8YEWHXP9adUdAaux9Iz22t9Tune9seDT8Jog1iUfwBjiYfw7I4i22XlbNzv14qPYeSiSBpRGzEqYQTdNeJxO91sZrY14MYwq3QVEY5HvtJAtNBbwnhtuZygKNFkK1IGbgvscPxWUWChCrbAFrrYHzQHYHlwOH2drn2CysrvOEEMZK9PKQYY3fKl5TLm0nG78wqR7oo2e816YNR6tDN6ThDgrHI2txtVvHb+ZOOhHM= root@ocean"
-  #   ];
-  # };
-  # users.groups.zfs-sync = {};
-  # services.zfs.autoScrub.enable = true;
+  # zfs create -p lake/backups/ocean
+  # zfs allow ocean-sync lake/backups/ocean
+  # zfs allow ocean-sync receive,create,mount,readonly lake/backups/ocean
+  # zfs set readonly=off lake/backups/ocean
+  users.users.ocean-sync = {
+    isSystemUser = true;
+    shell = pkgs.bash;
+    group = "zfs-sync";
+    openssh.authorizedKeys.keys = [
+      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCYpB2eDinPg/QrRH6MQXq7SIQpnywmtuFKTAYRibY5Pezkz+eJFYvL/edXID0vo4NeGOGSRtSrPlhICZPnR2U06CFnWG6Wr9qwxIizRG3iMFLVKT9K3ZmXslwBDXYe2Mnnd6KN05DTSUUwCTuUBnTxslfVI3/AU/KkaAinQ9J78i9C4ibPIMPqhgaRum4y3VDWkpJVnuXHLK11fbVKnevP+4KzYuL8/moJCD4sdAmsezdYaNO0Fl+3kPwK0mYmOzWeZTalRAHdPxLSyltIolYHqW8YEWHXP9adUdAaux9Iz22t9Tune9seDT8Jog1iUfwBjiYfw7I4i22XlbNzv14qPYeSiSBpRGzEqYQTdNeJxO91sZrY14MYwq3QVEY5HvtJAtNBbwnhtuZygKNFkK1IGbgvscPxWUWChCrbAFrrYHzQHYHlwOH2drn2CysrvOEEMZK9PKQYY3fKl5TLm0nG78wqR7oo2e816YNR6tDN6ThDgrHI2txtVvHb+ZOOhHM= root@ocean"
+    ];
+  };
+  users.groups.zfs-sync = {};
+  services.zfs.autoScrub.enable = true;
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
