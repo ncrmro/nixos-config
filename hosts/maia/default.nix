@@ -14,7 +14,7 @@
     ./hardware-configuration.nix
     ./disk-config.nix
     ../common/global/zfs.luks.root.nix
-    # ./zpool.lake.nix
+    ./zpool.lake.nix
     ../common/global/openssh.nix
     ../common/global/secureboot.nix
   ];

@@ -22,11 +22,13 @@
   boot.initrd = {
     # This would be a nightmare without systemd initrd
     systemd.enable = true;
+    
+    # TODO remove this eventually
     # Bound device and start timeouts during initrd to avoid indefinite waits
-    # systemd.extraConfig = ''
-    #   DefaultDeviceTimeoutSec=120s
-    #   DefaultTimeoutStartSec=120s
-    # '';
+    systemd.extraConfig = ''
+      DefaultDeviceTimeoutSec=120s
+      DefaultTimeoutStartSec=120s
+    '';
 
     # Disable NixOS's systemd service that imports the pool
     # systemd.services.zfs-import-rpool.enable = false;
@@ -135,7 +137,7 @@
         Type = "oneshot";
         ImportCredential = "zfs-lake.mount";
         RemainAfterExit = true;
-        ExecStart = "${config.boot.zfs.package}/bin/zfs load-key -L file://\"${CREDENTIALS_DIRECTORY}\"/zfs-lake.mount lake/crypt";
+        ExecStart = "${config.boot.zfs.package}/bin/zfs load-key -L file://\"\${CREDENTIALS_DIRECTORY}\"/zfs-lake.mount lake/crypt";
       };
     };
   };
