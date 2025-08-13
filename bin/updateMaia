@@ -1,0 +1,1 @@
+nixos-rebuild switch --flake .#maia --target-host "root@192.168.1.124"
