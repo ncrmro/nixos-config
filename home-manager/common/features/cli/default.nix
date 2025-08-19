@@ -40,6 +40,7 @@
     bottom # System viewer
     eza # Better ls
     ripgrep # Better grep
+    claude-code
     # # fd # Better find
     # httpie # Better curl
     # # diffsitter # Better diff
