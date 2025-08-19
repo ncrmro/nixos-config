@@ -26,5 +26,7 @@
     code-cursor
     zoom-us
     postman
+    telegram-desktop
+    discord-ptb
   ];
 }
