@@ -41,6 +41,9 @@
     eza # Better ls
     ripgrep # Better grep
     claude-code
+    jq
+    yq
+    sops
     # # fd # Better find
     # httpie # Better curl
     # # diffsitter # Better diff
