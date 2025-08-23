@@ -44,6 +44,7 @@
     jq
     yq
     sops
+    stow
     # # fd # Better find
     # httpie # Better curl
     # # diffsitter # Better diff
