@@ -30,6 +30,9 @@
   home-manager.backupFileExtension = "backup";
   home-manager.extraSpecialArgs = {inherit inputs outputs;};
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-laptop.nix;
+  
+  # TODO I guess this wasn't compiled with AirPlay 2 support?
+  # services.shairport-sync.enable = true;
 
   services.hardware.bolt.enable = true;
   services.fwupd.enable = true;
