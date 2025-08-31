@@ -28,5 +28,6 @@
     postman
     telegram-desktop
     discord-ptb
+    papers
   ];
 }
