@@ -45,6 +45,7 @@
     yq
     sops
     stow
+    postgresql
     # # fd # Better find
     # httpie # Better curl
     # # diffsitter # Better diff
@@ -82,4 +83,13 @@
       theme = "robbyrussell";
     };
   };
+
+  programs.git.aliases = {
+      s = "switch";
+      f = "fetch";
+      p = "pull";
+      rff = "reset --force";
+      r = "rebase";
+#      rsdm = "git checkout orgin/main --"
+    };
 }
