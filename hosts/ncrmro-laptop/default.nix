@@ -20,7 +20,8 @@
     ../common/optional/docker-rootless.nix
     ../common/optional/virt-manager.nix
     # ../common/optional/docker-root.nix
-   ../common/optional/shairport-sync.nix
+    #../common/optional/shairport-sync.nix
+   ../common/optional/tailscale.nix
   ];
 
   programs.zsh.enable = true;
@@ -31,7 +32,6 @@
   home-manager.backupFileExtension = "backup";
   home-manager.extraSpecialArgs = {inherit inputs outputs;};
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-laptop.nix;
-  
 
   services.greetd = {
     enable = true;
