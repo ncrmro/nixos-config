@@ -20,4 +20,9 @@ chmod 600 "$LOCAL_CONFIG_PATH"
 
 echo "K3s config downloaded to $LOCAL_CONFIG_PATH"
 
+# Create symlink in user's ~/.kube directory
+mkdir -p ~/.kube
+ln -sf "$(realpath "$LOCAL_CONFIG_PATH")" ~/.kube/catalyst-primary.yml
+echo "Symlink created at ~/.kube/catalyst-primary.yml"
+
 yq . ${LOCAL_CONFIG_PATH} | base64 -w 0
