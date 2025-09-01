@@ -20,6 +20,7 @@
     ../common/optional/docker-rootless.nix
     ../common/optional/virt-manager.nix
     # ../common/optional/docker-root.nix
+   ../common/optional/shairport-sync.nix
   ];
 
   programs.zsh.enable = true;
@@ -31,8 +32,6 @@
   home-manager.extraSpecialArgs = {inherit inputs outputs;};
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-laptop.nix;
   
-  # TODO I guess this wasn't compiled with AirPlay 2 support?
-  # services.shairport-sync.enable = true;
 
   services.greetd = {
     enable = true;
