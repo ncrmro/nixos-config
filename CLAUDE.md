@@ -1,0 +1,1 @@
+- Spikes folder is used for experimental/prototype code and project exploration read more [here](/spikes/README.md)
