@@ -8,7 +8,6 @@
 #    runs `zfs load-key` for dataset lake/crypt
 # 6) sysroot.mount and initrd.target continue; switch-root is ordered to wait until credstore
 #    units can stop cleanly via conflicts/after
-
 {
   lib,
   config,
@@ -22,7 +21,7 @@
   boot.initrd = {
     # This would be a nightmare without systemd initrd
     systemd.enable = true;
-    
+
     # TODO remove this eventually
     # Bound device and start timeouts during initrd to avoid indefinite waits
     systemd.extraConfig = ''

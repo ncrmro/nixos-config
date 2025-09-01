@@ -19,21 +19,19 @@
     ../common/global/secureboot.nix
   ];
 
-
   boot.initrd.systemd.emergencyAccess = true;
 
   environment.systemPackages = [
     pkgs.sbctl
     pkgs.htop
+    pkgs.usbutils
   ];
-  
 
   # Set your time zone.
   time.timeZone = "America/Chicago";
 
   services.openssh.settings.PermitRootLogin = "yes";
 
-  
   networking.hostId = "22386ca6"; # generate with: head -c 8 /etc/machine-id
   networking.hostName = "maia"; # Define your hostname.
 
