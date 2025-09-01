@@ -13,6 +13,7 @@
     ../common/global
     ../../modules/users/root.nix
     ../../modules/users/ncrmro.nix
+    ../common/optional/tailscale.nix
     ./k3s.nix
   ];
 

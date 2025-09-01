@@ -12,7 +12,7 @@
     # Additional arguments for tailscale daemon
     extraUpFlags = [
       # Uncomment and modify for use with Headscale
-      # "--login-server=https://headscale.example.com"
+      "--login-server=https://mercury.ncrmro.com"
     ];
   };
   

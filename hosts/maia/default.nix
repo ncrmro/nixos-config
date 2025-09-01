@@ -17,6 +17,7 @@
     # ./zpool.lake.nix
     ../common/global/openssh.nix
     ../common/global/secureboot.nix
+    ../common/optional/tailscale.nix
   ];
 
   boot.initrd.systemd.emergencyAccess = true;
