@@ -100,6 +100,10 @@
         modules = [./hosts/mercury];
         specialArgs = {inherit inputs self;};
       };
+       catalystPrimary = nixpkgs.lib.nixosSystem {
+        modules = [./hosts/catalystPrimary];
+        specialArgs = {inherit inputs self;};
+      };
     };
 
     # Home Manager configurations
