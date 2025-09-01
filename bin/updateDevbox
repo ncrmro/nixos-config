@@ -1,4 +1,4 @@
-nixos-rebuild switch --flake .#devbox --target-host "root@192.168.1.123"
+nixos-rebuild switch --flake .#devbox --target-host "root@ncrmro-devbox.mercury"
 
 HOST="root@192.168.1.123"
 REMOTE_K3S_PATH="/etc/rancher/k3s/k3s.yaml"
@@ -17,7 +17,13 @@ rsync -avz "${HOST}:${REMOTE_K3S_PATH}" "$LOCAL_CONFIG_PATH"
 # Set proper permissions
 chmod 600 "$LOCAL_CONFIG_PATH"
 
-echo "K3s config downloaded to $LOCAL_CONFIG_PATH"
+# Extract hostname from HOST variable (remove user@ prefix)
+SERVER_HOST=$(echo "$HOST" | sed 's/^[^@]*@//')
+
+# Update server address in kubeconfig
+sed -i "s|server: https://127.0.0.1:6443|server: https://${SERVER_HOST}:6443|" "$LOCAL_CONFIG_PATH"
+
+echo "K3s config downloaded to $LOCAL_CONFIG_PATH with updated server address"
 
 # Create symlink in user's ~/.kube directory
 mkdir -p ~/.kube
