@@ -13,14 +13,17 @@
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
     ./disk-config.nix
-    ../common/global/zfs.luks.root.nix
+    ../common/optional/zfs.luks.root.nix
     # ./zpool.lake.nix
-    ../common/global/openssh.nix
-    ../common/global/secureboot.nix
+    ./zpool.lake.noblock.nix
+    ../common/global
+    ../common/optional/secureboot.nix
     ../common/optional/tailscale.nix
+    ../../modules/users/ncrmro.nix
+    ../../modules/users/root.nix
   ];
 
-  boot.initrd.systemd.emergencyAccess = true;
+  boot.initrd.systemd.emergencyAccess = false;
 
   environment.systemPackages = [
     pkgs.sbctl
