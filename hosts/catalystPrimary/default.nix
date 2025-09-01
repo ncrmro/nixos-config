@@ -1,8 +1,7 @@
 { lib,... }: {
   imports = [
     ./hardware-configuration.nix
-    
-    
+    ./k3s.nix
   ];
 
   boot.tmp.cleanOnBoot = true;
