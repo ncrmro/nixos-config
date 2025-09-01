@@ -12,6 +12,7 @@
     ./hardware-configuration.nix
     ../common/global
     ../../modules/users/root.nix
+    ../../modules/users/ncrmro.nix
     ../common/global/openssh.nix
     ./k3s.nix
   ];

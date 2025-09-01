@@ -1,24 +1,9 @@
 {...}: {
   users.users.ncrmro = {
     isNormalUser = true;
-    initialPassword = "changeme";
+    extraGroups = ["wheel"];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyrDBVcGK+pUZOTUA7MLoD5vYK/kaPF6TNNyoDmwNl2 ncrmro@ncrmro-laptop-fw7k"
     ];
-    extraGroups = [
-      "audio"
-      "input"
-      "networkmanager"
-      "sound"
-      "tty"
-      "wheel"
-      "docker"
-      "podman"
-    ];
-  };
-
-  services.greetd = {
-    enable = true;
-    settings.default_session.user = "ncrmro";
   };
 }
