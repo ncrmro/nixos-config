@@ -1,12 +1,10 @@
-# disko-config.nix
-{ lib, ... }:
-{
+{lib, ...}: {
   disko.devices = {
     disk = {
       # OS Disk - referenced by serial number
       os = {
         type = "disk";
-        device = "/dev/disk/by-id/virtio-os-disk-001";
+        device = "/dev/vda";
         content = {
           type = "gpt";
           partitions = {
@@ -19,7 +17,7 @@
                 mountpoint = "/boot";
               };
             };
-            zfsPool = {
+            rpool = {
               size = "100%";
               content = {
                 type = "zfs";
@@ -29,8 +27,8 @@
           };
         };
       };
-      
-   
+    };
+
     # ZFS Pool Configurations
     zpool = {
       # OS Pool - Single Disk
@@ -44,7 +42,6 @@
           xattr = "sa";
           relatime = "on";
         };
-        
         datasets = {
           "root" = {
             type = "zfs_fs";
@@ -60,17 +57,24 @@
               "com.sun:auto-snapshot" = "false";
             };
           };
-          "var" = {
+          "home" = {
             type = "zfs_fs";
-            mountpoint = "/var";
+            mountpoint = "/home";
             options = {
               mountpoint = "legacy";
               "com.sun:auto-snapshot" = "true";
             };
           };
+          "var" = {
+            type = "zfs_fs";
+            mountpoint = "/var";
+            options = {
+              mountpoint = "legacy";
+              "com.sun:auto-snapshot" = "false";
+            };
+          };
         };
       };
-    
     };
   };
 }

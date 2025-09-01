@@ -96,6 +96,10 @@
         modules = [./hosts/devbox];
         specialArgs = {inherit inputs self;};
       };
+      mercury = nixpkgs.lib.nixosSystem {
+        modules = [./hosts/mercury];
+        specialArgs = {inherit inputs self;};
+      };
     };
 
     # Home Manager configurations
