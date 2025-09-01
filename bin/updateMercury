@@ -1,1 +1,17 @@
-nixos-rebuild switch --flake .#mercury --target-host "root@216.128.136.32"
+#!/usr/bin/env bash
+
+HOST="root@216.128.136.32"
+
+# Rebuild the NixOS configuration
+nixos-rebuild switch --flake .#mercury --target-host "$HOST"
+
+# Try to create headscale user 'ncrmro' and ignore errors if output contains 'UNIQUE'
+echo "Attempting to create headscale user 'ncrmro'..."
+output=$(ssh $HOST "headscale users create ncrmro" 2>&1) || {
+  if echo "$output" | grep -q "UNIQUE"; then
+    echo "User 'ncrmro' already exists (UNIQUE constraint). Continuing..."
+  else
+    echo "Error creating user: $output"
+    exit 1
+  fi
+}
