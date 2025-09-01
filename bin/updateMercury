@@ -1,0 +1,1 @@
+nixos-rebuild switch --flake .#mercury --target-host "root@216.128.136.32"
