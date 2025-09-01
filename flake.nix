@@ -60,13 +60,13 @@
       # Desktop/workstation configuration
       mox = nixpkgs.lib.nixosSystem {
         modules = [./hosts/mox];
-        specialArgs = {inherit inputs self;};
+        specialArgs = {inherit inputs self; outputs = self;};
       };
 
       # Home server configuration
       maia = nixpkgs.lib.nixosSystem {
         modules = [./hosts/maia];
-        specialArgs = {inherit inputs self;};
+        specialArgs = {inherit inputs self; outputs = self;};
       };
 
       # Test VM configuration
@@ -79,30 +79,30 @@
           }
           ./hosts/test-vm
         ];
-        specialArgs = {inherit inputs self;};
+        specialArgs = {inherit inputs self; outputs = self;};
       };
 
       # Additional systems
       testbox = nixpkgs.lib.nixosSystem {
         modules = [./hosts/testbox];
-        specialArgs = {inherit inputs self;};
+        specialArgs = {inherit inputs self; outputs = self;};
       };
 
       ncrmro-laptop = nixpkgs.lib.nixosSystem {
         modules = [./hosts/ncrmro-laptop];
-        specialArgs = {inherit inputs self;};
+        specialArgs = {inherit inputs self; outputs = self;};
       };
       devbox = nixpkgs.lib.nixosSystem {
         modules = [./hosts/devbox];
-        specialArgs = {inherit inputs self;};
+        specialArgs = {inherit inputs self; outputs = self;};
       };
       mercury = nixpkgs.lib.nixosSystem {
         modules = [./hosts/mercury];
-        specialArgs = {inherit inputs self;};
+        specialArgs = {inherit inputs self; outputs = self;};
       };
        catalystPrimary = nixpkgs.lib.nixosSystem {
         modules = [./hosts/catalystPrimary];
-        specialArgs = {inherit inputs self;};
+        specialArgs = {inherit inputs self; outputs = self;};
       };
     };
 
