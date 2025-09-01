@@ -1,0 +1,1 @@
+nixos-rebuild switch --flake .#catalystPrimary --target-host "root@144.202.67.5"

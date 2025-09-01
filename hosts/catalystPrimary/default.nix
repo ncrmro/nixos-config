@@ -1,39 +1,17 @@
-{
-  inputs,
-  outputs,
-  modulesPath,
-  lib,
-  pkgs,
-  ...
-} @ args: {
+{ lib,... }: {
   imports = [
-    inputs.disko.nixosModules.disko
-    ./disko-config.nix
     ./hardware-configuration.nix
-    ../common/global
-    ../../modules/users/root.nix
-    ../../modules/users/ncrmro.nix
-    ../common/global/openssh.nix
+    
+    
   ];
 
-  boot.initrd.systemd.enable = true;
-  boot.initrd.systemd.emergencyAccess = false;
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  services.openssh.settings.PermitRootLogin = "yes";
-
-  environment.systemPackages = [
-    pkgs.htop
-  ];
-
-  environment.variables = {
-    TERM = "xterm-256color"; # Or your preferred terminal type
-  };
-
-  time.timeZone = "America/Chicago";
-  networking.hostName = "catalayst-primary";
-  networking.hostId = "d3af8ee5";
+  boot.tmp.cleanOnBoot = true;
+  zramSwap.enable = true;
+  networking.hostName = "catalyst-primary";
+  networking.domain = "";
+  services.openssh.enable = true;
+  users.users.root.openssh.authorizedKeys.keys = [''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyrDBVcGK+pUZOTUA7MLoD5vYK/kaPF6TNNyoDmwNl2 ncrmro@ncrmro-laptop-fw7k'' ];
   system.stateVersion = "25.05";
+
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 }
