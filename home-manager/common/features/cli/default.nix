@@ -85,11 +85,11 @@
   };
 
   programs.git.aliases = {
-      s = "switch";
-      f = "fetch";
-      p = "pull";
-      rff = "reset --force";
-      r = "rebase";
-#      rsdm = "git checkout orgin/main --"
-    };
+    s = "switch";
+    f = "fetch";
+    p = "pull";
+    rff = "reset --force";
+    r = "rebase";
+    #      rsdm = "git checkout orgin/main --"
+  };
 }
