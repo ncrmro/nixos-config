@@ -1,1 +1,23 @@
-nixos-rebuild switch --flake .#catalystPrimary --target-host "root@144.202.67.5"
+#!/bin/bash
+set -e
+
+HOST="root@144.202.67.5"
+REMOTE_K3S_PATH="/etc/rancher/k3s/k3s.yaml"
+LOCAL_CONFIG_DIR="$(dirname "$0")/../.kube"
+LOCAL_CONFIG_PATH="${LOCAL_CONFIG_DIR}/catalyst-primary.yml"
+
+# Rebuild the NixOS configuration
+nixos-rebuild switch --flake .#catalystPrimary --target-host "$HOST"
+
+# Create .kube directory if it doesn't exist
+mkdir -p "$LOCAL_CONFIG_DIR"
+
+# Download k3s config file from remote host using rsync
+rsync -avz "${HOST}:${REMOTE_K3S_PATH}" "$LOCAL_CONFIG_PATH"
+
+# Set proper permissions
+chmod 600 "$LOCAL_CONFIG_PATH"
+
+echo "K3s config downloaded to $LOCAL_CONFIG_PATH"
+
+yq . ${LOCAL_CONFIG_PATH} | base64 -w 0
