@@ -13,7 +13,6 @@
     ../common/global
     ../../modules/users/root.nix
     ../../modules/users/ncrmro.nix
-    ../common/global/openssh.nix
     ./k3s.nix
   ];
 
@@ -33,7 +32,6 @@
     TERM = "xterm-256color"; # Or your preferred terminal type
   };
 
-  time.timeZone = "America/Chicago";
   networking.hostName = "ncrmro-devbox";
   networking.hostId = "1cea3b82";
   system.stateVersion = "25.05";
