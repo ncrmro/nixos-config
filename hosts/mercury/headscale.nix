@@ -29,7 +29,7 @@ in {
       settings = { 
         logtail.enabled = false;
         server_url = "https://${domain}";
-        dns.base_domain = "ncrmro.com";
+        dns.base_domain = "mercury";
 
       };
     };
