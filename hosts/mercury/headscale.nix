@@ -1,13 +1,37 @@
-let domain = "headscale.example.com";
+{ config, ... }:
+let domain = "mercury.ncrmro.com";
 in {
+  # Configure ACME for SSL certificates
+  security.acme = {
+    acceptTerms = true;
+    defaults.email = "ncrmro@gmail.com";  # Replace with your email
+  };
+  
+  # Enable nginx for reverse proxy
+  services.nginx = {
+    enable = true;
+    recommendedProxySettings = true;
+    recommendedTlsSettings = true;
+    recommendedOptimisation = true;
+    recommendedGzipSettings = true;
+  };
+  
+  # Open firewall ports for HTTP/HTTPS and headscale
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 80 443 8080 ];
+  };
   services = {
     headscale = {
       enable = true;
       address = "0.0.0.0";
       port = 8080;
-      server_url = "https://${domain}";
-      dns = { baseDomain = "example.com"; };
-      settings = { logtail.enabled = false; };
+      settings = { 
+        logtail.enabled = false;
+        server_url = "https://${domain}";
+        dns.base_domain = "ncrmro.com";
+
+      };
     };
 
     nginx.virtualHosts.${domain} = {
@@ -22,3 +46,4 @@ in {
   };
 
   environment.systemPackages = [ config.services.headscale.package ];
+}
