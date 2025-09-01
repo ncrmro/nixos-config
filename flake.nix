@@ -5,29 +5,29 @@
     # Main package sources
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
-    
+
     # Tools and modules
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     lanzaboote = {
       url = "github:nix-community/lanzaboote/v0.4.2";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     omarchy-nix = {
       url = "git+file:///home/ncrmro/code/omarchy/omarchy-nix/";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
       inputs.home-manager.follows = "home-manager";
     };
-    
+
     # Additional tools
     alejandra.url = "github:kamadorueda/alejandra/4.0.0";
     alejandra.inputs.nixpkgs.follows = "nixpkgs";
@@ -38,19 +38,19 @@
     };
   };
 
-  outputs = inputs @ { 
-    self, 
-    nixpkgs, 
-    disko, 
-    home-manager, 
-    nixos-hardware, 
+  outputs = inputs @ {
+    self,
+    nixpkgs,
+    disko,
+    home-manager,
+    nixos-hardware,
     nix-index-database,
-    ... 
+    ...
   }: {
     # Code formatter
     formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.alejandra;
     formatter.aarch64-darwin = nixpkgs.legacyPackages.aarch64-darwin.alejandra;
-    
+
     # Import NixOS and Home Manager modules
     nixosModules = import ./modules/nixos;
     homeManagerModules = import ./modules/home-manager;
@@ -60,15 +60,15 @@
       # Desktop/workstation configuration
       mox = nixpkgs.lib.nixosSystem {
         modules = [./hosts/mox];
-        specialArgs = { inherit inputs self; };
+        specialArgs = {inherit inputs self;};
       };
-      
+
       # Home server configuration
       maia = nixpkgs.lib.nixosSystem {
         modules = [./hosts/maia];
-        specialArgs = { inherit inputs self; };
+        specialArgs = {inherit inputs self;};
       };
-      
+
       # Test VM configuration
       test-vm = nixpkgs.lib.nixosSystem {
         modules = [
@@ -79,18 +79,22 @@
           }
           ./hosts/test-vm
         ];
-        specialArgs = { inherit inputs self; };
+        specialArgs = {inherit inputs self;};
       };
-      
+
       # Additional systems
       testbox = nixpkgs.lib.nixosSystem {
         modules = [./hosts/testbox];
-        specialArgs = { inherit inputs self; };
+        specialArgs = {inherit inputs self;};
       };
-      
+
       ncrmro-laptop = nixpkgs.lib.nixosSystem {
         modules = [./hosts/ncrmro-laptop];
-        specialArgs = { inherit inputs self; };
+        specialArgs = {inherit inputs self;};
+      };
+      devbox = nixpkgs.lib.nixosSystem {
+        modules = [./hosts/devbox];
+        specialArgs = {inherit inputs self;};
       };
     };
 
@@ -99,7 +103,7 @@
       "ncrmro@mox" = home-manager.lib.homeManagerConfiguration {
         modules = [./home-manager/ncrmro/mox.nix];
         pkgs = nixpkgs.legacyPackages."x86_64-linux";
-        extraSpecialArgs = { inherit inputs self; };
+        extraSpecialArgs = {inherit inputs self;};
       };
     };
   };
