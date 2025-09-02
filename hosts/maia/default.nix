@@ -16,6 +16,7 @@
     ../common/optional/zfs.luks.root.nix
     # ./zpool.lake.nix
     ./zpool.lake.noblock.nix
+    ./zfs.users.nix
     ../common/global
     ../common/optional/secureboot.nix
     ../common/optional/tailscale.nix

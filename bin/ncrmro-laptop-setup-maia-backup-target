@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# This script creates the necessary ZFS dataset on maia.mercury to receive snapshots from ncrmro-laptop
+# Run this script once to set up the receiving dataset structure
+
+set -e
+
+echo "Setting up backup target on maia.mercury..."
+
+# Use a single SSH connection with heredoc to run all commands
+ssh root@maia.mercury <<'EOF'
+  set -e
+  
+  echo "Creating ZFS dataset for ncrmro-laptop backups..."
+  sudo zfs create -p lake/backups/ncrmro-laptop
+  
+  echo "Setting permissions for laptop-sync user..."
+  sudo zfs allow laptop-sync create,receive,mount,compression,mountpoint,readonly lake/backups/ncrmro-laptop
+  
+  echo "Configuring dataset properties..."
+  sudo zfs set compression=zstd lake/backups/ncrmro-laptop
+  sudo zfs set mountpoint=/lake/backups/ncrmro-laptop lake/backups/ncrmro-laptop
+  
+  echo "Setup completed successfully on maia.mercury"
+EOF
+
+if [ $? -eq 0 ]; then
+  echo "Successfully created backup dataset on maia.mercury"
+  echo "Replication can now be started from ncrmro-laptop"
+else
+  echo "Error: Failed to set up backup target on maia.mercury"
+  echo "Check the error messages above for details"
+  exit 1
+fi
+

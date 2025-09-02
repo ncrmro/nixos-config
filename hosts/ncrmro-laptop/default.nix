@@ -21,7 +21,8 @@
     ../common/optional/virt-manager.nix
     # ../common/optional/docker-root.nix
     #../common/optional/shairport-sync.nix
-   ../common/optional/tailscale.nix
+    ../common/optional/tailscale.nix
+    ./zfs.remote-replication.nix
   ];
 
   programs.zsh.enable = true;
@@ -60,21 +61,6 @@
   services.zfs.trim.enable = true;
   services.zfs.autoScrub.enable = true;
   services.zfs.autoSnapshot.enable = true;
-  # services.sanoid = {
-  #   enable = true;
-  #   datasets = {
-  #     "rpool" = {
-  #       recursive = true;
-  #       processChildrenOnly = true;
-  #       hourly = 36;
-  #       daily = 30;
-  #       monthly = 3;
-  #       yearly = 0;
-  #       autosnap = "yes";
-  #       autoprune = "yes";
-  #     };
-  #   };
-  # };
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.greetd.enableGnomeKeyring = true;
 
