@@ -10,16 +10,13 @@ echo "Setting up backup target on maia.mercury..."
 # Use a single SSH connection with heredoc to run all commands
 ssh root@maia.mercury <<'EOF'
   set -e
-  
+  # Because we are running with --no-sync-snap and --skip-parent we need to ensure cryptswap is present as that is where all the OS child datasets are
+  # Credstore will be created under rpoo/credstore and must be present to unlock cryptswap
   echo "Creating ZFS dataset for ncrmro-laptop backups..."
-  sudo zfs create -p lake/backups/ncrmro-laptop
+  zfs create -o mountpoint=none -p lake/backups/ncrmro-laptop/rpool/crypt
   
   echo "Setting permissions for laptop-sync user..."
-  sudo zfs allow laptop-sync create,receive,mount,compression,mountpoint,readonly lake/backups/ncrmro-laptop
-  
-  echo "Configuring dataset properties..."
-  sudo zfs set compression=zstd lake/backups/ncrmro-laptop
-  sudo zfs set mountpoint=/lake/backups/ncrmro-laptop lake/backups/ncrmro-laptop
+  zfs allow laptop-sync create,receive,mount,compression,mountpoint,readonly,keylocation lake/backups/ncrmro-laptop
   
   echo "Setup completed successfully on maia.mercury"
 EOF
@@ -32,4 +29,3 @@ else
   echo "Check the error messages above for details"
   exit 1
 fi
-

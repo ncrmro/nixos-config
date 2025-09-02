@@ -1,10 +1,15 @@
-{pkgs, ...} :
-{
+{pkgs, ...}: {
   # Enable ZFS backup and NAS
   # zfs create -p lake/backups/ocean
   # zfs allow ocean-sync lake/backups/ocean
   # zfs allow ocean-sync receive,create,mount,readonly lake/backups/ocean
   # zfs set readonly=off lake/backups/ocean
+
+  # Install packages required for ZFS replication
+  environment.systemPackages = with pkgs; [
+    lzop
+    mbuffer
+  ];
   users.users.ocean-sync = {
     isSystemUser = true;
     shell = pkgs.bash;
@@ -20,6 +25,6 @@
     group = "zfs-sync";
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyrDBVcGK+pUZOTUA7MLoD5vYK/kaPF6TNNyoDmwNl2 ncrmro@ncrmro-laptop-fw7k"
-    ]; 
+    ];
   };
 }

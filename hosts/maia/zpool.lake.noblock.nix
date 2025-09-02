@@ -10,11 +10,11 @@
   # Create a systemd service that runs after boot is complete
   systemd.services.import-lake = {
     description = "Import ZFS pool 'lake' after boot";
-    
+
     # Run after the system is fully booted
-    wantedBy = [ "multi-user.target" ];
-    after = [ "multi-user.target" ];
-    
+    wantedBy = ["multi-user.target"];
+    after = ["multi-user.target"];
+
     # Don't prevent boot from completing if this service fails
     unitConfig = {
       ConditionPathExists = [
@@ -22,15 +22,15 @@
         config.disko.devices.disk.disk3.device
       ];
     };
-    
+
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
       TimeoutStartSec = "2min";
       Restart = "no";
     };
-    
-    path = [ config.boot.zfs.package ];
+
+    path = [config.boot.zfs.package];
     script = ''
       # Only attempt import if the pool isn't already imported
       if ! zpool list lake > /dev/null 2>&1; then
