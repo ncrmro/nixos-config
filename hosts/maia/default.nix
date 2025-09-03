@@ -30,7 +30,13 @@
     pkgs.sbctl
     pkgs.htop
     pkgs.usbutils
+    pkgs.bottom
+    pkgs.btop
   ];
+
+  environment.variables = {
+    TERM = "xterm-256color"; # Or your preferred terminal type
+  };
 
   # Set your time zone.
   time.timeZone = "America/Chicago";
