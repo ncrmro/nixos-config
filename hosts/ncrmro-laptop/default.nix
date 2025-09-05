@@ -30,6 +30,7 @@
   users.users.ncrmro.shell = pkgs.zsh;
 
   home-manager.useGlobalPkgs = true;
+  home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
   home-manager.extraSpecialArgs = {inherit inputs outputs;};
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-laptop.nix;
@@ -63,6 +64,9 @@
   services.zfs.autoSnapshot.enable = true;
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.greetd.enableGnomeKeyring = true;
+
+  # Allow unfree packages like VSCode
+  nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = [
     # For debugging and troubleshooting Secure Boot.

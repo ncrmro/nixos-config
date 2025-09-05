@@ -11,6 +11,14 @@
     {id = "nkbihfbeogaeaoehlefnkodbefgpgknn";} # metamask
     {id = "einnioafmpimabjcddiinlhmijaionap";} # wander wallet
   ];
+  programs.vscode = {
+    enable = true;
+    package =
+      (import inputs.nixpkgs-unstable {
+        inherit (pkgs) system;
+        config.allowUnfree = true;
+      }).vscode;
+  };
   wayland.windowManager.hyprland.settings = {
     # Environment variables
     # https://wiki.hyprland.org/Configuring/Variables/#input
