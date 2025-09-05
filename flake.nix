@@ -23,7 +23,8 @@
     };
 
     omarchy-nix = {
-      url = "git+file:///home/ncrmro/code/omarchy/omarchy-nix/";
+      url = "git+https://github.com/ncrmro/omarchy-nix.git?ref=feat/submodule-omarchy-arch";
+      #url = "git+file:///home/ncrmro/code/omarchy/omarchy-nix/";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
       inputs.home-manager.follows = "home-manager";
     };
@@ -41,15 +42,34 @@
   outputs = inputs @ {
     self,
     nixpkgs,
+    nixpkgs-unstable,
     disko,
     home-manager,
     nixos-hardware,
     nix-index-database,
     ...
-  }: {
+  }: let
+    # Function to create system-specific packages with allowUnfree enabled
+    pkgsForSystem = system:
+      import nixpkgs {
+        inherit system;
+        config = {
+          allowUnfree = true;
+        };
+      };
+
+    # Same for unstable packages
+    unstablePkgsForSystem = system:
+      import nixpkgs-unstable {
+        inherit system;
+        config = {
+          allowUnfree = true;
+        };
+      };
+  in {
     # Code formatter
-    formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.alejandra;
-    formatter.aarch64-darwin = nixpkgs.legacyPackages.aarch64-darwin.alejandra;
+    formatter.x86_64-linux = pkgsForSystem "x86_64-linux".alejandra;
+    formatter.aarch64-darwin = pkgsForSystem "aarch64-darwin".alejandra;
 
     # Import NixOS and Home Manager modules
     nixosModules = import ./modules/nixos;
@@ -134,7 +154,7 @@
     homeConfigurations = {
       "ncrmro@mox" = home-manager.lib.homeManagerConfiguration {
         modules = [./home-manager/ncrmro/mox.nix];
-        pkgs = nixpkgs.legacyPackages."x86_64-linux";
+        pkgs = pkgsForSystem "x86_64-linux";
         extraSpecialArgs = {inherit inputs self;};
       };
     };

@@ -72,6 +72,8 @@
 
   programs.nix-ld.enable = true;
 
+  hardware.keyboard.uhk.enable = true;
+
   # Lanzaboote currently replaces the systemd-boot module.
   # This setting is usually set to true in configuration.nix
   # generated at installation time. So we force it to false

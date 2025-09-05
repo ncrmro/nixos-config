@@ -29,5 +29,9 @@
     telegram-desktop
     discord-ptb
     papers
+    (import inputs.nixpkgs-unstable {
+      inherit (pkgs) system;
+      config.allowUnfree = true;
+    }).uhk-agent
   ];
 }
