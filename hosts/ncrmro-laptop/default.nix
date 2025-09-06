@@ -71,6 +71,7 @@
   environment.systemPackages = [
     # For debugging and troubleshooting Secure Boot.
     pkgs.sbctl
+    pkgs.nfs-utils
     inputs.alejandra.defaultPackage."x86_64-linux"
   ];
 
