@@ -58,30 +58,30 @@
   # packages
   environment = {
     systemPackages = with pkgs; [
-      alsa-utils
+      # alsa-utils
       nqptp
       shairport-sync-airplay2
     ];
   };
-
-  # enable pulseaudio
-  services.pipewire.enable = false;
-  hardware = {
-    pulseaudio = {
-      enable = true;
-      support32Bit = true;
-      systemWide = true;
-    };
-  };
-
+  #
+  # # enable pulseaudio
+  # services.pipewire.enable = false;
+  # hardware = {
+  #   pulseaudio = {
+  #     enable = true;
+  #     support32Bit = true;
+  #     systemWide = true;
+  #   };
+  # };
+  #
   # enable Avahi
   services.avahi = {
     enable = true;
     publish.enable = true;
     publish.userServices = true;
-    allowInterfaces = ["enp2s0"];
+    allowInterfaces = ["enp192s0"];
   };
-
+  #
   # systemd services
   systemd.services = {
     nqptp = {
@@ -91,64 +91,20 @@
       serviceConfig = {
         ExecStart = "${pkgs.nqptp}/bin/nqptp";
         Restart = "always";
-        RestartSec = "5s";
+        RestartSeck = "5s";
       };
     };
-    dining-room = {
-      description = "Dining room speakers shairport-sync instance";
+    desktop-speakers = {
+      description = "Desktop speakers shairport-sync instance";
       wantedBy = ["multi-user.target"];
       after = ["network.target" "avahi-daemon.service"];
       serviceConfig = {
-        User = "shairport";
-        Group = "shairport";
-        ExecStart = "${pkgs.shairport-sync-airplay2}/bin/shairport-sync -c /etc/dining_room.conf";
+        ExecStart = "${pkgs.shairport-sync-airplay2}/bin/shairport-sync pa --name 'Desktop Speakers'";
         Restart = "on-failure";
         RuntimeDirectory = "shairport-sync";
       };
-    };
-    outdoor-speakers = {
-      description = "Outdoor speakers shairport-sync instance";
-      wantedBy = ["multi-user.target"];
-      after = ["network.target" "avahi-daemon.service"];
-      serviceConfig = {
-        User = "shairport";
-        Group = "shairport";
-        ExecStart = "${pkgs.shairport-sync-airplay2}/bin/shairport-sync -c /etc/outdoor_speakers.conf";
-        Restart = "on-failure";
-        RuntimeDirectory = "shairport-sync";
-      };
-    };
+    }; 
   };
-
-  # write shairport-sync configs
-  environment.etc."dining_room.conf".text = ''
-    general =
-    {
-      name = "Dining Room";
-      output_backend = "pa";
-      port = 7000;
-      airplay_device_id_offset = 0;
-    };
-
-    pa =
-    {
-      sink = "alsa_output.usb-Generic_USB_Audio_20210726905926-00.analog-stereo";
-    };
-  '';
-  environment.etc."outdoor_speakers.conf".text = ''
-    general =
-    {
-      name = "Outdoor Speakers";
-      output_backend = "pa";
-      port = 7001;
-      airplay_device_id_offset = 1;
-    };
-
-    pa =
-    {
-      sink = "alsa_output.usb-Generic_USB_Audio_20210726905926-00.analog-stereo.2";
-    };
-  '';
 }
 # run `sudo -u pulse pactl list sinks short` to display available sinks
 # run `sudo -u pulse alsamixer` to adjust volume levels
