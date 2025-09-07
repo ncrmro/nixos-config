@@ -27,6 +27,9 @@
 
   environment.systemPackages = [
     pkgs.htop
+    pkgs.btop
+    pkgs.bottom
+    pkgs.iftop
   ];
 
   environment.variables = {
@@ -35,5 +38,8 @@
 
   networking.hostName = "ncrmro-devbox";
   networking.hostId = "1cea3b82";
+  networking.hosts = {
+    "127.0.0.1" = [ "devbox.ncrmro.com" "cr.devbox.ncrmro.com" "devbox.catalyst.ncrmro.com" ];
+  };
   system.stateVersion = "25.05";
 }
