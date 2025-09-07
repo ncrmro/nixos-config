@@ -37,6 +37,13 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Secret management
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
   };
 
   outputs = inputs @ {
@@ -47,6 +54,7 @@
     home-manager,
     nixos-hardware,
     nix-index-database,
+    agenix,
     ...
   }: let
     # Function to create system-specific packages with allowUnfree enabled
@@ -143,6 +151,13 @@
       };
       catalystPrimary = nixpkgs.lib.nixosSystem {
         modules = [./hosts/catalystPrimary];
+        specialArgs = {
+          inherit inputs self;
+          outputs = self;
+        };
+      };
+      ocean = nixpkgs.lib.nixosSystem {
+        modules = [./hosts/ocean];
         specialArgs = {
           inherit inputs self;
           outputs = self;
