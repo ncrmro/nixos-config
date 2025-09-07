@@ -1,7 +1,13 @@
-{ config, lib, pkgs, ... }:
-
 {
+  inputs,
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   home.packages = [
-    pkgs.playwright-mcp
+    (import inputs.nixpkgs-unstable {
+      inherit (pkgs) system;
+    }).playwright-mcp
   ];
 }
