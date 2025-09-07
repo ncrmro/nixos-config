@@ -10,6 +10,8 @@
     ../common/features/cli
     ../common/features/desktop
     ../common/features/virtualization.nix
+    ../common/optional/mcp/kubernetes.nix
+    ../common/optional/mcp/playwright.nix
     inputs.nix-index-database.homeModules.nix-index
   ];
 
