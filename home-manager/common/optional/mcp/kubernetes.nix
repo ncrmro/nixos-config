@@ -1,7 +1,13 @@
-{ config, lib, pkgs, ... }:
-
 {
+  inputs,
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   home.packages = [
-    pkgs.mcp-k8s-go
+    (import inputs.nixpkgs-unstable {
+      inherit (pkgs) system;
+    }).mcp-k8s-go
   ];
 }
