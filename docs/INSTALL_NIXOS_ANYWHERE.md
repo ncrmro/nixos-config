@@ -48,28 +48,26 @@ The installer will hang after completing, run this command on the install host
 cryptsetup luksClose /dev/mapper/credstore
 ```
 
-## Secure Boot (lanzaboote)
-Follow the lanzaboote quickstart after first boot:
-- Reference: [lanzaboote Quickstart](https://github.com/nix-community/lanzaboote/blob/master/docs/QUICK_START.md)
+## Verify Install 
 
+At this point you should have to put you disk encryption password in after the reboot. Confirm you have SSH connectivity.
+
+Ensure the user can upgrade with flakes:
 ```bash
-bootctl status
-sudo sbctl create-keys
-sudo sbctl enroll-keys --microsoft
-sudo reboot now
+nixos-rebuild switch --flake .#devbox --target-host "$HOST"
 ```
 
-## TPM2 enrollment for ZFS keyslots
-After Secure Boot, enroll the TPM2 for your encrypted datasets. Adjust device paths as needed.
-```bash
-systemd-cryptenroll /dev/zvol/rpool/credstore --wipe-slot=empty --tpm2-device=auto --tpm2-pcrs=1,7
-```
 
-## Post-install checklist
+## Next Steps
+
+After installation, complete these tasks and see the guides for additional configuration:
+
 - Turn off emergency access
-- Enable/verify Secure Boot
-- TPM2 enrollment
-- Copy WireGuard keys/configs
+- [Root Disk TPM + Secure Boot Unlock](./ROOT_DISK_TPM_SECURE_BOOT_UNLOCK.md)
+- [Connecting Tailscale Clients](./HEADSCALE_SETUP.md#connecting-tailscale-clients)
+- [Fingerprint Enrollment](./fingerprint-enrollment.md)
+- [ZFS Tweaks](./zfs-tweaks.md)
+- [Mounting Old Disks](./mounting-old-disks.md)
 
 ## Updating or deploying to a host
 Replace host and address as appropriate.
@@ -84,38 +82,3 @@ Switch user configuration via Home Manager (adjust user/host):
 home-manager switch --flake /etc/nixos/flake/#ncrmro@mox
 ```
 
-## Fingerprint enrollment (fprintd)
-Add to your host config:
-```nix
-systemd.services.fprintd = {
-  wantedBy = [ "multi-user.target" ];
-  serviceConfig.Type = "simple";
-};
-services.fprintd.enable = true;
-```
-Then enroll:
-```bash
-fprintd-enroll
-```
-
-## ZFS snapshot policy tweaks
-Optional dataset settings:
-```bash
-zfs set com.sun:auto-snapshot=false rpool/crypt/system/nix
-zfs set syncoid:no-sync=true rpool/crypt/system/nix
-```
-
-## Mounting an old Ubuntu disk (LUKS + LVM)
-Adjust device identifiers to your disk.
-```bash
-sudo cryptsetup luksOpen /dev/disk/by-id/ata-Samsung_SSD_980_PRO_2TB_S6B0NL0W127373V-part3 oldroot
-sudo vgscan
-mkdir -p /media/oldroot
-sudo mount /dev/mapper/vgubuntu-root /media/oldroot/
-```
-When finished:
-```bash
-sudo umount /media/oldroot
-sudo vgexport vgubuntu
-sudo cryptsetup luksClose oldroot
-```
