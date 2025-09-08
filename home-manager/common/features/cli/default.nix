@@ -50,6 +50,7 @@
     # httpie # Better curl
     # # diffsitter # Better diff
     # jq # JSON pretty printer and manipulator
+    marksman
   ];
 
   # home.packages = with pkgs.unstable; [
