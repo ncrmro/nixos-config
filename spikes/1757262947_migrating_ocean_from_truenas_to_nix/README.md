@@ -85,7 +85,7 @@ kind: StorageClass
 metadata:
   name: ocean-nvme
   annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
+    storageclass.kubernetes.io/is-default-class: "false"
 allowVolumeExpansion: true
 parameters:
   thinprovision: "no"
@@ -166,8 +166,7 @@ spec:
         className: nginx
         hosts:
           - host: radarr.local.example.com
-            paths:
-              - path: /
+
                 pathType: Prefix
       nodeSelector:
         kubernetes.io/hostname: ocean
