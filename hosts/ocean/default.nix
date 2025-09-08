@@ -6,6 +6,7 @@
     ../common/optional/zfs.luks.root.nix
     ../common/global
     ../common/optional/tailscale.nix
+    ../common/optional/secureboot.nix
   ];
 
   environment.variables = {
