@@ -52,6 +52,8 @@ cryptsetup luksClose /dev/mapper/credstore
 
 At this point you should have to put you disk encryption password in after the reboot. Confirm you have SSH connectivity.
 
+Note that `ssh-keygen -R IP_ADDRESS` will need to run now that the host's key fingerprint has changed.
+
 Ensure the user can upgrade with flakes:
 ```bash
 nixos-rebuild switch --flake .#devbox --target-host "$HOST"
