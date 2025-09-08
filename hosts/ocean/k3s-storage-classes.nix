@@ -22,12 +22,16 @@
           shared = "yes";
         };
         provisioner = "zfs.csi.openebs.io";
-        allowedTopologies = [{
-          matchLabelExpressions = [{
-            key = "kubernetes.io/hostname";
-            values = ["ocean"];
-          }];
-        }];
+        allowedTopologies = [
+          {
+            matchLabelExpressions = [
+              {
+                key = "kubernetes.io/hostname";
+                values = ["ocean"];
+              }
+            ];
+          }
+        ];
       };
       "ocean-hdd-storage-class".content = {
         apiVersion = "storage.k8s.io/v1";
@@ -43,12 +47,16 @@
           shared = "yes";
         };
         provisioner = "zfs.csi.openebs.io";
-        allowedTopologies = [{
-          matchLabelExpressions = [{
-            key = "kubernetes.io/hostname";
-            values = ["ocean"];
-          }];
-        }];
+        allowedTopologies = [
+          {
+            matchLabelExpressions = [
+              {
+                key = "kubernetes.io/hostname";
+                values = ["ocean"];
+              }
+            ];
+          }
+        ];
       };
     };
   };

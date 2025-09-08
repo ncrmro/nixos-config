@@ -103,7 +103,7 @@
         Restart = "on-failure";
         RuntimeDirectory = "shairport-sync";
       };
-    }; 
+    };
   };
 }
 # run `sudo -u pulse pactl list sinks short` to display available sinks
