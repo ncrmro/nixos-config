@@ -20,7 +20,7 @@
     ../common/optional/docker-rootless.nix
     ../common/optional/virt-manager.nix
     # ../common/optional/docker-root.nix
-    #../common/optional/shairport-sync.nix
+    ../common/optional/shairport-sync.nix
     ../common/optional/tailscale.nix
     ./zfs.remote-replication.nix
   ];

@@ -14,6 +14,7 @@
     ../../modules/users/root.nix
     ../../modules/users/ncrmro.nix
     ../common/optional/tailscale.nix
+    #../common/optional/k3s-openebs-zfs.nix
     ./k3s.nix
   ];
 
