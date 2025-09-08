@@ -1,15 +1,16 @@
-{...}: {
+{inputs, ...}: {
   imports = [
+    inputs.disko.nixosModules.disko
     ./hardware-configuration.nix
+    ./disk-config.nix
+    ../common/optional/zfs.luks.root.nix
     ../common/global
     ../common/optional/tailscale.nix
   ];
 
-  
   environment.variables = {
     TERM = "xterm-256color"; # Or your preferred terminal type
   };
-
 
   services.openssh.settings.PermitRootLogin = "yes";
 
