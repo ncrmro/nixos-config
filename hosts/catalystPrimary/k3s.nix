@@ -10,6 +10,7 @@
   services.k3s.enable = true;
   services.k3s.role = "server";
   services.k3s.extraFlags = toString [
+    "--disable=traefik" # Disable traefik to use ingress nginx instead
     # "--debug" # Optionally add additional args to k3s
   ];
 }
