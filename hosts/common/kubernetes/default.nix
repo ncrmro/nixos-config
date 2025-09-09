@@ -1,0 +1,5 @@
+{ ... }: {
+  imports = [
+    ./ingress-nginx.nix
+  ];
+}
