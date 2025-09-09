@@ -7,6 +7,7 @@
     ../common/global
     ../common/optional/tailscale.nix
     ../common/optional/secureboot.nix
+    ./k3s.nix
   ];
 
   environment.variables = {

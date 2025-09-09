@@ -1,4 +1,32 @@
-{...}: {
+{pkgs, ...}: {
+  # containerd configuration
+  virtualisation.containerd = {
+    enable = true;
+    settings = let
+      fullCNIPlugins = pkgs.buildEnv {
+        name = "full-cni";
+        paths = with pkgs; [
+          cni-plugins
+          cni-plugin-flannel
+        ];
+      };
+    in {
+      version = 2;
+      plugins."io.containerd.grpc.v1.cri".containerd = {
+        snapshotter = "zfs";
+      };
+      plugins."io.containerd.grpc.v1.cri".cni = {
+        bin_dir = "${fullCNIPlugins}/bin";
+        conf_dir = "/var/lib/rancher/k3s/agent/etc/cni/net.d/";
+      };
+      # Optionally set private registry credentials here instead of using /etc/rancher/k3s/registries.yaml
+      # plugins."io.containerd.grpc.v1.cri".registry.configs."registry.example.com".auth = {
+      #   username = "";
+      #   password = "";
+      # };
+    };
+  };
+
   # k3s configuration
   networking.firewall.allowedTCPPorts = [
     6443 # k3s: required so that pods can reach the API server (running on port 6443 by default)
@@ -7,6 +35,9 @@
   services.k3s.role = "server";
   services.k3s.extraFlags = toString [
     "--disable=traefik" # Disable traefik to use ingress nginx instead
+    "--container-runtime-endpoint=/run/containerd/containerd.sock"
+    "--tls-san=ocean.mercury"
+    "--tls-san=100.64.0.6"
     # "--debug" # Optionally add additional args to k3s
   ];
 }

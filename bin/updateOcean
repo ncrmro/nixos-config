@@ -2,11 +2,38 @@
 set -euo pipefail
 
 HOST="ocean"
-HOST_IP="192.168.1.231"
+HOST_IP="ocean.mercury"
+REMOTE_K3S_PATH="/etc/rancher/k3s/k3s.yaml"
+LOCAL_CONFIG_DIR="$(dirname "$0")/../.kube"
+LOCAL_CONFIG_PATH="${LOCAL_CONFIG_DIR}/ocean.yml"
 
 echo "Updating $HOST at $HOST_IP..."
 
+# Rebuild the NixOS configuration
 nixos-rebuild switch --flake .#${HOST} --target-host "root@${HOST_IP}"
 
-echo "Update completed for $HOST"
+# Create .kube directory if it doesn't exist
+mkdir -p "$LOCAL_CONFIG_DIR"
 
+# Download k3s config file from remote host using rsync
+rsync -avz "root@${HOST_IP}:${REMOTE_K3S_PATH}" "$LOCAL_CONFIG_PATH"
+
+# Set proper permissions
+chmod 600 "$LOCAL_CONFIG_PATH"
+
+# Update server address in kubeconfig
+sed -i "s|server: https://127.0.0.1:6443|server: https://${HOST_IP}:6443|" "$LOCAL_CONFIG_PATH"
+
+echo "K3s config downloaded to $LOCAL_CONFIG_PATH with updated server address"
+
+# Create symlink in user's ~/.kube directory
+mkdir -p ~/.kube
+ln -sf "$(realpath "$LOCAL_CONFIG_PATH")" ~/.kube/config.ocean.yml
+echo "Symlink created at ~/.kube/config.ocean.yml"
+
+# Output base64 encoded config (requires yq)
+if command -v yq &>/dev/null; then
+  yq . ${LOCAL_CONFIG_PATH} | base64 -w 0
+fi
+
+echo "Update completed for $HOST"
