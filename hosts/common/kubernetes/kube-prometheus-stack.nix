@@ -1,4 +1,4 @@
-{ ... }: {
+{...}: {
   services.k3s.autoDeployCharts = {
     kube-prometheus-stack = {
       name = "kube-prometheus-stack";
@@ -16,7 +16,7 @@
               volumeClaimTemplate = {
                 spec = {
                   storageClassName = "ocean-nvme";
-                  accessModes = [ "ReadWriteOnce" ];
+                  accessModes = ["ReadWriteOnce"];
                   resources = {
                     requests = {
                       storage = "50Gi";
@@ -40,7 +40,7 @@
               volumeClaimTemplate = {
                 spec = {
                   storageClassName = "ocean-nvme";
-                  accessModes = [ "ReadWriteOnce" ];
+                  accessModes = ["ReadWriteOnce"];
                   resources = {
                     requests = {
                       storage = "10Gi";
