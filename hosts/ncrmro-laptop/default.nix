@@ -11,7 +11,8 @@
     # inputs.omarchy-nix.nixosModules.default
     inputs.home-manager.nixosModules.default
     outputs.nixosModules.omarchy-config
-    ../common/global/disk-config.nix
+    ./disk-config.nix
+    ../common/optional/zfs.luks.root.nix
     ./hardware-configuration.nix
     ../common/global
     ../../modules/users/ncrmro.nix
