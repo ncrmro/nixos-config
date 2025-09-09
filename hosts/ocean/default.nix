@@ -1,4 +1,4 @@
-{inputs, ...}: {
+{inputs, pkgs, ...}: {
   imports = [
     inputs.disko.nixosModules.disko
     ./hardware-configuration.nix
@@ -18,5 +18,13 @@
   networking.hostId = "89cbac5f"; # generate with: head -c 8 /etc/machine-id
   networking.hostName = "ocean";
 
-  system.stateVersion = "25.05";
+  environment.systemPackages = [
+    pkgs.sbctl
+    pkgs.htop
+    pkgs.usbutils
+    pkgs.bottom
+    pkgs.btop
+  ];
+
+  system.stateVersion = "25.11";
 }

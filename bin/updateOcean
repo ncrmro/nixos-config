@@ -2,10 +2,11 @@
 set -euo pipefail
 
 HOST="ocean"
-HOST_IP="${1:-ocean}"
+HOST_IP="192.168.1.231"
 
 echo "Updating $HOST at $HOST_IP..."
 
 nixos-rebuild switch --flake .#${HOST} --target-host "root@${HOST_IP}"
 
 echo "Update completed for $HOST"
+
