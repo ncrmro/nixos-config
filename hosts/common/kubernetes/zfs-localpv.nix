@@ -1,4 +1,4 @@
-{ ... }: {
+{...}: {
   services.k3s.autoDeployCharts = {
     zfs-localpv = {
       name = "zfs-localpv";
@@ -8,7 +8,6 @@
       targetNamespace = "kube-system";
       createNamespace = false;
       values = {
-       
       };
     };
   };

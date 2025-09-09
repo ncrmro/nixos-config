@@ -1,4 +1,4 @@
-{ ... }: {
+{...}: {
   services.k3s.autoDeployCharts = {
     ingress-nginx = {
       name = "ingress-nginx";

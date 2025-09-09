@@ -118,12 +118,11 @@
       };
     };
 
-
     # Ensure udev doesn't shutdown before cryptsetup detach completes.
     # There's a race condition where udev is being shutdown as we transition
     # out of initrd, but the cryptsetup detach verb needs to do one last udev
     # update, so that has to happen before udev shuts down.
-    systemd.services.systemd-udevd.before = [ "systemd-cryptsetup@credstore.service" ];
+    systemd.services.systemd-udevd.before = ["systemd-cryptsetup@credstore.service"];
   };
 
   # All my datasets use 'mountpoint=$path', but you have to be careful

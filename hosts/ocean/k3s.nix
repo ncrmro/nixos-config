@@ -35,14 +35,14 @@
   services.k3s.role = "server";
   services.k3s.extraFlags = toString [
     "--disable=traefik" # Disable traefik to use ingress nginx instead
-    "--disable=local-storage" 
+    "--disable=local-storage"
     "--container-runtime-endpoint=/run/containerd/containerd.sock"
     "--tls-san=ocean.mercury"
     "--tls-san=100.64.0.6"
     # "--debug" # Optionally add additional args to k3s
   ];
 
-    # The following is because local zfsebs looks for zfs binaries in default place
+  # The following is because local zfsebs looks for zfs binaries in default place
   environment.etc = {
     "zfs-usr-bin.conf" = {
       text = ''
