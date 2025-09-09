@@ -12,6 +12,7 @@
     ../common/optional/tailscale.nix
     ../common/optional/secureboot.nix
     ./k3s.nix
+    ./k3s-storage-classes.nix
     ../common/kubernetes/default.nix
   ];
 

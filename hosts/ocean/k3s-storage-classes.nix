@@ -18,7 +18,7 @@
         parameters = {
           thinprovision = "no";
           fstype = "zfs";
-          poolname = "rpool/kube";
+          poolname = "rpool/crypt/kube-pv";
           shared = "yes";
         };
         provisioner = "zfs.csi.openebs.io";
@@ -43,7 +43,7 @@
         parameters = {
           thinprovision = "no";
           fstype = "zfs";
-          poolname = "tank/kube";
+          poolname = "ocean/crypt/kube-pv";
           shared = "yes";
         };
         provisioner = "zfs.csi.openebs.io";
