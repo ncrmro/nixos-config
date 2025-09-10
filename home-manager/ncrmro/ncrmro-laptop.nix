@@ -20,10 +20,11 @@
     # https://wiki.hyprland.org/Configuring/Variables/#input
     monitor = [
       "desc:LG Electronics LG Ultra HD 0x00044217, 3840x2160@60.00Hz, 0x0, 1"
+      "desc:LG Electronics LG Ultra HD 0x000063ED, 3840x2160@60.00Hz, auto-center-left, 1, transform, 1"
       "desc:BOE 0x0BCA, 2256x1504@60.00Hz, 3840x500, 1"
     ];
     workspace = [
-      "1, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
+      "1, monitor:desc:LG Electronics LG Ultra HD 0x000063ED, persistent:true"
       "2, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
       "3, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
       "4, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
