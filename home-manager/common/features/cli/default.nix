@@ -51,6 +51,7 @@
     # # diffsitter # Better diff
     # jq # JSON pretty printer and manipulator
     marksman
+    yarn
   ];
 
   # home.packages = with pkgs.unstable; [
