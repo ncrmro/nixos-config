@@ -39,6 +39,7 @@
     "--container-runtime-endpoint=/run/containerd/containerd.sock"
     "--tls-san=ocean.mercury"
     "--tls-san=100.64.0.6"
+    "--node-ip=100.64.0.6"
     # "--debug" # Optionally add additional args to k3s
   ];
 
