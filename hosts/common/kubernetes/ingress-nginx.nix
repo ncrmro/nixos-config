@@ -5,8 +5,8 @@
       repo = "https://kubernetes.github.io/ingress-nginx";
       version = "4.13.2";
       hash = "sha256-5rZUCUQ1AF6GBa+vUbko3vMhinZ7tsnJC5p/JiKllTo=";
-      targetNamespace = "ingress-nginx";
-      createNamespace = true;
+      targetNamespace = "kube-system";
+      createNamespace = false;
       values = {
         controller = {
           service = {
