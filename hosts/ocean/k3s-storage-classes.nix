@@ -33,6 +33,35 @@
           }
         ];
       };
+      "zfs-nvme-storage-class".content = {
+        apiVersion = "storage.k8s.io/v1";
+        kind = "StorageClass";
+        metadata = {
+          name = "zfs-nvme";
+          annotations = {
+            "storageclass.kubernetes.io/is-default-class" = "false";
+          };
+        };
+        allowVolumeExpansion = true;
+        parameters = {
+          thinprovision = "no";
+          fstype = "zfs";
+          poolname = "rpool/crypt/kube-pv";
+          shared = "yes";
+        };
+        provisioner = "zfs.csi.openebs.io";
+        # TODO: Modify allowedTopologies for multi-node setup
+        # allowedTopologies = [
+        #   {
+        #     matchLabelExpressions = [
+        #       {
+        #         key = "kubernetes.io/hostname";
+        #         values = ["ocean"];
+        #       }
+        #     ];
+        #   }
+        # ];
+      };
       "ocean-hdd-storage-class".content = {
         apiVersion = "storage.k8s.io/v1";
         kind = "StorageClass";
