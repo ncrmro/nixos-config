@@ -163,6 +163,13 @@
           outputs = self;
         };
       };
+      ncrmro-workstation = nixpkgs.lib.nixosSystem {
+        modules = [./hosts/workstation];
+        specialArgs = {
+          inherit inputs self;
+          outputs = self;
+        };
+      };
     };
 
     # Home Manager configurations
