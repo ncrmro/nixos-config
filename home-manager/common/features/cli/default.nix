@@ -68,7 +68,6 @@
       l = "eza -1l";
       ls = "eza -1l";
       grep = "rg";
-      cd = "z";
       # Local Development
       g = "git";
       lzg = "lazygit";
