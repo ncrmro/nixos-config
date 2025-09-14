@@ -8,10 +8,12 @@
     ./hardware-configuration.nix
     ./disk-config.nix
     ../common/optional/zfs.luks.root.nix
+    ./zpool.ocean.noblock.nix
+    ./zfs.users.nix
     ../common/global
     ../common/optional/tailscale.nix
     ../common/optional/secureboot.nix
-    # ../common/optional/adguard-home.nix
+    ../common/optional/adguard-home.nix
     ./k3s.nix
     ./k3s-storage-classes.nix
     ../common/kubernetes/default.nix
