@@ -8,7 +8,6 @@
 } @ args: {
   imports = [
     inputs.disko.nixosModules.disko
-    inputs.lanzaboote.nixosModules.lanzaboote
     # inputs.omarchy-nix.nixosModules.default
     inputs.home-manager.nixosModules.default
     outputs.nixosModules.omarchy-config
@@ -19,6 +18,7 @@
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
     ../common/optional/tailscale.nix
+    ../common/optional/secureboot.nix
     ./nvidia.nix
   ];
 
