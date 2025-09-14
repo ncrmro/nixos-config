@@ -52,6 +52,10 @@
     # jq # JSON pretty printer and manipulator
     marksman
     yarn
+
+    # network tools
+    dig
+    nmap
   ];
 
   # home.packages = with pkgs.unstable; [
