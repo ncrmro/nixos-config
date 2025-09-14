@@ -56,7 +56,7 @@ Before the ClusterIssuer can function, you must manually create the Cloudflare A
 # Create the secret with your Cloudflare API token
 kubectl create secret generic cloudflare-api-token \
   --from-literal=api-token=<your-cloudflare-api-token> \
-  --namespace=cert-manager
+  --namespace=kube-system
 
 # Verify the secret was created
 kubectl get secret cloudflare-api-token -n cert-manager

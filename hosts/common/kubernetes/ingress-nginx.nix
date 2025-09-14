@@ -1,5 +1,6 @@
 {...}: {
   services.k3s.autoDeployCharts = {
+    # Ingress NGINX Controller Helm Chart: https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx
     ingress-nginx = {
       name = "ingress-nginx";
       repo = "https://kubernetes.github.io/ingress-nginx";
@@ -18,6 +19,36 @@
             enabled = true;
             default = true;
           };
+          extraArgs = {
+            "default-ssl-certificate" = "kube-system/wildcard-ncrmro-com-tls";
+          };
+        };
+      };
+    };
+  };
+
+  # Wildcard certificate for *.ncrmro.com domain
+  services.k3s.manifests = {
+    wildcard-certificate = {
+      enable = true;
+      target = "wildcard-ncrmro-com-certificate.yaml";
+      content = {
+        apiVersion = "cert-manager.io/v1";
+        kind = "Certificate";
+        metadata = {
+          name = "wildcard-ncrmro-com";
+          namespace = "kube-system";
+        };
+        spec = {
+          secretName = "wildcard-ncrmro-com-tls";
+          issuerRef = {
+            name = "letsencrypt-cloudflare";
+            kind = "ClusterIssuer";
+          };
+          dnsNames = [
+            "*.ncrmro.com"
+            "ncrmro.com"
+          ];
         };
       };
     };

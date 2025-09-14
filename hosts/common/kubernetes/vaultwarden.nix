@@ -34,6 +34,7 @@
   };
 
   services.k3s.autoDeployCharts = {
+    # Vaultwarden Helm Chart: https://artifacthub.io/packages/helm/gabe565/vaultwarden
     vaultwarden = {
       name = "vaultwarden";
       repo = "https://gabe565.github.io/charts";
@@ -42,6 +43,8 @@
       targetNamespace = "vaultwarden";
       createNamespace = false;
       values = {
+        # Note: Setting .Values.env overrides the normal Helm templated env values,
+        # so we need to explicitly set DOMAIN and ROCKET_PORT which are normally set by the chart
         env = [
           {
             name = "DATABASE_URL";
@@ -52,12 +55,41 @@
               };
             };
           }
+          {
+            name = "DOMAIN";
+            value = "https://vaultwarden.ncrmro.com";
+          }
+          {
+            name = "ROCKET_PORT";
+            value = "8080";
+          }
         ];
         persistence.data = {
           enabled = true;
           storageClass = "ocean-nvme";
           accessMode = "ReadWriteOnce";
           size = "1Gi";
+        };
+        ingress.main = {
+          enabled = true;
+          className = "nginx";
+          hosts = [
+            {
+              host = "vaultwarden.ncrmro.com";
+              paths = [
+                {
+                  path = "/";
+                  pathType = "Prefix";
+                }
+              ];
+            }
+          ];
+          tls = [
+            {
+              # Using default ingress-nginx wildcard cert (*.ncrmro.com)
+              hosts = ["vaultwarden.ncrmro.com"];
+            }
+          ];
         };
       };
     };

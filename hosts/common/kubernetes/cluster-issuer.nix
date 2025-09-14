@@ -37,29 +37,5 @@
         };
       };
     };
-
-    wildcard-certificate = {
-      enable = true;
-      target = "wildcard-ncrmro-com-certificate.yaml";
-      content = {
-        apiVersion = "cert-manager.io/v1";
-        kind = "Certificate";
-        metadata = {
-          name = "wildcard-ncrmro-com";
-          namespace = "kube-system";
-        };
-        spec = {
-          secretName = "wildcard-ncrmro-com-tls";
-          issuerRef = {
-            name = "letsencrypt-cloudflare";
-            kind = "ClusterIssuer";
-          };
-          dnsNames = [
-            "*.ncrmro.com"
-            "ncrmro.com"
-          ];
-        };
-      };
-    };
   };
 }
