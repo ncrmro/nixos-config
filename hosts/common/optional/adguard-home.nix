@@ -3,5 +3,6 @@
     enable = true;
     mutableSettings = true;
     openFirewall = true;
+    allowDHCP = true;
   };
 }

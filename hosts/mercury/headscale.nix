@@ -47,6 +47,16 @@ in {
               type = "A";
               value = "100.64.0.6";
             }
+            {
+              name = "loki.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
+            {
+              name = "adguard.home.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
           ];
         };
       };

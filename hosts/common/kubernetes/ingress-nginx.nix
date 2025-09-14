@@ -47,6 +47,7 @@
           };
           dnsNames = [
             "*.ncrmro.com"
+            "*.home.ncrmro.com"
             "ncrmro.com"
           ];
         };
