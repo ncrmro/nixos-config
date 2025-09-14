@@ -29,7 +29,26 @@ in {
       settings = {
         logtail.enabled = false;
         server_url = "https://${domain}";
-        dns.base_domain = "mercury";
+        dns = {
+          base_domain = "mercury";
+          magic_dns = true;
+          nameservers = {
+            global = ["1.1.1.1" "1.0.0.1"];
+          };
+          override_local_dns = true;
+          extra_records = [
+            {
+              name = "grafana.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
+            {
+              name = "vaultwarden.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
+          ];
+        };
       };
     };
 
