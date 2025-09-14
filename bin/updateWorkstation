@@ -1,0 +1,2 @@
+WORKSTATION_HOST="192.168.1.240"
+nixos-rebuild switch --flake .#ncrmro-workstation --target-host "root@$WORKSTATION_HOST"

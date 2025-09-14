@@ -19,6 +19,7 @@
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
     ../common/optional/tailscale.nix
+    ./nvidia.nix
   ];
 
   programs.zsh.enable = true;
