@@ -1,5 +1,6 @@
 {...}: {
   services.k3s.autoDeployCharts = {
+    # Kube Prometheus Stack Helm Chart: https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
     kube-prometheus-stack = {
       name = "kube-prometheus-stack";
       repo = "https://prometheus-community.github.io/helm-charts";
@@ -32,6 +33,17 @@
             enabled = true;
             storageClassName = "ocean-nvme";
             size = "10Gi";
+          };
+          ingress = {
+            enabled = true;
+            ingressClassName = "nginx";
+            hosts = ["grafana.ncrmro.com"];
+            tls = [
+              {
+                # Using default ingress-nginx wildcard cert (*.ncrmro.com)
+                hosts = ["grafana.ncrmro.com"];
+              }
+            ];
           };
         };
         alertmanager = {
