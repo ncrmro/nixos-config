@@ -1,4 +1,15 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  config,
+  ...
+}: {
+  # Define the K3s server token secret
+  age.secrets.k3s-server-token = {
+    file = ../../secrets/k3s-server-token.age;
+    owner = "root";
+    group = "root";
+    mode = "0400";
+  };
   # containerd configuration
   virtualisation.containerd = {
     enable = true;
@@ -33,6 +44,7 @@
   ];
   services.k3s.enable = true;
   services.k3s.role = "server";
+  services.k3s.tokenFile = config.age.secrets.k3s-server-token.path;
   services.k3s.extraFlags = toString [
     "--disable=traefik" # Disable traefik to use ingress nginx instead
     "--disable=local-storage"

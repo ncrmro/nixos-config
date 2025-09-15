@@ -13,6 +13,7 @@
     ../common/global
     ../common/optional/tailscale.nix
     ../common/optional/secureboot.nix
+    ../common/optional/agenix.nix
     ../common/optional/adguard-home.nix
     ./k3s.nix
     ./k3s-storage-classes.nix

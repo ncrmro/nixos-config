@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  inputs,
   ...
 }: {
   #   imports = [
@@ -56,6 +57,9 @@
     # network tools
     dig
     nmap
+
+    # secret management
+    inputs.agenix.packages.${pkgs.system}.default
   ];
 
   # home.packages = with pkgs.unstable; [
