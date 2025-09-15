@@ -17,8 +17,11 @@
     ../common/optional/adguard-home.nix
     ./k3s.nix
     ./k3s-storage-classes.nix
+    ./nfs.nix
     ../common/kubernetes/default.nix
     ../common/kubernetes/adguard-home.nix
+    ../../modules/users/ncrmro.nix
+    ../../modules/users/root.nix
   ];
 
   environment.variables = {
