@@ -10,7 +10,7 @@ LOCAL_CONFIG_PATH="${LOCAL_CONFIG_DIR}/ocean.yml"
 echo "Updating $HOST at $HOST_IP..."
 
 # Rebuild the NixOS configuration
-nixos-rebuild switch --flake .#${HOST} --target-host "root@${HOST_IP}"
+nixos-rebuild switch --flake .#${HOST} --build-host "root@${HOST_IP}" --target-host "root@${HOST_IP}"
 
 # Create .kube directory if it doesn't exist
 mkdir -p "$LOCAL_CONFIG_DIR"
