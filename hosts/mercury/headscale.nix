@@ -1,3 +1,4 @@
+# Headscale configuration reference: https://github.com/juanfont/headscale/blob/main/config-example.yaml
 {config, ...}: let
   domain = "mercury.ncrmro.com";
 in {
@@ -16,10 +17,11 @@ in {
     recommendedGzipSettings = true;
   };
 
-  # Open firewall ports for HTTP/HTTPS and headscale
+  # Open firewall ports for HTTP/HTTPS, headscale, and DERP
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [80 443 8080];
+    allowedUDPPorts = [3478];
   };
   services = {
     headscale = {
@@ -58,6 +60,15 @@ in {
               value = "100.64.0.6";
             }
           ];
+        };
+        derp = {
+          server = {
+            enabled = true;
+            region_id = 999;
+            region_code = "mercury";
+            region_name = "Mercury DERP";
+            stun_listen_addr = "0.0.0.0:3478";
+          };
         };
       };
     };
