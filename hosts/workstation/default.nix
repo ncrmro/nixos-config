@@ -20,6 +20,7 @@
     ../common/optional/tailscale.nix
     ../common/optional/secureboot.nix
     ../common/optional/ollama.nix
+    ../common/optional/nfs-client.nix
     ./nvidia.nix
   ];
 
@@ -32,6 +33,10 @@
   home-manager.backupFileExtension = "backup";
   home-manager.extraSpecialArgs = {inherit inputs outputs;};
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-laptop.nix;
+
+  environment.systemPackages = with pkgs; [
+    nvtopPackages.nvidia
+  ];
 
   environment.variables = {
     TERM = "xterm-256color"; # Or your preferred terminal type

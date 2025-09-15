@@ -23,6 +23,7 @@
     # ../common/optional/docker-root.nix
     ../common/optional/shairport-sync.nix
     ../common/optional/tailscale.nix
+    ../common/optional/nfs-client.nix
     ./zfs.remote-replication.nix
   ];
 
@@ -73,6 +74,7 @@
     # For debugging and troubleshooting Secure Boot.
     pkgs.sbctl
     pkgs.nfs-utils
+    pkgs.nvtopPackages.amd
     inputs.alejandra.defaultPackage."x86_64-linux"
   ];
 
