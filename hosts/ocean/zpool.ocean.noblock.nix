@@ -4,6 +4,9 @@
   utils,
   ...
 }: {
+  imports = [
+    ../../modules/users/media.nix
+  ];
   # This configuration ensures the ZFS pool "ocean" is imported after boot
   # and does not block the boot process if there's an error with the pool
   #
@@ -39,6 +42,12 @@
       if ! zpool list ocean > /dev/null 2>&1; then
         # Try to import the pool but don't fail the service if it doesn't work
         zpool import -d /dev/disk/by-id ocean || true
+      fi
+
+      # Set proper ownership for /ocean/media after pool import
+      if [ -d "/ocean/media" ]; then
+        chown media:media /ocean/media
+        chmod 770 /ocean/media
       fi
     '';
   };

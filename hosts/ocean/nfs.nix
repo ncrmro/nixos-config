@@ -7,9 +7,10 @@
     mountdPort = 4002;
     statdPort = 4000;
 
-    # Export the /guest directory
+    # Export directories
     exports = ''
       /guest 100.64.0.0/10(rw,sync,no_subtree_check,no_root_squash)
+      /ocean/media 100.64.0.0/10(rw,sync,no_subtree_check,no_root_squash)
     '';
 
     # Create mount directory if it doesn't exist
