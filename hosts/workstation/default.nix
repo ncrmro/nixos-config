@@ -19,6 +19,7 @@
     ../../modules/users/root.nix
     ../common/optional/tailscale.nix
     ../common/optional/secureboot.nix
+    ../common/optional/ollama.nix
     ./nvidia.nix
   ];
 
