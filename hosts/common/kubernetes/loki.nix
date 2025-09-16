@@ -67,6 +67,27 @@
           service = {
             type = "ClusterIP";
           };
+          ingress = {
+            enabled = true;
+            ingressClassName = "nginx";
+            hosts = [
+              {
+                host = "loki.ncrmro.com";
+                paths = [
+                  {
+                    path = "/";
+                    pathType = "Prefix";
+                  }
+                ];
+              }
+            ];
+            tls = [
+              {
+                # Using default ingress-nginx wildcard cert (*.ncrmro.com)
+                hosts = ["loki.ncrmro.com"];
+              }
+            ];
+          };
         };
       };
     };

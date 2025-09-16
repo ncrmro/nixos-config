@@ -26,6 +26,16 @@
                 };
               };
             };
+          ingress = {
+            enabled = true;
+            ingressClassName = "nginx";
+            hosts = ["prometheus.ncrmro.com"];
+            tls = [
+              {
+                # Using default ingress-nginx wildcard cert (*.ncrmro.com)
+                hosts = ["prometheus.ncrmro.com"];
+              }
+            ];
           };
         };
         grafana = {

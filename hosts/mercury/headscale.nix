@@ -45,6 +45,11 @@ in {
               value = "100.64.0.6";
             }
             {
+              name = "prometheus.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
+            {
               name = "vaultwarden.ncrmro.com";
               type = "A";
               value = "100.64.0.6";
