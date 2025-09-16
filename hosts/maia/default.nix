@@ -20,6 +20,8 @@
     ../common/global
     ../common/optional/secureboot.nix
     ../common/optional/tailscale.nix
+    ../common/optional/agenix.nix
+    ./k3s.nix
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
   ];

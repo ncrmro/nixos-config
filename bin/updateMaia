@@ -1,1 +1,2 @@
-nixos-rebuild switch --flake .#maia --target-host "root@maia.mercury"
+HOSTNAME="maia.mercury"
+nixos-rebuild switch --flake .#maia --build-host "root@$HOSTNAME" --target-host "root@$HOSTNAME"
