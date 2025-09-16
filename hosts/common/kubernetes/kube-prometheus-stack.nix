@@ -26,6 +26,30 @@
                 };
               };
             };
+            additionalScrapeConfigs = [
+              {
+                job_name = "node-exporter";
+                static_configs = [
+                  {
+                    targets = ["100.64.0.3:9100"];
+                    labels = {
+                      instance = "ncrmro-workstation";
+                      environment = "home";
+                    };
+                  }
+                  {
+                    targets = ["100.64.0.1:9100"];
+                    labels = {
+                      instance = "ncrmro-laptop";
+                      environment = "home";
+                    };
+                  }
+                ];
+                scrape_interval = "15s";
+                metrics_path = "/metrics";
+              }
+            ];
+          };
           ingress = {
             enabled = true;
             ingressClassName = "nginx";

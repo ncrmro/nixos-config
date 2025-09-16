@@ -21,6 +21,7 @@
     ../common/optional/secureboot.nix
     ../common/optional/ollama.nix
     ../common/optional/nfs-client.nix
+    ../common/optional/monitoring-client.nix
     ./nvidia.nix
   ];
 
@@ -43,6 +44,11 @@
   };
 
   services.openssh.settings.PermitRootLogin = "yes";
+
+  services.monitoring-client = {
+    enable = true;
+    listenAddress = "100.64.0.3";
+  };
 
   networking.hostId = "cb1216ed"; # generate with: head -c 8 /etc/machine-id
   networking.hostName = "ncrmro-workstation";

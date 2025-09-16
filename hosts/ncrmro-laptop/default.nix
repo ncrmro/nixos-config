@@ -24,6 +24,7 @@
     ../common/optional/shairport-sync.nix
     ../common/optional/tailscale.nix
     ../common/optional/nfs-client.nix
+    ../common/optional/monitoring-client.nix
     ./zfs.remote-replication.nix
   ];
 
@@ -89,6 +90,11 @@
 
   # networking.firewall.enable = true;
   # networking.firewall.logRefusedConnections = true;
+
+  services.monitoring-client = {
+    enable = true;
+    listenAddress = "100.64.0.1";
+  };
 
   networking.hostName = "ncrmro-laptop";
   networking.hostId = "cac44b47";
