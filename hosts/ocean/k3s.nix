@@ -44,6 +44,7 @@
   # k3s configuration
   networking.firewall.allowedTCPPorts = [
     6443 # k3s: required so that pods can reach the API server (running on port 6443 by default)
+    5001 # k3s: distributed registry mirror peer-to-peer communication
   ];
   services.k3s.enable = true;
   services.k3s.role = "server";
@@ -55,9 +56,15 @@
     "--tls-san=ocean.mercury"
     "--tls-san=100.64.0.6"
     "--node-ip=100.64.0.6"
+    # "--embedded-registry" # Enable distributed OCI registry mirror (TODO: fix nft-expr-counter kernel module issue)
     # "--debug" # Optionally add additional args to k3s
   ];
 
+  # K3s registry mirror configuration
+  environment.etc."rancher/k3s/registries.yaml" = {
+    text = ''
+      mirrors:
+        "*":
+    '';
   };
-
 }

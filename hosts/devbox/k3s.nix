@@ -1,6 +1,7 @@
 {
   networking.firewall.allowedTCPPorts = [
     6443 # k3s: required so that pods can reach the API server (running on port 6443 by default)
+    5001 # k3s: distributed registry mirror peer-to-peer communication
     # 2379 # k3s, etcd clients: required if using a "High Availability Embedded etcd" configuration
     # 2380 # k3s, etcd peers: required if using a "High Availability Embedded etcd" configuration
   ];
@@ -11,6 +12,15 @@
   services.k3s.role = "server";
   services.k3s.extraFlags = toString [
     "--disable=traefik" # Disable traefik to use ingress nginx instead
+    "--embedded-registry" # Enable distributed OCI registry mirror
     # "--debug" # Optionally add additional args to k3s
   ];
+
+  # K3s registry mirror configuration
+  environment.etc."rancher/k3s/registries.yaml" = {
+    text = ''
+      mirrors:
+        "*":
+    '';
+  };
 }

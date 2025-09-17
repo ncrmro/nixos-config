@@ -39,7 +39,7 @@
 
   # k3s configuration as agent
   networking.firewall.allowedTCPPorts = [
-    # K3s agent doesn't need to expose API server port
+    5001 # k3s: distributed registry mirror peer-to-peer communication
   ];
 
   services.k3s = {
@@ -51,9 +51,15 @@
       "--container-runtime-endpoint=/run/containerd/containerd.sock"
       "--node-ip=100.64.0.5" # Maia's headscale IP
       "--node-taint=ncrmro.com/region=us-south-2:NoSchedule"
+      #"--embedded-registry" # Enable distributed OCI registry mirror
     ];
   };
 
+  # K3s registry mirror configuration
+  environment.etc."rancher/k3s/registries.yaml" = {
+    text = ''
+      mirrors:
+        "*":
+    '';
   };
-
 }

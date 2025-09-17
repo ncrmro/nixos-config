@@ -111,6 +111,25 @@ When running `bin/updateOcean` (or similar update scripts), the process:
 2. k3s automatically deploys/updates the configured charts
 3. Downloads and configures the kubeconfig for local access
 
+## Registry Mirroring
+
+K3s is configured with distributed OCI registry mirroring using the `--embedded-registry` flag and wildcard mirroring configuration. This enables:
+
+- Peer-to-peer image sharing between cluster nodes
+- Reduced bandwidth usage for image pulls
+- Improved deployment speed for frequently used images
+
+**Known Issue**: Registry mirroring may fail with kernel module warnings:
+```
+time="2025-09-16T01:32:11-05:00" level=warning msg="Failed to load kernel module nft-expr-counter with modprobe"
+```
+This indicates missing netfilter kernel modules but typically doesn't prevent functionality.
+
+**Configuration**: 
+- TCP port 5001 opened for peer-to-peer communication
+- TCP port 6443 for API server access
+- Wildcard registry mirror (`"*"`) configured in `/etc/rancher/k3s/registries.yaml`
+
 ## TLS Configuration
 
 k3s is configured with TLS SANs for both hostname and IP access:
