@@ -7,7 +7,7 @@
   # ];
 
   # Load RBD kernel module for Rook Ceph
-  boot.kernelModules = [ "rbd" ];
+  boot.kernelModules = ["rbd" "nbd"];
 
   # ZFS and RBD kernel module setup for Kubernetes storage
   environment.etc = {

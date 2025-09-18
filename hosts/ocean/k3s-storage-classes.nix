@@ -87,6 +87,21 @@
           }
         ];
       };
+      "zfs-nvme-block-storage-class".content = {
+        apiVersion = "storage.k8s.io/v1";
+        kind = "StorageClass";
+        metadata = {
+          name = "zfs-nvme-block";
+        };
+        provisioner = "zfs.csi.openebs.io";
+        allowVolumeExpansion = true;
+        volumeBindingMode = "WaitForFirstConsumer";
+        parameters = {
+          poolname = "rpool/crypt/kube-blockstorage";
+          # Block volume mode for raw devices (used by Ceph OSDs)
+          volumeMode = "Block";
+        };
+      };
     };
   };
 }
