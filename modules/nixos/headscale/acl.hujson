@@ -1,0 +1,62 @@
+{
+  // Headscale ACL Configuration
+  // This file defines tag-based access control for your Tailscale network
+
+  // Define who can use which tags
+  "tagOwners": {
+    // GitHub Actions runners
+    "tag:github-actions": ["ncrmro"],
+    
+    // Kubernetes cluster nodes
+    "tag:k8s-cluster": ["ncrmro"],
+    "tag:k8s-master": ["ncrmro"],
+    "tag:k8s-worker": ["ncrmro"]
+  },
+
+  // Define access control rules
+  "acls": [
+    // GitHub Actions can access Kubernetes API server only
+    {
+      "action": "accept",
+      "src": ["tag:github-actions"],
+      "dst": [
+        "tag:k8s-master:6443",    // Kubernetes API
+        "tag:k8s-cluster:6443"    // Kubernetes API
+      ]
+    },
+    
+    // Kubernetes nodes can communicate with each other
+    {
+      "action": "accept",
+      "src": ["tag:k8s-cluster"],
+      "dst": [
+        "tag:k8s-cluster:*"           // All ports between K8s nodes
+      ]
+    },
+    
+    // Admin user has full access to everything
+    {
+      "action": "accept",
+      "src": ["ncrmro"],
+      "dst": ["*:*"]
+    }
+  ],
+
+  // Test rules (used with `headscale acls test`)
+  "tests": [
+    {
+      "src": "tag:github-actions",
+      "accept": [
+        "tag:k8s-master:6443",
+        "tag:k8s-cluster:6443"
+      ]
+    },
+    {
+      "src": "ncrmro",
+      "accept": [
+        "tag:k8s-master:6443",
+        "tag:k8s-cluster:*"
+      ]
+    }
+  ]
+}

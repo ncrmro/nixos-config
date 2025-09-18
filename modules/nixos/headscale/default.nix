@@ -1,11 +1,11 @@
-# Headscale configuration reference: https://github.com/juanfont/headscale/blob/main/config-example.yaml
-{config, ...}: let
+# Headscale configuration module
+{config, lib, ...}: let
   domain = "mercury.ncrmro.com";
 in {
   # Configure ACME for SSL certificates
   security.acme = {
     acceptTerms = true;
-    defaults.email = "ncrmro@gmail.com"; # Replace with your email
+    defaults.email = "ncrmro@gmail.com";
   };
 
   # Enable nginx for reverse proxy
@@ -23,6 +23,7 @@ in {
     allowedTCPPorts = [80 443 8080];
     allowedUDPPorts = [3478];
   };
+
   services = {
     headscale = {
       enable = true;
@@ -75,6 +76,9 @@ in {
             stun_listen_addr = "0.0.0.0:3478";
           };
         };
+        policy = {
+          path = "/etc/headscale/acl.hujson";
+        };
       };
     };
 
@@ -89,4 +93,7 @@ in {
   };
 
   environment.systemPackages = [config.services.headscale.package];
+
+  # Copy ACL configuration to system
+  environment.etc."headscale/acl.hujson".source = ./acl.hujson;
 }

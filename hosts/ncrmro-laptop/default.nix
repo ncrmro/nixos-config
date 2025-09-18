@@ -22,7 +22,7 @@
     ../common/optional/virt-manager.nix
     # ../common/optional/docker-root.nix
     ../common/optional/shairport-sync.nix
-    ../common/optional/tailscale.nix
+    ../common/optional/tailscale.node.nix
     ../common/optional/nfs-client.nix
     ../common/optional/monitoring-client.nix
     ./zfs.remote-replication.nix
@@ -94,6 +94,9 @@
   services.monitoring-client = {
     enable = true;
     listenAddress = "100.64.0.1";
+  # Configure Tailscale node (no tags for client machine)
+  services.tailscale.node = {
+    enable = true;
   };
 
   networking.hostName = "ncrmro-laptop";

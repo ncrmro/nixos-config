@@ -13,7 +13,7 @@
     ../common/global
     ../../modules/users/root.nix
     ../../modules/users/ncrmro.nix
-    ../common/optional/tailscale.nix
+    ../common/optional/tailscale.node.nix
     #../common/optional/k3s-openebs-zfs.nix
     ./k3s.nix
   ];
@@ -35,6 +35,12 @@
 
   environment.variables = {
     TERM = "xterm-256color"; # Or your preferred terminal type
+  };
+
+  # Configure Tailscale node with Kubernetes tags
+  services.tailscale.node = {
+    enable = true;
+    tags = ["tag:k8s-cluster"];
   };
 
   networking.hostName = "ncrmro-devbox";

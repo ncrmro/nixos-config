@@ -17,7 +17,7 @@
     ../common/global
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
-    ../common/optional/tailscale.nix
+    ../common/optional/tailscale.node.nix
     ../common/optional/secureboot.nix
     ../common/optional/ollama.nix
     ../common/optional/nfs-client.nix
@@ -41,6 +41,11 @@
 
   environment.variables = {
     TERM = "xterm-256color"; # Or your preferred terminal type
+  };
+
+  # Configure Tailscale node (no tags for client machine)
+  services.tailscale.node = {
+    enable = true;
   };
 
   services.openssh.settings.PermitRootLogin = "yes";

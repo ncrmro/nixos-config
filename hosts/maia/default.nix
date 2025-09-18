@@ -19,7 +19,7 @@
     ./zfs.users.nix
     ../common/global
     ../common/optional/secureboot.nix
-    ../common/optional/tailscale.nix
+    ../common/optional/tailscale.node.nix
     ../common/optional/agenix.nix
     ./k3s.nix
     ../../modules/users/ncrmro.nix
@@ -38,6 +38,12 @@
 
   environment.variables = {
     TERM = "xterm-256color"; # Or your preferred terminal type
+  };
+
+  # Configure Tailscale node with Kubernetes worker tags
+  services.tailscale.node = {
+    enable = true;
+    tags = ["tag:k8s-cluster" "tag:k8s-worker"];
   };
 
   # Set your time zone.

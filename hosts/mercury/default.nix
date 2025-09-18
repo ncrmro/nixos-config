@@ -1,7 +1,7 @@
 {...}: {
   imports = [
     ./hardware-configuration.nix
-    ./headscale.nix
+    ../../modules/nixos/headscale
   ];
 
   boot.tmp.cleanOnBoot = true;

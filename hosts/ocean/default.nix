@@ -11,7 +11,7 @@
     ./zpool.ocean.noblock.nix
     ./zfs.users.nix
     ../common/global
-    ../common/optional/tailscale.nix
+    ../common/optional/tailscale.node.nix
     ../common/optional/secureboot.nix
     ../common/optional/agenix.nix
     ../common/optional/adguard-home.nix
@@ -26,6 +26,12 @@
 
   environment.variables = {
     TERM = "xterm-256color"; # Or your preferred terminal type
+  };
+
+  # Configure Tailscale node with Kubernetes tags
+  services.tailscale.node = {
+    enable = true;
+    tags = ["tag:k8s-cluster" "tag:k8s-master"];
   };
 
   services.openssh.settings.PermitRootLogin = "yes";
