@@ -18,10 +18,12 @@ This repository contains my NixOS flake and host configurations.
 - [Mounting Old Disks](docs/mounting-old-disks.md) - Instructions for mounting legacy disks
 - [ZFS Tweaks](docs/zfs-tweaks.md) - ZFS performance and configuration tweaks
 
-### GitHub Actions Examples
+### GitHub Actions Setup
 
-This repository includes example workflows and reusable actions for integrating with Tailscale:
-- [Setup Tailscale Action](.github/actions/setup-tailscale/) - Reusable action for connecting to Tailscale
-- [Kubernetes Deployment Example](.github/workflows/deploy-k8s-example.yml) - Deploy to K8s via Tailscale
-- [Service Health Check Example](.github/workflows/service-health-check-example.yml) - Monitor services over Tailscale
-- [Database Backup Example](.github/workflows/database-backup-example.yml) - Backup databases via Tailscale
+The Tailscale documentation includes complete examples for setting up GitHub Actions workflows and reusable actions in your own repositories:
+- Reusable action for connecting to Tailscale
+- Kubernetes deployment workflows via Tailscale
+- Service health monitoring over Tailscale  
+- Database backup operations via Tailscale
+
+See the [Tailscale GitHub Actions guide](docs/TAILSCALE_GITHUB_ACTIONS.md) for complete implementation examples.

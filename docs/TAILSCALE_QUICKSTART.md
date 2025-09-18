@@ -27,7 +27,50 @@ This will output an auth key like: `tskey-auth-xxxxxxxxxx`
 4. Name: `TAILSCALE_AUTHKEY`
 5. Value: (paste the auth key from step 1)
 
-## Step 3: Use in Workflow
+## Step 3: Create Reusable Action
+
+First, create `.github/actions/setup-tailscale/action.yml` in your repository:
+
+```yaml
+name: 'Setup Tailscale'
+description: 'Connect to Tailscale network via Headscale server'
+inputs:
+  authkey:
+    description: 'Tailscale auth key (preferably ephemeral)'
+    required: true
+  timeout:
+    description: 'Connection timeout in seconds'
+    required: false
+    default: '30'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Tailscale
+      shell: bash
+      run: |
+        curl -fsSL https://tailscale.com/install.sh | sh
+        tailscale version
+        
+    - name: Connect to Tailscale Network
+      shell: bash
+      run: |
+        sudo tailscale up \
+          --authkey=${{ inputs.authkey }} \
+          --login-server=https://mercury.ncrmro.com \
+          --timeout=${{ inputs.timeout }}s \
+          --accept-routes --accept-dns
+        
+    - name: Verify Connection
+      shell: bash
+      run: |
+        echo "=== Tailscale Status ==="
+        tailscale status
+        echo "=== Tailscale IP ==="
+        tailscale ip -4
+```
+
+## Step 4: Use in Workflow
 
 Create `.github/workflows/example.yml`:
 
@@ -54,9 +97,14 @@ jobs:
           
           # Test Kubernetes API
           curl -k https://100.64.0.6:6443/healthz
+
+      - name: Cleanup
+        if: always()
+        run: |
+          sudo tailscale logout || true
 ```
 
-## Step 4: Configure ACLs (Optional but Recommended)
+## Step 5: Configure ACLs (Optional but Recommended)
 
 Apply the example ACL configuration to restrict GitHub Actions access:
 
