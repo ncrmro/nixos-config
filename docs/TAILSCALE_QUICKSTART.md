@@ -8,7 +8,90 @@ This is a condensed guide to get GitHub Actions working with your Tailscale/Head
 - ✅ SSH access to Mercury server
 - ✅ GitHub repository where you want to add Tailscale access
 
-## Step 1: Create Auth Key
+## Authentication Methods
+
+Choose one of two authentication methods:
+
+### Method A: OAuth Authentication (Recommended)
+More secure, no long-lived secrets to manage.
+
+### Method B: Auth Key Authentication (Traditional)
+Uses pre-shared keys, simpler to set up.
+
+---
+
+## Method A: OAuth Authentication Setup
+
+### Step 1: Configure Headscale OIDC
+
+Add OIDC configuration to your Mercury server's Headscale setup:
+
+```nix
+# In hosts/mercury/headscale.nix
+services.headscale.settings.oidc = {
+  issuer = "https://token.actions.githubusercontent.com";
+  client_id = "your-github-org-or-username";
+  scope = ["openid" "profile" "email"];
+  allowed_domains = ["github.com"];
+  strip_email_domain = false;
+};
+```
+
+### Step 2: Create OAuth Action
+
+Create `.github/actions/setup-tailscale-oauth/action.yml`:
+
+```yaml
+name: 'Setup Tailscale with OAuth'
+description: 'Connect to Tailscale network using GitHub OIDC'
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Tailscale
+      shell: bash
+      run: curl -fsSL https://tailscale.com/install.sh | sh
+        
+    - name: Connect via OAuth
+      shell: bash
+      run: |
+        sudo tailscale up \
+          --login-server=https://mercury.ncrmro.com \
+          --auth-key="$GITHUB_TOKEN" \
+          --oauth \
+          --accept-routes --accept-dns
+```
+
+### Step 3: Use OAuth in Workflow
+
+Create `.github/workflows/example.yml`:
+
+```yaml
+name: Test Tailscale OAuth
+
+on: workflow_dispatch
+
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Tailscale
+        uses: ./.github/actions/setup-tailscale-oauth
+      
+      - name: Test Connection
+        run: curl -f http://grafana.ncrmro.com/api/health
+```
+
+---
+
+## Method B: Auth Key Authentication Setup
+
+### Step 1: Create Auth Key
 
 Use the provided script to create an ephemeral auth key:
 

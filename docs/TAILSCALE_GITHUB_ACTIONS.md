@@ -193,14 +193,23 @@ headscale preauthkeys create \
 
 ## GitHub Actions Integration
 
-### Setting Up Repository Secrets
+### Authentication Methods
+
+There are two main ways to authenticate GitHub Actions with Tailscale:
+
+1. **Auth Keys** (Traditional method) - Uses pre-shared keys
+2. **OAuth Clients** (Recommended) - Uses GitHub OIDC tokens for authentication
+
+### Method 1: Using Auth Keys
+
+#### Setting Up Repository Secrets
 
 Add the following secrets to your GitHub repository:
 
 1. **TAILSCALE_AUTHKEY**: Ephemeral or reusable auth key with appropriate tags
 2. **KUBECONFIG**: Base64-encoded Kubernetes configuration (if accessing K8s)
 
-### Basic Tailscale Setup Action
+#### Basic Tailscale Setup Action
 
 Create a reusable action for connecting to Tailscale:
 
@@ -255,6 +264,214 @@ Ensure runners are properly cleaned up after job completion:
   run: |
     sudo tailscale logout || true
     sudo systemctl stop tailscaled || true
+```
+
+### Method 2: Using OAuth Clients (Recommended)
+
+OAuth clients provide a more secure authentication method by using GitHub's OIDC tokens instead of long-lived auth keys. This approach is more secure because:
+
+- No long-lived secrets to manage
+- Fine-grained access control via OAuth scopes
+- Automatic token expiration
+- Better audit trail
+
+#### Setting Up OAuth Client for Headscale
+
+**Note:** OAuth client support for Headscale requires configuration of an OIDC provider. This section shows how to set up GitHub as an OIDC provider for Headscale.
+
+1. **Configure Headscale OIDC** - Add to your `headscale.nix`:
+
+```nix
+services.headscale.settings.oidc = {
+  issuer = "https://token.actions.githubusercontent.com";
+  client_id = "your-github-org-or-username";
+  client_secret_path = "/path/to/github/oidc/secret";
+  scope = ["openid" "profile" "email"];
+  extra_params = {};
+  allowed_domains = ["github.com"];
+  allowed_users = ["your-github-username"];
+  strip_email_domain = false;
+};
+```
+
+2. **Create GitHub OIDC Configuration** - In your repository settings:
+
+   - Go to Settings → Secrets and variables → Actions
+   - Add repository variable: `TAILSCALE_OAUTH_CLIENT_ID`
+   - Add repository secret: `TAILSCALE_OAUTH_CLIENT_SECRET`
+
+#### OAuth-Based Tailscale Setup Action
+
+Create `.github/actions/setup-tailscale-oauth/action.yml`:
+
+```yaml
+name: 'Setup Tailscale with OAuth'
+description: 'Connect to Tailscale network using GitHub OIDC'
+inputs:
+  login-server:
+    description: 'Headscale server URL'
+    required: true
+    default: 'https://mercury.ncrmro.com'
+  timeout:
+    description: 'Connection timeout in seconds'
+    required: false
+    default: '30'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Tailscale
+      shell: bash
+      run: |
+        curl -fsSL https://tailscale.com/install.sh | sh
+        tailscale version
+
+    - name: Connect via GitHub OIDC
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        # Use GitHub OIDC token for authentication
+        sudo tailscale up \
+          --login-server=${{ inputs.login-server }} \
+          --timeout=${{ inputs.timeout }}s \
+          --accept-routes \
+          --accept-dns \
+          --auth-key="$GITHUB_TOKEN" \
+          --oauth
+
+    - name: Verify Connection
+      shell: bash
+      run: |
+        echo "=== Tailscale Status ==="
+        tailscale status
+        echo "=== Tailscale IP ==="
+        tailscale ip -4
+        echo "=== OAuth Authentication Successful ==="
+```
+
+#### OAuth Workflow Example
+
+```yaml
+# .github/workflows/deploy-oauth.yml
+name: Deploy with OAuth Authentication
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Tailscale via OAuth
+        uses: ./.github/actions/setup-tailscale-oauth
+        with:
+          login-server: https://mercury.ncrmro.com
+
+      - name: Deploy to Kubernetes
+        env:
+          KUBECONFIG: /tmp/kubeconfig
+        run: |
+          # Configure kubectl with Tailscale network access
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > $KUBECONFIG
+          kubectl config set-cluster cluster --server=https://100.64.0.6:6443
+          
+          # Deploy applications
+          kubectl apply -f kubernetes/
+          kubectl rollout status deployment/my-app
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f /tmp/kubeconfig
+          sudo tailscale logout || true
+```
+
+#### OAuth Client Management
+
+**Creating OAuth Clients in Headscale:**
+
+```bash
+# SSH to Mercury server
+ssh root@mercury.ncrmro.com
+
+# Create OAuth client for GitHub Actions
+headscale oauth clients create \
+  --name "github-actions" \
+  --redirect-uri "https://github.com/your-org/your-repo" \
+  --scopes "read:user,user:email"
+
+# List OAuth clients
+headscale oauth clients list
+
+# Revoke OAuth client
+headscale oauth clients delete <client-id>
+```
+
+**GitHub Repository Configuration:**
+
+1. **Enable OIDC** in repository settings:
+   ```yaml
+   # Add to workflow permissions
+   permissions:
+     id-token: write
+     contents: read
+   ```
+
+2. **Configure audience** for your Headscale server:
+   ```bash
+   # In Headscale configuration
+   oidc.allowed_domains = ["github.com"]
+   oidc.client_id = "your-github-org"
+   ```
+
+#### OAuth Security Benefits
+
+- **No stored secrets**: Authentication uses short-lived OIDC tokens
+- **Automatic expiration**: Tokens expire automatically (typically 1 hour)
+- **Audit trail**: All authentication events logged in GitHub and Headscale
+- **Revocable access**: Can revoke OAuth clients without affecting other authentication methods
+- **Fine-grained permissions**: OAuth scopes control access levels
+
+#### OAuth Troubleshooting
+
+**Common OAuth Issues:**
+
+```bash
+# 1. Check OIDC configuration
+ssh root@mercury.ncrmro.com "headscale config show | grep -A 20 oidc"
+
+# 2. Verify GitHub OIDC token
+echo "$GITHUB_TOKEN" | base64 -d | jq '.'
+
+# 3. Test OAuth client
+curl -X POST https://mercury.ncrmro.com/oauth/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=authorization_code&code=$GITHUB_TOKEN"
+
+# 4. Check Headscale OAuth logs
+journalctl -u headscale -f | grep -i oauth
+```
+
+**Workflow Debugging:**
+
+```yaml
+- name: Debug OAuth Authentication
+  run: |
+    echo "GitHub Token Present: ${{ github.token != '' }}"
+    echo "Repository: ${{ github.repository }}"
+    echo "Actor: ${{ github.actor }}"
+    echo "OIDC Token URL: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL }}"
 ```
 
 ## Security Best Practices
@@ -455,6 +672,138 @@ jobs:
           sudo tailscale logout || true
 ```
 
+### Example 4: OAuth-Based Kubernetes Deployment
+
+```yaml
+# .github/workflows/deploy-k8s-oauth.yml
+name: Deploy to Kubernetes with OAuth
+
+on:
+  push:
+    branches: [main]
+    paths: ['kubernetes/**']
+
+permissions:
+  id-token: write  # Required for GitHub OIDC
+  contents: read
+
+env:
+  KUBECONFIG_PATH: /tmp/kubeconfig
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Tailscale via OAuth
+        uses: ./.github/actions/setup-tailscale-oauth
+        with:
+          login-server: https://mercury.ncrmro.com
+
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+      - name: Configure Kubernetes access
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > $KUBECONFIG_PATH
+          chmod 600 $KUBECONFIG_PATH
+          kubectl config set-cluster cluster --server=https://100.64.0.6:6443
+          kubectl cluster-info
+
+      - name: Deploy applications
+        run: |
+          kubectl apply -f kubernetes/
+          kubectl rollout status deployment/my-app --timeout=300s
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f $KUBECONFIG_PATH
+          sudo tailscale logout || true
+```
+
+### Example 5: OAuth Service Monitoring
+
+```yaml
+# .github/workflows/monitor-oauth.yml
+name: Service Monitoring with OAuth
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'  # Every 4 hours
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Setup Tailscale via OAuth
+        uses: ./.github/actions/setup-tailscale-oauth
+
+      - name: Health Check Services
+        id: health-check
+        run: |
+          echo "Testing service connectivity..."
+          FAILURES=0
+          
+          # Test internal services
+          services=(
+            "http://grafana.ncrmro.com/api/health"
+            "http://vaultwarden.ncrmro.com/alive"
+            "https://100.64.0.6:6443/healthz"
+          )
+          
+          for service in "${services[@]}"; do
+            if curl -f -s --connect-timeout 10 "$service" > /dev/null; then
+              echo "✅ $(echo $service | cut -d'/' -f3): OK"
+            else
+              echo "❌ $(echo $service | cut -d'/' -f3): FAILED"
+              FAILURES=$((FAILURES + 1))
+            fi
+          done
+          
+          echo "failures=$FAILURES" >> $GITHUB_OUTPUT
+
+      - name: Report Results
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          # OAuth Service Health Report
+          
+          **Authentication**: GitHub OIDC ✅
+          **Timestamp**: $(date -u)
+          **Failures**: ${{ steps.health-check.outputs.failures }}
+          
+          $([ "${{ steps.health-check.outputs.failures }}" = "0" ] && echo "## All Services Healthy ✅" || echo "## Some Services Failed ❌")
+          EOF
+
+      - name: Cleanup
+        if: always()
+        run: sudo tailscale logout || true
+```
+
+### OAuth vs Auth Key Comparison
+
+| Feature | OAuth Authentication | Auth Key Authentication |
+|---------|---------------------|------------------------|
+| **Security** | ✅ No long-lived secrets | ⚠️ Requires key management |
+| **Setup Complexity** | ⚠️ Requires OIDC configuration | ✅ Simple setup |
+| **Token Lifetime** | ✅ Short-lived (1 hour) | ⚠️ Configurable (hours to days) |
+| **Revocation** | ✅ Immediate via OAuth client | ⚠️ Manual key expiration |
+| **Audit Trail** | ✅ GitHub + Headscale logs | ✅ Headscale logs only |
+| **Automation** | ✅ Fully automated | ⚠️ Requires key rotation |
+
 ## Troubleshooting
 
 ### Common Issues
@@ -603,6 +952,33 @@ grep "ephemeral node expired" /var/log/headscale.log
 - **Configure regional DERP** for geographically distributed runners
 - **Monitor bandwidth usage** for large file transfers
 
+### OAuth Authentication Troubleshooting
+
+**Problem**: OAuth authentication fails or OIDC token errors
+
+**Solutions**:
+```bash
+# Check Headscale OIDC configuration
+ssh root@mercury.ncrmro.com "headscale config show | grep -A 20 oidc"
+
+# Verify GitHub OIDC environment variables
+echo "OIDC Token URL: $ACTIONS_ID_TOKEN_REQUEST_URL"
+echo "OIDC Token: $ACTIONS_ID_TOKEN_REQUEST_TOKEN"
+
+# Test OAuth token format
+curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+  "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://mercury.ncrmro.com"
+
+# Check Headscale OAuth logs
+ssh root@mercury.ncrmro.com "journalctl -u headscale -f | grep -i 'oauth\|oidc'"
+```
+
+**Common OAuth Issues**:
+- Missing `permissions: id-token: write` in workflow
+- Incorrect OIDC issuer URL in Headscale config
+- GitHub repository not configured for OIDC
+- Headscale OIDC client configuration mismatch
+
 ## Additional Resources
 
 - [Tailscale Documentation](https://tailscale.com/kb/)
@@ -613,12 +989,15 @@ grep "ephemeral node expired" /var/log/headscale.log
 
 ## Security Considerations Summary
 
-1. **Use ephemeral keys** for all GitHub Actions runners
-2. **Implement tag-based ACLs** for fine-grained access control
-3. **Rotate credentials regularly** and monitor usage
-4. **Segment network access** based on environment (dev/staging/prod)
-5. **Monitor and audit** all network connections
-6. **Use environment-specific secrets** in GitHub Actions
-7. **Implement proper cleanup** to remove nodes after job completion
+1. **Prefer OAuth authentication** over auth keys for GitHub Actions
+2. **Use ephemeral keys** if OAuth is not available
+3. **Implement tag-based ACLs** for fine-grained access control
+4. **Rotate credentials regularly** and monitor usage
+5. **Segment network access** based on environment (dev/staging/prod)
+6. **Monitor and audit** all network connections
+7. **Use environment-specific secrets** in GitHub Actions
+8. **Implement proper cleanup** to remove nodes after job completion
+9. **Configure OIDC properly** with correct issuer and audience
+10. **Use short-lived tokens** whenever possible
 
 This comprehensive setup provides secure, auditable access to your infrastructure while maintaining the benefits of a zero-trust network architecture.
