@@ -12,7 +12,9 @@
   services.k3s.role = "server";
   services.k3s.extraFlags = toString [
     "--disable=traefik" # Disable traefik to use ingress nginx instead
-    "--embedded-registry" # Enable distributed OCI registry mirror
+    "--node-ip=100.64.0.4"
+    #"--cluster-reset"
+    #"--embedded-registry" # Enable distributed OCI registry mirror
     # "--debug" # Optionally add additional args to k3s
   ];
 
