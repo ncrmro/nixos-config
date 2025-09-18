@@ -1,0 +1,221 @@
+{
+  // Headscale ACL Configuration Example
+  // This file defines tag-based access control for your Tailscale network
+  // Place this file on your Headscale server and load it with: headscale acls load acl.hujson
+
+  // Define who can use which tags
+  "tagOwners": {
+    // GitHub Actions runners
+    "tag:github-actions": ["ncrmro"],
+    
+    // Kubernetes cluster nodes
+    "tag:k8s-cluster": ["ncrmro"],
+    "tag:k8s-master": ["ncrmro"],
+    "tag:k8s-worker": ["ncrmro"],
+    
+    // Environment-based tags
+    "tag:dev-services": ["ncrmro"],
+    "tag:staging-services": ["ncrmro"],
+    "tag:prod-services": ["ncrmro"],
+    
+    // Service type tags
+    "tag:database": ["ncrmro"],
+    "tag:web-services": ["ncrmro"],
+    "tag:monitoring": ["ncrmro"],
+    
+    // Administrative systems
+    "tag:admin": ["ncrmro"],
+    "tag:backup": ["ncrmro"]
+  },
+
+  // Define access control rules
+  "acls": [
+    // ========================================
+    // GitHub Actions Access Rules
+    // ========================================
+    
+    // GitHub Actions can access Kubernetes API
+    {
+      "action": "accept",
+      "src": ["tag:github-actions"],
+      "dst": [
+        "tag:k8s-master:6443",    // Kubernetes API
+        "tag:k8s-master:443",     // HTTPS
+        "tag:k8s-cluster:6443",   // Kubernetes API
+        "tag:k8s-cluster:443"     // HTTPS
+      ]
+    },
+    
+    // GitHub Actions can access development services
+    {
+      "action": "accept",
+      "src": ["tag:github-actions"],
+      "dst": [
+        "tag:dev-services:*"      // All ports on dev services
+      ]
+    },
+    
+    // GitHub Actions can access staging services (limited ports)
+    {
+      "action": "accept",
+      "src": ["tag:github-actions"],
+      "dst": [
+        "tag:staging-services:80",    // HTTP
+        "tag:staging-services:443",   // HTTPS
+        "tag:staging-services:8080",  // Common alt HTTP
+        "tag:staging-services:9090"   // Monitoring/metrics
+      ]
+    },
+    
+    // GitHub Actions can access production services (very limited)
+    {
+      "action": "accept",
+      "src": ["tag:github-actions"],
+      "dst": [
+        "tag:prod-services:80",       // HTTP
+        "tag:prod-services:443"       // HTTPS
+        // Note: No database or admin access for production
+      ]
+    },
+    
+    // GitHub Actions can access backup services
+    {
+      "action": "accept",
+      "src": ["tag:github-actions"],
+      "dst": [
+        "tag:backup:22",              // SSH for backup operations
+        "tag:backup:3306",            // MySQL
+        "tag:backup:5432"             // PostgreSQL
+      ]
+    },
+    
+    // ========================================
+    // Inter-service Communication
+    // ========================================
+    
+    // Web services can access databases
+    {
+      "action": "accept",
+      "src": ["tag:web-services"],
+      "dst": [
+        "tag:database:3306",          // MySQL
+        "tag:database:5432",          // PostgreSQL
+        "tag:database:6379",          // Redis
+        "tag:database:27017"          // MongoDB
+      ]
+    },
+    
+    // Monitoring can access all services for metrics
+    {
+      "action": "accept",
+      "src": ["tag:monitoring"],
+      "dst": [
+        "tag:web-services:9090",      // Prometheus metrics
+        "tag:web-services:8080",      // Health checks
+        "tag:database:9090",          // Database metrics
+        "tag:k8s-cluster:10250",      // Kubelet metrics
+        "tag:k8s-cluster:9100"        // Node exporter
+      ]
+    },
+    
+    // Kubernetes nodes can communicate with each other
+    {
+      "action": "accept",
+      "src": ["tag:k8s-cluster"],
+      "dst": [
+        "tag:k8s-cluster:*"           // All ports between K8s nodes
+      ]
+    },
+    
+    // ========================================
+    // Administrative Access
+    // ========================================
+    
+    // Admin user has full access to everything
+    {
+      "action": "accept",
+      "src": ["ncrmro"],
+      "dst": ["*:*"]
+    },
+    
+    // Admin tagged devices have broad access
+    {
+      "action": "accept",
+      "src": ["tag:admin"],
+      "dst": [
+        "*:22",                       // SSH to all hosts
+        "*:80",                       // HTTP
+        "*:443",                      // HTTPS
+        "tag:k8s-cluster:6443"        // Kubernetes API
+      ]
+    },
+    
+    // ========================================
+    // Default Deny Rules
+    // ========================================
+    
+    // Explicitly deny GitHub Actions from certain sensitive services
+    {
+      "action": "deny",
+      "src": ["tag:github-actions"],
+      "dst": [
+        "tag:prod-services:22",       // No SSH to production
+        "tag:prod-services:3306",     // No direct DB access to prod
+        "tag:prod-services:5432",     // No direct DB access to prod
+        "tag:admin:*"                 // No access to admin systems
+      ]
+    }
+  ],
+
+  // SSH access rules
+  "ssh": [
+    // Admin user can SSH to any machine
+    {
+      "action": "accept",
+      "src": ["ncrmro"],
+      "dst": ["*"],
+      "users": ["root", "ncrmro", "ubuntu"]
+    },
+    
+    // GitHub Actions can SSH to backup systems only
+    {
+      "action": "accept",
+      "src": ["tag:github-actions"],
+      "dst": ["tag:backup"],
+      "users": ["backup", "root"]
+    },
+    
+    // Admin tagged devices can SSH with limited users
+    {
+      "action": "accept",
+      "src": ["tag:admin"],
+      "dst": ["*"],
+      "users": ["ncrmro", "ubuntu"]
+    }
+  ],
+
+  // Test rules (used with `headscale acls test`)
+  "tests": [
+    {
+      "src": "tag:github-actions",
+      "accept": [
+        "tag:k8s-master:6443",
+        "tag:dev-services:80",
+        "tag:staging-services:443"
+      ],
+      "deny": [
+        "tag:prod-services:22",
+        "tag:prod-services:3306",
+        "tag:admin:22"
+      ]
+    },
+    {
+      "src": "ncrmro",
+      "accept": [
+        "tag:k8s-master:6443",
+        "tag:prod-services:22",
+        "tag:admin:22"
+      ]
+    }
+  ]
+}

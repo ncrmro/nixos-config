@@ -1,0 +1,89 @@
+name: Deploy to Kubernetes via Tailscale
+
+on:
+  push:
+    branches: [main]
+    paths: ['kubernetes/**']
+  workflow_dispatch:
+
+env:
+  KUBECONFIG_PATH: /tmp/kubeconfig
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Tailscale
+        uses: ./.github/actions/setup-tailscale
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          timeout: 60
+
+      - name: Install kubectl
+        run: |
+          # Install latest kubectl
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+      - name: Configure Kubernetes access
+        run: |
+          # Decode and save kubeconfig
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > $KUBECONFIG_PATH
+          chmod 600 $KUBECONFIG_PATH
+          
+          # Update server URL to use Tailscale IP
+          # Note: Replace 100.64.0.6 with your actual K8s master Tailscale IP
+          kubectl config set-cluster cluster --server=https://100.64.0.6:6443
+          
+          # Test connection
+          echo "=== Kubernetes Cluster Info ==="
+          kubectl cluster-info
+          
+          echo "=== Node Status ==="
+          kubectl get nodes
+
+      - name: Validate Kubernetes manifests
+        run: |
+          # Dry-run validation
+          kubectl apply --dry-run=client -f kubernetes/ || {
+            echo "Manifest validation failed"
+            exit 1
+          }
+
+      - name: Deploy applications
+        run: |
+          echo "=== Applying Kubernetes manifests ==="
+          kubectl apply -f kubernetes/
+          
+          echo "=== Checking rollout status ==="
+          # Wait for deployments to complete (adjust selectors as needed)
+          for deployment in $(kubectl get deployments -o name); do
+            echo "Waiting for $deployment..."
+            kubectl rollout status $deployment --timeout=300s
+          done
+
+      - name: Verify deployment
+        run: |
+          echo "=== Deployment Status ==="
+          kubectl get deployments
+          kubectl get pods
+          kubectl get services
+          
+          echo "=== Recent Events ==="
+          kubectl get events --sort-by='.lastTimestamp' | tail -10
+
+      - name: Cleanup
+        if: always()
+        run: |
+          # Clean up sensitive files
+          rm -f $KUBECONFIG_PATH
+          
+          # Disconnect from Tailscale
+          sudo tailscale logout || true
+          sudo systemctl stop tailscaled || true

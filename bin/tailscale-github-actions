@@ -1,0 +1,272 @@
+#!/usr/bin/env bash
+
+# Tailscale Auth Key Management Script for GitHub Actions
+# This script helps manage ephemeral auth keys for GitHub Actions runners
+
+set -euo pipefail
+
+MERCURY_HOST="root@mercury.ncrmro.com"
+HEADSCALE_USER="ncrmro"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+log_info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
+}
+
+log_success() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
+
+log_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+log_error() {
+    echo -e "${RED}❌ $1${NC}"
+}
+
+show_help() {
+    cat << EOF
+Tailscale Auth Key Management for GitHub Actions
+
+Usage: $0 COMMAND [OPTIONS]
+
+Commands:
+    create-ephemeral    Create ephemeral auth key for GitHub Actions
+    create-reusable     Create reusable auth key for development
+    list               List all pre-auth keys
+    revoke KEY_ID      Revoke a specific auth key
+    cleanup            Remove expired keys
+    test-acl           Test ACL configuration
+    
+Options:
+    --expiration DURATION   Set key expiration (default: 24h for ephemeral, 168h for reusable)
+    --tags TAGS            Comma-separated list of tags (default: tag:github-actions)
+    --help                 Show this help message
+
+Examples:
+    $0 create-ephemeral                    # Create 24h ephemeral key
+    $0 create-reusable --expiration 72h    # Create 72h reusable key
+    $0 list                                # List all keys
+    $0 revoke key_12345                    # Revoke specific key
+    $0 cleanup                             # Remove expired keys
+    $0 test-acl                            # Test ACL rules
+
+EOF
+}
+
+create_auth_key() {
+    local key_type="$1"
+    local expiration="${2:-}"
+    local tags="${3:-tag:github-actions}"
+    
+    # Set default expiration based on key type
+    if [[ -z "$expiration" ]]; then
+        case "$key_type" in
+            "ephemeral")
+                expiration="24h"
+                ;;
+            "reusable")
+                expiration="168h"  # 7 days
+                ;;
+            *)
+                log_error "Invalid key type: $key_type"
+                exit 1
+                ;;
+        esac
+    fi
+    
+    log_info "Creating $key_type auth key with expiration: $expiration, tags: $tags"
+    
+    # Build headscale command
+    local cmd="headscale preauthkeys create --user $HEADSCALE_USER --expiration $expiration --tags \"$tags\""
+    
+    if [[ "$key_type" == "ephemeral" ]]; then
+        cmd="$cmd --ephemeral"
+    elif [[ "$key_type" == "reusable" ]]; then
+        cmd="$cmd --reusable"
+    fi
+    
+    # Execute command on Mercury server
+    log_info "Executing on Mercury server..."
+    local result
+    result=$(ssh "$MERCURY_HOST" "$cmd" 2>&1) || {
+        log_error "Failed to create auth key: $result"
+        exit 1
+    }
+    
+    # Extract the auth key from the result
+    local auth_key
+    auth_key=$(echo "$result" | grep -o 'tskey-auth-[A-Za-z0-9_-]*' || true)
+    
+    if [[ -n "$auth_key" ]]; then
+        log_success "Auth key created successfully!"
+        echo ""
+        echo "🔑 Auth Key: $auth_key"
+        echo ""
+        log_warning "Add this key to your GitHub repository secrets as 'TAILSCALE_AUTHKEY'"
+        echo ""
+        log_info "To add to GitHub repository:"
+        echo "  1. Go to your repository on GitHub"
+        echo "  2. Navigate to Settings > Secrets and variables > Actions"
+        echo "  3. Click 'New repository secret'"
+        echo "  4. Name: TAILSCALE_AUTHKEY"
+        echo "  5. Value: $auth_key"
+        echo ""
+        
+        # Copy to clipboard if available
+        if command -v pbcopy >/dev/null 2>&1; then
+            echo "$auth_key" | pbcopy
+            log_success "Auth key copied to clipboard (macOS)"
+        elif command -v xclip >/dev/null 2>&1; then
+            echo "$auth_key" | xclip -selection clipboard
+            log_success "Auth key copied to clipboard (Linux)"
+        fi
+    else
+        log_error "Could not extract auth key from result: $result"
+        exit 1
+    fi
+}
+
+list_keys() {
+    log_info "Listing all pre-auth keys for user: $HEADSCALE_USER"
+    ssh "$MERCURY_HOST" "headscale preauthkeys list --user $HEADSCALE_USER"
+}
+
+revoke_key() {
+    local key_id="$1"
+    
+    if [[ -z "$key_id" ]]; then
+        log_error "Key ID is required for revoke command"
+        exit 1
+    fi
+    
+    log_info "Revoking auth key: $key_id"
+    ssh "$MERCURY_HOST" "headscale preauthkeys expire $key_id"
+    log_success "Auth key $key_id has been revoked"
+}
+
+cleanup_expired() {
+    log_info "Cleaning up expired auth keys..."
+    
+    # Note: Headscale doesn't have a built-in cleanup command for expired keys
+    # This is a placeholder for when that functionality is available
+    log_warning "Manual cleanup required. Use 'list' command to see expired keys and 'revoke' to remove them."
+    
+    # Show expired keys
+    log_info "Listing all keys (expired keys will be marked):"
+    list_keys
+}
+
+test_acl() {
+    log_info "Testing ACL configuration..."
+    
+    # Test GitHub Actions access rules
+    ssh "$MERCURY_HOST" "headscale acls test --user $HEADSCALE_USER" || {
+        log_error "ACL test failed. Check ACL configuration."
+        exit 1
+    }
+    
+    log_success "ACL test completed successfully"
+}
+
+check_mercury_connection() {
+    log_info "Checking connection to Mercury server..."
+    
+    if ! ssh -o ConnectTimeout=10 "$MERCURY_HOST" "echo 'Connection test successful'" >/dev/null 2>&1; then
+        log_error "Cannot connect to Mercury server at $MERCURY_HOST"
+        log_info "Please ensure:"
+        log_info "  1. You have SSH access to the Mercury server"
+        log_info "  2. The server is running and accessible"
+        log_info "  3. Your SSH key is properly configured"
+        exit 1
+    fi
+    
+    log_success "Mercury server connection verified"
+}
+
+main() {
+    if [[ $# -eq 0 ]]; then
+        show_help
+        exit 0
+    fi
+    
+    # Parse command line arguments
+    local command="$1"
+    shift
+    
+    # Default values
+    local expiration=""
+    local tags="tag:github-actions"
+    
+    # Parse options
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --expiration)
+                expiration="$2"
+                shift 2
+                ;;
+            --tags)
+                tags="$2"
+                shift 2
+                ;;
+            --help)
+                show_help
+                exit 0
+                ;;
+            *)
+                # For revoke command, this is the key ID
+                if [[ "$command" == "revoke" ]]; then
+                    key_id="$1"
+                    shift
+                else
+                    log_error "Unknown option: $1"
+                    exit 1
+                fi
+                ;;
+        esac
+    done
+    
+    # Check connection before executing commands
+    if [[ "$command" != "help" ]]; then
+        check_mercury_connection
+    fi
+    
+    # Execute command
+    case "$command" in
+        "create-ephemeral")
+            create_auth_key "ephemeral" "$expiration" "$tags"
+            ;;
+        "create-reusable")
+            create_auth_key "reusable" "$expiration" "$tags"
+            ;;
+        "list")
+            list_keys
+            ;;
+        "revoke")
+            revoke_key "${key_id:-}"
+            ;;
+        "cleanup")
+            cleanup_expired
+            ;;
+        "test-acl")
+            test_acl
+            ;;
+        "help"|"--help")
+            show_help
+            ;;
+        *)
+            log_error "Unknown command: $command"
+            show_help
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"
