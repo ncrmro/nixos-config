@@ -60,6 +60,8 @@
 
     # secret management
     inputs.agenix.packages.${pkgs.system}.default
+
+    openssl
   ];
 
   # home.packages = with pkgs.unstable; [
