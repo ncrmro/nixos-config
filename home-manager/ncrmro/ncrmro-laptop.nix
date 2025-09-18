@@ -30,7 +30,12 @@
       "3, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
       "4, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
       "5, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
-      "6, monitor:desc:BOE 0x0BCA, persistent:true, default:true"
+      "6, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
+      "7, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
+      "8, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
+      "9, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
+      # uses 0 for keybinding
+      "10, monitor:desc:BOE 0x0BCA, persistent:true, default:true"
     ];
     windowrule = [
       # Tag messaging apps
