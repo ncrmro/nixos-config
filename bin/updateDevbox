@@ -1,6 +1,6 @@
 nixos-rebuild switch --flake .#devbox --target-host "root@ncrmro-devbox.mercury"
 
-HOST="root@192.168.1.123"
+HOST="root@100.64.0.4"
 REMOTE_K3S_PATH="/etc/rancher/k3s/k3s.yaml"
 LOCAL_CONFIG_DIR="$(dirname "$0")/../.kube"
 LOCAL_CONFIG_PATH="${LOCAL_CONFIG_DIR}/devbox.yml"
