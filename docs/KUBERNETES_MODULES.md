@@ -15,6 +15,7 @@ hosts/common/kubernetes/
 ├── ingress-nginx.nix         # Ingress controller (kube-system namespace)
 ├── kube-prometheus-stack.nix # Monitoring stack (monitoring namespace)
 ├── loki.nix                  # Log aggregation
+├── longhorn.nix              # Distributed storage system (longhorn-system namespace)
 └── zfs-localpv.nix          # ZFS storage provisioner (kube-system namespace)
 ```
 
@@ -79,10 +80,22 @@ services.k3s.autoDeployCharts = {
 ### Logging
 - **loki**: Log aggregation and storage
 
+### Distributed Storage (longhorn-system namespace)
+- **longhorn**: Distributed block storage for Kubernetes
+  - Provides ReadWriteMany (RWX) and ReadWriteOnce (RWO) storage classes
+  - Web UI accessible at `longhorn.ncrmro.com`
+  - Multiple storage classes:
+    - `longhorn-rwx`: Multi-node read/write access with 3 replicas
+    - `longhorn-rwo`: Single-node access with 3 replicas
+    - `longhorn-fast`: Single-replica for non-critical workloads
+
 ## Storage Classes
 
 The configuration uses custom storage classes:
 - `ocean-nvme`: High-performance storage for monitoring components
+- `longhorn-rwx`: ReadWriteMany storage using Longhorn distributed storage
+- `longhorn-rwo`: ReadWriteOnce storage using Longhorn distributed storage  
+- `longhorn-fast`: High-performance single-replica storage for non-critical data
 - ZFS LocalPV provides additional storage options
 
 ## Host Integration
