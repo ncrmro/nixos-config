@@ -12,6 +12,7 @@ The Kubernetes configuration is organized using NixOS modules that leverage k3s'
 hosts/common/kubernetes/
 ├── default.nix              # Main module that imports all components
 ├── cert-manager.nix          # Certificate management
+├── gitea.nix                 # Git repository management (gitea namespace)
 ├── ingress-nginx.nix         # Ingress controller (kube-system namespace)
 ├── kube-prometheus-stack.nix # Monitoring stack (monitoring namespace)
 ├── loki.nix                  # Log aggregation
@@ -80,6 +81,14 @@ services.k3s.autoDeployCharts = {
 ### Logging
 - **loki**: Log aggregation and storage
 
+### Git Repository Management
+- **gitea**: Self-hosted Git service with web interface (gitea namespace)
+  - SQLite database for simplicity
+  - Persistent storage using configurable storage classes
+  - Ingress configuration for web access
+  - SSH service for Git operations
+  - Example placeholder storage class configurations
+
 ### Distributed Storage (longhorn-system namespace)
 - **longhorn**: Distributed block storage for Kubernetes
   - Provides ReadWriteMany (RWX) and ReadWriteOnce (RWO) storage classes
@@ -91,12 +100,24 @@ services.k3s.autoDeployCharts = {
 
 ## Storage Classes
 
-The configuration uses custom storage classes:
-- `ocean-nvme`: High-performance storage for monitoring components
+The configuration uses custom storage classes for persistent volumes:
+- `ocean-nvme`: High-performance ZFS storage for monitoring components and applications
+- `zfs-nvme`: Alternative ZFS storage class for fast storage
+- `ocean-hdd`: ZFS storage class for larger, slower storage needs
 - `longhorn-rwx`: ReadWriteMany storage using Longhorn distributed storage
 - `longhorn-rwo`: ReadWriteOnce storage using Longhorn distributed storage  
 - `longhorn-fast`: High-performance single-replica storage for non-critical data
-- ZFS LocalPV provides additional storage options
+- ZFS LocalPV provides the underlying storage provisioner
+
+Example storage class usage in Gitea module:
+```nix
+persistence = {
+  enabled = true;
+  storageClass = "ocean-nvme"; # Example placeholder storage class
+  size = "10Gi";
+  accessModes = ["ReadWriteOnce"];
+};
+```
 
 ## Host Integration
 
