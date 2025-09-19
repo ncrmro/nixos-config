@@ -608,6 +608,86 @@ headscale preauthkeys list --user ncrmro
 
 ## Example Workflows
 
+### Complete GitHub Actions Setup
+
+**Step 1: Generate secrets using the management script**
+
+```bash
+# Generate both Tailscale auth key and kubeconfig (first time setup)
+./bin/github-actions-secrets --roll
+
+# Display the secrets for copying to GitHub
+./bin/github-actions-secrets --show
+```
+
+This will output both secrets in the format needed for GitHub repository secrets:
+- `TAILSCALE_AUTHKEY`: Ephemeral auth key with `tag:github-actions`
+- `KUBECONFIG`: Base64-encoded kubeconfig for your K8s cluster
+
+**Step 2: Add secrets to GitHub repository**
+
+1. Go to your repository → Settings → Secrets and variables → Actions
+2. Add these secrets:
+   - `TAILSCALE_AUTHKEY`: Copy from script output
+   - `KUBECONFIG`: Copy from script output
+
+**Secret Management:**
+```bash
+# Rotate both secrets
+./bin/github-actions-secrets --roll
+
+# Rotate only Tailscale auth key
+./bin/github-actions-secrets --roll-tailscale
+
+# Rotate only kubeconfig
+./bin/github-actions-secrets --roll-kubeconfig
+
+# View current secrets
+./bin/github-actions-secrets --show
+```
+
+**Step 3: Create reusable Tailscale action**
+
+```yaml
+# .github/actions/setup-tailscale/action.yml
+name: 'Setup Tailscale'
+description: 'Connect to Tailscale network via Headscale'
+inputs:
+  authkey:
+    description: 'Tailscale auth key'
+    required: true
+  timeout:
+    description: 'Connection timeout in seconds'
+    required: false
+    default: '30'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Tailscale
+      shell: bash
+      run: |
+        curl -fsSL https://tailscale.com/install.sh | sh
+        tailscale version
+        
+    - name: Connect to Tailscale
+      shell: bash
+      run: |
+        sudo tailscale up \
+          --authkey=${{ inputs.authkey }} \
+          --login-server=https://mercury.ncrmro.com \
+          --timeout=${{ inputs.timeout }}s \
+          --accept-routes --accept-dns
+        
+    - name: Verify Connection
+      shell: bash
+      run: |
+        echo "=== Tailscale Status ==="
+        tailscale status
+        echo "=== Tailscale IP ==="
+        tailscale ip -4
+```
+
 ### Example 1: Deploy to Kubernetes
 
 ```yaml

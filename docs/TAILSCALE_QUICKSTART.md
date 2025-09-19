@@ -91,24 +91,30 @@ jobs:
 
 ## Method B: Auth Key Authentication Setup
 
-### Step 1: Create Auth Key
-
-Use the provided script to create an ephemeral auth key:
+### Step 1: Generate secrets using management script
 
 ```bash
-# From repository root
-./bin/tailscale-github-actions create-ephemeral
+# Generate fresh Tailscale auth key and kubeconfig for your repository
+./bin/github-actions-secrets ncrmro/website
+
+# Or specify a different environment
+./bin/github-actions-secrets ncrmro/website staging
 ```
 
-This will output an auth key like: `tskey-auth-xxxxxxxxxx`
+This will:
+- Create a new Tailscale auth key
+- Create a Kubernetes namespace (e.g., `ncrmro-website-prod`) with repository label
+- Set up a service account with permissions to that namespace
+- Generate a kubeconfig for the service account
+- Display both secrets for copying to GitHub
 
-## Step 2: Add to GitHub Secrets
+### Step 2: Add to GitHub Secrets
 
 1. Go to your GitHub repository
 2. Navigate to **Settings** → **Secrets and variables** → **Actions**
-3. Click **New repository secret**
-4. Name: `TAILSCALE_AUTHKEY`
-5. Value: (paste the auth key from step 1)
+3. Add these secrets:
+   - Name: `TAILSCALE_AUTHKEY`, Value: (from script output)
+   - Name: `KUBECONFIG`, Value: (from script output)
 
 ## Step 3: Create Reusable Action
 
@@ -244,8 +250,8 @@ headscale acls get
 
 ### Connection Fails
 ```bash
-# Check auth key validity
-./bin/tailscale-github-actions list
+# Generate new secrets
+./bin/github-actions-secrets
 
 # Test manual connection
 tailscale up --login-server=https://mercury.ncrmro.com --authkey=YOUR_KEY
