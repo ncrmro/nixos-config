@@ -94,6 +94,8 @@
   services.monitoring-client = {
     enable = true;
     listenAddress = "100.64.0.1";
+  };
+
   # Configure Tailscale node (no tags for client machine)
   services.tailscale.node = {
     enable = true;
