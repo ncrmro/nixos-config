@@ -55,20 +55,20 @@
         csi = {
           enableCSIHostNetwork = true;
           pluginTolerations = [
-            # {
-            #   key = "ncrmro.com/region";
-            #   operator = "Equal";
-            #   value = "us-south-2";
-            #   effect = "NoSchedule";
-            # }
+            {
+              key = "ncrmro.com/region";
+              operator = "Equal";
+              value = "us-south-2";
+              effect = "NoSchedule";
+            }
           ];
           provisionerTolerations = [
-            # {
-            #   key = "ncrmro.com/region";
-            #   operator = "Equal";
-            #   value = "us-south-2";
-            #   effect = "NoSchedule";
-            # }
+            {
+              key = "ncrmro.com/region";
+              operator = "Equal";
+              value = "us-south-2";
+              effect = "NoSchedule";
+            }
           ];
 
           # NixOS-specific volume mounts for kernel modules and nix store

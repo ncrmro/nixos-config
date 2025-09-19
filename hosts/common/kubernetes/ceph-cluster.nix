@@ -18,12 +18,12 @@
         waitTimeoutForHealthyOSDInMinutes = 10;
 
         mon = {
-          count = 1;
+          count = 2;
           allowMultiplePerNode = false;
         };
 
         mgr = {
-          count = 1;
+          count = 2;
           allowMultiplePerNode = false;
         };
 
@@ -72,12 +72,12 @@
         placement = {
           all = {
             tolerations = [
-              # {
-              #   key = "ncrmro.com/region";
-              #   operator = "Equal";
-              #   value = "us-south-2";
-              #   effect = "NoSchedule";
-              # }
+              {
+                key = "ncrmro.com/region";
+                operator = "Equal";
+                value = "us-south-2";
+                effect = "NoSchedule";
+              }
             ];
           };
         };
@@ -127,25 +127,25 @@
           ];
         };
 
-        disruptionManagement = {
-          managePodBudgets = true;
-          osdMaintenanceTimeout = 30;
-          pgHealthCheckTimeout = 0;
-        };
+        # disruptionManagement = {
+        #   managePodBudgets = true;
+        #   osdMaintenanceTimeout = 30;
+        #   pgHealthCheckTimeout = 0;
+        # };
 
-        healthCheck = {
-          daemonHealth = {
-            mon = {
-              interval = "45s";
-            };
-            osd = {
-              interval = "60s";
-            };
-            status = {
-              interval = "60s";
-            };
-          };
-        };
+        # healthCheck = {
+        #   daemonHealth = {
+        #     mon = {
+        #       interval = "45s";
+        #     };
+        #     osd = {
+        #       interval = "60s";
+        #     };
+        #     status = {
+        #       interval = "60s";
+        #     };
+        #   };
+        # };
       };
     };
   };

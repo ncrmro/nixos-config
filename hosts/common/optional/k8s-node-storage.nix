@@ -2,12 +2,12 @@
 # Common storage setup for K8s nodes including ZFS and Ceph/RBD support
 {pkgs, ...}: {
   # Install ceph-client for Rook Ceph cluster management and RBD kernel module access
-  # environment.systemPackages = [
-  #   pkgs.ceph-client
-  # ];
+  environment.systemPackages = [
+    pkgs.ceph-client
+  ];
 
   # Load RBD kernel module for Rook Ceph
-  boot.kernelModules = ["rbd" "nbd"];
+  #boot.kernelModules = ["rbd" "nbd"];
 
   # ZFS and RBD kernel module setup for Kubernetes storage
   environment.etc = {
