@@ -84,7 +84,7 @@ services.k3s.autoDeployCharts = {
 ### Git Repository Management
 - **gitea**: Self-hosted Git service with web interface (gitea namespace)
   - SQLite database for simplicity
-  - Persistent storage using configurable storage classes
+  - Persistent storage using Ceph filesystem storage class
   - Ingress configuration for web access
   - SSH service for Git operations
   - Example placeholder storage class configurations
@@ -113,7 +113,7 @@ Example storage class usage in Gitea module:
 ```nix
 persistence = {
   enabled = true;
-  storageClass = "ocean-nvme"; # Example placeholder storage class
+  storageClass = "ceph-filesystem";
   size = "10Gi";
   accessModes = ["ReadWriteOnce"];
 };
