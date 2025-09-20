@@ -53,7 +53,7 @@
         # Persistent storage configuration - Main data volume
         persistence = {
           enabled = true;
-          storageClass = "ocean-nvme"; # Example placeholder storage class
+          storageClass = "ceph-filesystem";
           size = "10Gi";
           accessModes = ["ReadWriteOnce"];
         };
