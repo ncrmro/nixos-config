@@ -4,8 +4,7 @@
   ...
 }: {
   imports = [
-    ../common/optional/k8s-node-storage.nix
-    #../common/kubernetes/rook-ceph.nix
+    ../common/kubernetes/rook-ceph.nix
     ../common/kubernetes/zfs-localpv.nix
     ../common/kubernetes/longhorn.nix
   ];
@@ -63,6 +62,7 @@
       "--container-runtime-endpoint=/run/containerd/containerd.sock"
       "--node-ip=100.64.0.5" # Maia's headscale IP
       "--flannel-iface=tailscale0"
+      #"--node-taint=ncrmro.com/region=us-south-2:NoSchedule"
       #"--embedded-registry" # Enable distributed OCI registry mirror
     ];
   };

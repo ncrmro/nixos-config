@@ -4,8 +4,7 @@
   ...
 }: {
   imports = [
-    ../common/optional/k8s-node-storage.nix
-    #../common/kubernetes/rook-ceph.nix
+    ../common/kubernetes/rook-ceph.nix
     ../common/kubernetes/zfs-localpv.nix
     ../common/kubernetes/longhorn.nix
   ];

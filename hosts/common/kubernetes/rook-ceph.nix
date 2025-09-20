@@ -1,14 +1,24 @@
 # Rook Ceph Operator and Cluster
 # https://artifacthub.io/packages/helm/rook/rook-ceph
 # https://artifacthub.io/packages/helm/rook/rook-ceph-cluster
-{pkgs, config, lib, ...}: {
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}: {
   # Install Ceph client tools for Rook Ceph
   environment.systemPackages = [
-    pkgs.ceph-client  # For Rook Ceph cluster management
+    pkgs.ceph-client # For Rook Ceph cluster management
   ];
 
-  # Load RBD kernel modules for Rook Ceph
-  boot.kernelModules = ["rbd" "nbd"];
+  # Load kernel modules for Rook Ceph
+  boot.kernelModules = ["rbd" "nbd" "ceph"];
+
+  # Fix containerd LimitNOFILE for Rook Ceph
+  systemd.services.containerd.serviceConfig = {
+    LimitNOFILE = lib.mkForce null;
+  };
 
   # Only deploy Helm charts on K3s server nodes
   services.k3s.autoDeployCharts = lib.mkIf (config.services.k3s.enable && config.services.k3s.role == "server") {
@@ -114,7 +124,7 @@
       createNamespace = false;
       values = {
         operatorNamespace = "rook-ceph";
-        
+
         # Ceph Cluster Configuration
         cephClusterSpec = {
           cephVersion = {
