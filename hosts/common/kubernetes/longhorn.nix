@@ -1,18 +1,44 @@
-{...}: {
-  services.k3s.autoDeployCharts = {
+{config, pkgs, lib, ...}: {
+  # iSCSI is required for Longhorn distributed block storage
+  services.openiscsi = {
+    enable = true;
+    name = "${config.networking.hostName}-initiatorhost";
+  };
+  
+  # Install iSCSI tools for Longhorn
+  environment.systemPackages = [
+    pkgs.openiscsi
+  ];
+  
+  # Make iSCSI tools available for Longhorn CSI driver (following ZFS pattern)
+  systemd.services.iscsi-tools = {
+    description = "iSCSI tools for Longhorn";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = [
+        "${pkgs.coreutils}/bin/mkdir -p /usr/bin"
+        "${pkgs.coreutils}/bin/ln -sf ${pkgs.openiscsi}/bin/iscsiadm /usr/bin/iscsiadm"
+      ];
+      RemainAfterExit = true;
+    };
+    wantedBy = ["multi-user.target"];
+  };
+
+  # Only deploy Helm charts on K3s server nodes
+  services.k3s.autoDeployCharts = lib.mkIf (config.services.k3s.enable && config.services.k3s.role == "server") {
     # Longhorn Helm Chart: https://artifacthub.io/packages/helm/longhorn/longhorn
     longhorn = {
       name = "longhorn";
       repo = "https://charts.longhorn.io";
       version = "1.8.0";
-      hash = "sha256-PLACEHOLDER"; # TODO: Add hash after first deployment
+      hash = "sha256-CV3ZBvYEAtD3Peaqu/knQcPEMod/CQFAWyIonzvX7Uw=";
       targetNamespace = "longhorn-system";
       createNamespace = true;
       values = {
         # Longhorn configuration
         persistence = {
           defaultClass = false; # Don't make Longhorn the default storage class
-          defaultClassReplicaCount = 3; # Default replica count for new volumes
+          defaultClassReplicaCount = 2; # Default replica count for new volumes
         };
         
         # Ingress configuration for Longhorn UI
@@ -38,7 +64,7 @@
           storageOverProvisioningPercentage = "100";
           storageMinimalAvailablePercentage = "25";
           upgradeChecker = false;
-          defaultReplicaCount = "3";
+          defaultReplicaCount = "2";
           # Resource guarantees for stable performance
           guaranteedEngineManagerCPU = "12";
           guaranteedReplicaManagerCPU = "12";
@@ -53,7 +79,14 @@
         # Resource limits for Longhorn components
         longhornManager = {
           priorityClass = "";
-          tolerations = [];
+          tolerations = [
+            {
+              key = "ncrmro.com/region";
+              operator = "Equal";
+              value = "us-south-2";
+              effect = "NoSchedule";
+            }
+          ];
           ## Node selector for manager pods
           # nodeSelector = {
           #   "kubernetes.io/hostname" = "ocean";
@@ -62,7 +95,14 @@
         
         longhornDriver = {
           priorityClass = "";
-          tolerations = [];
+          tolerations = [
+            {
+              key = "ncrmro.com/region";
+              operator = "Equal";
+              value = "us-south-2";
+              effect = "NoSchedule";
+            }
+          ];
           ## Node selector for driver pods  
           # nodeSelector = {
           #   "kubernetes.io/hostname" = "ocean";
@@ -71,7 +111,14 @@
         
         longhornUI = {
           priorityClass = "";
-          tolerations = [];
+          tolerations = [
+            {
+              key = "ncrmro.com/region";
+              operator = "Equal";
+              value = "us-south-2";
+              effect = "NoSchedule";
+            }
+          ];
           ## Node selector for UI pods
           # nodeSelector = {
           #   "kubernetes.io/hostname" = "ocean";
@@ -81,8 +128,8 @@
     };
   };
 
-  # Longhorn-based storage classes
-  services.k3s.manifests = {
+  # Longhorn-based storage classes - only on server nodes
+  services.k3s.manifests = lib.mkIf (config.services.k3s.enable && config.services.k3s.role == "server") {
     # ReadWriteMany storage class using Longhorn with NFS
     "longhorn-rwx-storage-class".content = {
       apiVersion = "storage.k8s.io/v1";
@@ -98,7 +145,7 @@
       reclaimPolicy = "Delete";
       volumeBindingMode = "Immediate";
       parameters = {
-        numberOfReplicas = "3";
+        numberOfReplicas = "2";
         staleReplicaTimeout = "2880"; # 48 hours
         fromBackup = "";
         fsType = "ext4";
@@ -110,52 +157,6 @@
       };
       # Allow RWX access modes
       allowedTopologies = [];
-    };
-    
-    # ReadWriteOnce storage class using Longhorn (for comparison/alternative)
-    "longhorn-rwo-storage-class".content = {
-      apiVersion = "storage.k8s.io/v1";
-      kind = "StorageClass";
-      metadata = {
-        name = "longhorn-rwo";
-        annotations = {
-          "storageclass.kubernetes.io/is-default-class" = "false";
-        };
-      };
-      provisioner = "driver.longhorn.io";
-      allowVolumeExpansion = true;
-      reclaimPolicy = "Delete";
-      volumeBindingMode = "Immediate";
-      parameters = {
-        numberOfReplicas = "3";
-        staleReplicaTimeout = "2880"; # 48 hours
-        fromBackup = "";
-        fsType = "ext4";
-        dataLocality = "disabled";
-      };
-    };
-    
-    # High-performance single replica storage class for non-critical data
-    "longhorn-fast-storage-class".content = {
-      apiVersion = "storage.k8s.io/v1";
-      kind = "StorageClass";
-      metadata = {
-        name = "longhorn-fast";
-        annotations = {
-          "storageclass.kubernetes.io/is-default-class" = "false";
-        };
-      };
-      provisioner = "driver.longhorn.io";
-      allowVolumeExpansion = true;
-      reclaimPolicy = "Delete";
-      volumeBindingMode = "Immediate";
-      parameters = {
-        numberOfReplicas = "1";
-        staleReplicaTimeout = "2880"; # 48 hours
-        fromBackup = "";
-        fsType = "ext4";
-        dataLocality = "best-effort";
-      };
     };
   };
 }

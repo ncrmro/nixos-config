@@ -5,6 +5,9 @@
 }: {
   imports = [
     ../common/optional/k8s-node-storage.nix
+    #../common/kubernetes/rook-ceph.nix
+    ../common/kubernetes/zfs-localpv.nix
+    ../common/kubernetes/longhorn.nix
   ];
   # Define the K3s server token secret
   age.secrets.k3s-server-token = {
