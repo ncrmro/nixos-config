@@ -41,9 +41,18 @@
   };
 
   # k3s configuration as agent
-  networking.firewall.allowedTCPPorts = [
-    5001 # k3s: distributed registry mirror peer-to-peer communication
-  ];
+  networking.firewall = {
+    # Open K3s cluster ports only on Tailscale interface
+    interfaces.tailscale0 = {
+      allowedTCPPorts = [
+        10250 # k3s: kubelet API
+        5001 # k3s: distributed registry mirror peer-to-peer communication
+      ];
+      allowedUDPPorts = [
+        8472 # k3s: flannel VXLAN
+      ];
+    };
+  };
 
   services.k3s = {
     enable = true;
@@ -53,7 +62,7 @@
     extraFlags = toString [
       "--container-runtime-endpoint=/run/containerd/containerd.sock"
       "--node-ip=100.64.0.5" # Maia's headscale IP
-      "--node-taint=ncrmro.com/region=us-south-2:NoSchedule"
+      "--flannel-iface=tailscale0"
       #"--embedded-registry" # Enable distributed OCI registry mirror
     ];
   };

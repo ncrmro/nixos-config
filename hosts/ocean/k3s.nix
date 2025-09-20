@@ -45,10 +45,21 @@
   };
 
   # k3s configuration
-  networking.firewall.allowedTCPPorts = [
-    6443 # k3s: required so that pods can reach the API server (running on port 6443 by default)
-    5001 # k3s: distributed registry mirror peer-to-peer communication
-  ];
+  networking.firewall = {
+    # Open K3s cluster ports only on Tailscale interface
+    interfaces.tailscale0 = {
+      allowedTCPPorts = [
+        6443 # k3s: API server (restricted to Tailscale only)
+        10250 # k3s: kubelet API
+        2379 # k3s: etcd server client API
+        2380 # k3s: etcd server peer API
+        5001 # k3s: distributed registry mirror peer-to-peer communication
+      ];
+      allowedUDPPorts = [
+        8472 # k3s: flannel VXLAN
+      ];
+    };
+  };
   services.k3s.enable = true;
   services.k3s.role = "server";
   services.k3s.tokenFile = config.age.secrets.k3s-server-token.path;
@@ -59,6 +70,7 @@
     "--tls-san=ocean.mercury"
     "--tls-san=100.64.0.6"
     "--node-ip=100.64.0.6"
+    "--flannel-iface=tailscale0"
     # "--embedded-registry" # Enable distributed OCI registry mirror (TODO: fix nft-expr-counter kernel module issue)
     # "--debug" # Optionally add additional args to k3s
   ];
