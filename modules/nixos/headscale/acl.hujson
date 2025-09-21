@@ -10,7 +10,10 @@
     // Kubernetes cluster nodes
     "tag:k8s-cluster": ["ncrmro"],
     "tag:k8s-master": ["ncrmro"],
-    "tag:k8s-worker": ["ncrmro"]
+    "tag:k8s-worker": ["ncrmro"],
+    
+    // Nodes running node exporter for monitoring
+    "tag:node-exporter": ["ncrmro"]
   },
 
   // Define access control rules
@@ -31,6 +34,24 @@
       "src": ["tag:k8s-cluster"],
       "dst": [
         "tag:k8s-cluster:*"           // All ports between K8s nodes
+      ]
+    },
+    
+    // K8s cluster can access node exporter on tagged devices
+    {
+      "action": "accept",
+      "src": ["tag:k8s-cluster"],
+      "dst": [
+        "tag:node-exporter:9100"     // Node exporter port
+      ]
+    },
+    
+    // K8s cluster (Prometheus) can access node exporter on all user devices
+    {
+      "action": "accept",
+      "src": ["tag:k8s-cluster"],
+      "dst": [
+        "ncrmro:9100"                // Node exporter on ncrmro's devices
       ]
     },
     
@@ -55,7 +76,8 @@
       "src": "ncrmro",
       "accept": [
         "tag:k8s-master:6443",
-        "tag:k8s-cluster:*"
+        "tag:k8s-cluster:*",
+        "tag:k8s-cluster:22"
       ]
     }
   ]
