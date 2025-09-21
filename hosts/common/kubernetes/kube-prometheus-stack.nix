@@ -13,6 +13,16 @@
         prometheus = {
           prometheusSpec = {
             retention = "90d";
+            # Monitor all ServiceMonitors across all namespaces
+            serviceMonitorSelectorNilUsesHelmValues = false;
+            serviceMonitorSelector = {};
+            serviceMonitorNamespaceSelector = {};
+            podMonitorSelectorNilUsesHelmValues = false;
+            podMonitorSelector = {};
+            podMonitorNamespaceSelector = {};
+            ruleSelectorNilUsesHelmValues = false;
+            ruleSelector = {};
+            ruleNamespaceSelector = {};
             storageSpec = {
               volumeClaimTemplate = {
                 spec = {
