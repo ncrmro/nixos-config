@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-HOST="root@216.128.136.32"
+HOST="root@mercury.ncrmro.com"
 
-# Rebuild the NixOS configuration
-nixos-rebuild switch --flake .#mercury --target-host "$HOST"
+# Rebuild the NixOS configuration via Ocean jumphost
+nixos-rebuild switch --flake .#mercury --target-host "$HOST" #--build-host ocean.mercury
 
 # Try to create headscale user 'ncrmro' and ignore errors if output contains 'UNIQUE'
 echo "Attempting to create headscale user 'ncrmro'..."
-output=$(ssh $HOST "headscale users create ncrmro" 2>&1) || {
+output=$(ssh -J ocean.mercury $HOST "headscale users create ncrmro" 2>&1) || {
   if echo "$output" | grep -q "UNIQUE"; then
     echo "User 'ncrmro' already exists (UNIQUE constraint). Continuing..."
   else
