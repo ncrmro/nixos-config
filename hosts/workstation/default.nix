@@ -42,6 +42,7 @@
   environment.variables = {
     TERM = "xterm-256color"; # Or your preferred terminal type
   };
+  hardware.keyboard.uhk.enable = true;
 
   # Configure Tailscale node (no tags for client machine)
   services.tailscale.node = {
