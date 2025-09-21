@@ -15,11 +15,13 @@
     ../common/optional/secureboot.nix
     ../common/optional/agenix.nix
     ../common/optional/adguard-home.nix
+    ../common/optional/servarr.nix
     ./k3s.nix
     ./k3s-storage-classes.nix
     ./nfs.nix
     ../common/kubernetes/default.nix
     ../common/kubernetes/adguard-home.nix
+    ../common/kubernetes/servarr.nix
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
   ];

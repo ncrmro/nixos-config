@@ -1,5 +1,9 @@
 # Headscale configuration module
-{config, lib, ...}: let
+{
+  config,
+  lib,
+  ...
+}: let
   domain = "mercury.ncrmro.com";
 in {
   # Configure ACME for SSL certificates
@@ -67,6 +71,46 @@ in {
             }
             {
               name = "longhorn.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
+            {
+              name = "jellyfin.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
+            {
+              name = "radarr.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
+            {
+              name = "sonarr.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
+            {
+              name = "prowlarr.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
+            {
+              name = "bazarr.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
+            {
+              name = "lidarr.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
+            {
+              name = "readarr.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
+            {
+              name = "jellyseerr.ncrmro.com";
               type = "A";
               value = "100.64.0.6";
             }
