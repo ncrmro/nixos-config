@@ -1,34 +1,20 @@
 {...}: {
-  services.k3s.manifests = {
-    gitea-namespace = {
-      enable = true;
-      target = "gitea-namespace.yaml";
-      content = {
-        apiVersion = "v1";
-        kind = "Namespace";
-        metadata = {
-          name = "gitea";
-        };
-      };
-    };
-  };
-
   services.k3s.autoDeployCharts = {
     # Gitea Helm Chart: https://gitea.com/gitea/helm-chart
     gitea = {
       name = "gitea";
       repo = "https://dl.gitea.com/charts/";
-      version = "10.6.0";
-      hash = "sha256-PLACEHOLDER"; # TODO: Add hash after first deployment
+      version = "12.3.0";
+      hash = "sha256-2vVuqlW+BJA5Tgyu9VipbAnij2zzNflDeVHJqZug/W8=";
       targetNamespace = "gitea";
-      createNamespace = false;
+      createNamespace = true;
       values = {
         # Gitea configuration
         gitea = {
           admin = {
-            username = "admin";
+            username = "ncrmro";
             password = "changeme"; # TODO: Use proper secret management
-            email = "admin@example.com";
+            email = "ncrmro@gmail.com";
           };
           config = {
             database = {
@@ -38,14 +24,15 @@
               PROVIDER = "file";
             };
             cache = {
-              ADAPTER = "memory";
+              ADAPTER = "valkey";
             };
             queue = {
               TYPE = "level";
             };
             server = {
-              DOMAIN = "git.example.com"; # TODO: Update with actual domain
-              ROOT_URL = "https://git.example.com"; # TODO: Update with actual domain
+              DOMAIN = "git.ncrmro.com";
+              ROOT_URL = "https://git.ncrmro.com";
+              SSH_PORT = "2222";
             };
           };
         };
@@ -55,7 +42,7 @@
           enabled = true;
           storageClass = "ceph-filesystem";
           size = "10Gi";
-          accessModes = ["ReadWriteOnce"];
+          accessModes = ["ReadWriteMany"];
         };
 
         # Database configuration - using external PostgreSQL
@@ -67,13 +54,34 @@
           enabled = false; # Use external PostgreSQL or SQLite for simplicity
         };
 
+        # Valkey cluster configuration (enabled by default in v12+)
+        valkey-cluster = {
+          enabled = true;
+          persistence = {
+            enabled = true;
+            storageClass = "zfs-nvme";
+            size = "2Gi";
+            accessModes = ["ReadWriteOnce"];
+          };
+          resources = {
+            limits = {
+              cpu = "200m";
+              memory = "256Mi";
+            };
+            requests = {
+              cpu = "100m";
+              memory = "128Mi";
+            };
+          };
+        };
+
         # Ingress configuration
         ingress = {
           enabled = true;
           className = "nginx";
           hosts = [
             {
-              host = "git.example.com"; # TODO: Update with actual domain
+              host = "git.ncrmro.com";
               paths = [
                 {
                   path = "/";
@@ -85,7 +93,7 @@
           tls = [
             {
               # Using default ingress-nginx wildcard cert (*.ncrmro.com)
-              hosts = ["git.example.com"]; # TODO: Update with actual domain
+              hosts = ["git.ncrmro.com"];
             }
           ];
         };
@@ -98,7 +106,7 @@
           };
           ssh = {
             type = "LoadBalancer"; # For Git SSH access
-            port = 22;
+            port = 2222;
             externalPort = 2222;
           };
         };
@@ -120,10 +128,30 @@
           fsGroup = 1000;
         };
 
-        # Node selector (example placeholder)
-        nodeSelector = {
-          "kubernetes.io/hostname" = "ocean"; # Example placeholder node selector
+        # Deployment configuration
+        replicaCount = 2;
+
+        # Anti-affinity to spread pods across different nodes
+        affinity = {
+          podAntiAffinity = {
+            preferredDuringSchedulingIgnoredDuringExecution = [
+              {
+                weight = 100;
+                podAffinityTerm = {
+                  labelSelector = {
+                    matchLabels = {
+                      "app.kubernetes.io/name" = "gitea";
+                    };
+                  };
+                  topologyKey = "kubernetes.io/hostname";
+                };
+              }
+            ];
+          };
         };
+
+        # Node selector removed to allow scheduling on any node
+        # nodeSelector = {};
       };
     };
   };
