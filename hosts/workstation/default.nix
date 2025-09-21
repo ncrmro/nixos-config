@@ -33,7 +33,7 @@
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
   home-manager.extraSpecialArgs = {inherit inputs outputs;};
-  home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-laptop.nix;
+  home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-workstation.nix;
 
   environment.systemPackages = with pkgs; [
     nvtopPackages.nvidia
