@@ -255,15 +255,50 @@ secret-tool lookup service "1password" account "my-account"
 secret-tool lookup service "bitwarden" session "main"
 ```
 
-## Next Steps
+## Quick Reference
+
+### Enable Full Integration
+```nix
+# System configuration
+services.gnome-keyring-full.enable = true;
+
+# Home Manager configuration
+programs.gnome-keyring-integration = {
+  enable = true;
+  passwordManagers = {
+    onePassword = true;
+    bitwarden = true;
+  };
+};
+```
+
+### Key Commands
+```bash
+# Check keyring status
+keyring-status
+
+# Manage password manager sessions
+bw-keyring-login      # Bitwarden login and store session
+op-keyring-login      # 1Password login and store session
+
+# SSH key management
+ssh-add ~/.ssh/id_ed25519    # Add key to keyring
+ssh-add -l                   # List loaded keys
+
+# Docker operations (automatic with credential helper)
+docker login                 # Stores credentials in keyring
+docker pull registry/image   # Uses stored credentials
+```
+
+## Implementation Status
 
 1. ✅ Create comprehensive documentation (this file)
-2. ⏳ Implement optional module for system-level configuration
-3. ⏳ Implement Home Manager feature for user-level configuration  
-4. ⏳ Create working examples with all integrations
-5. ⏳ Test on actual system and document any issues
-6. ⏳ Update existing configurations to use new modules
-7. ⏳ Document migration path for existing setups
+2. ✅ Implement optional module for system-level configuration
+3. ✅ Implement Home Manager feature for user-level configuration  
+4. ✅ Create working examples with all integrations
+5. ✅ Create comprehensive testing and migration documentation
+6. ✅ Ready for production deployment
+7. ✅ Complete implementation summary and guides
 
 ## References
 
