@@ -35,12 +35,17 @@
     nodejs_24
     devenv
     kind
+    ruby
+    rustup
+    python312Full
+    python312Packages.pip
     chart-testing
     # Does not support Network Manager
     # impala # TUI for managing wifi
     bottom # System viewer
     eza # Better ls
     ripgrep # Better grep
+    tree # Directory tree visualization
     claude-code
     jq
     yq
@@ -62,11 +67,11 @@
     inputs.agenix.packages.${pkgs.system}.default
 
     openssl
+    (import inputs.nixpkgs-unstable {
+      inherit (pkgs) system;
+      config.allowUnfree = true;
+    }).sbom-tool
   ];
-
-  # home.packages = with pkgs.unstable; [
-  #   eza # better ls, temporary whilst as eza is not on stable yet
-  # ];
   programs.zsh = {
     enable = true;
     # enableCompletions = true;
