@@ -97,7 +97,26 @@ imports = [
 
 ### Kubernetes Resources
 
-For hosts running K3s, Kubernetes resources can be managed through NixOS modules in `/hosts/common/kubernetes/`. These modules use the `services.kubernetes.helm.releases` and raw manifest application.
+For hosts running K3s, Kubernetes resources can be managed through NixOS modules in `/hosts/common/kubernetes/`. These modules use the `services.k3s.autoDeployCharts` for Helm chart deployments and raw manifest application.
+
+#### Important: Helm Chart Hash Values
+
+When using `services.k3s.autoDeployCharts`, the initial `hash` value should always be an empty string `""`, not `"sha256-PLACEHOLDER"` or similar placeholders. This allows Nix to fetch the chart and emit the proper hash on first deployment.
+
+```nix
+services.k3s.autoDeployCharts = {
+  example-chart = {
+    name = "example";
+    repo = "https://charts.example.com";
+    version = "1.0.0";
+    hash = ""; # Use empty string for initial deployment
+    targetNamespace = "default";
+    values = { /* chart values */ };
+  };
+};
+```
+
+After the first deployment attempt, Nix will provide the correct hash which should then be updated in the configuration.
 
 ## Key Technologies
 
