@@ -14,6 +14,7 @@
     ../../modules/users/root.nix
     ../../modules/users/ncrmro.nix
     ../common/optional/tailscale.node.nix
+    ../common/optional/alloy-client.nix
     #../common/optional/k3s-openebs-zfs.nix
     ./k3s.nix
   ];
@@ -41,6 +42,15 @@
   services.tailscale.node = {
     enable = true;
     tags = ["tag:k8s-cluster"];
+  };
+
+  services.alloy-client = {
+    enable = true;
+    extraLabels = {
+      environment = "development";
+      device_type = "devbox";
+      k8s_role = "worker";
+    };
   };
 
   networking.hostName = "ncrmro-devbox";

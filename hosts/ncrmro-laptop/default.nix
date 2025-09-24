@@ -25,6 +25,7 @@
     ../common/optional/tailscale.node.nix
     ../common/optional/nfs-client.nix
     ../common/optional/monitoring-client.nix
+    ../common/optional/alloy-client.nix
     ./zfs.remote-replication.nix
   ];
 
@@ -94,6 +95,14 @@
   services.monitoring-client = {
     enable = true;
     listenAddress = "100.64.0.1";
+  };
+
+  services.alloy-client = {
+    enable = true;
+    extraLabels = {
+      environment = "home";
+      device_type = "laptop";
+    };
   };
 
   # Configure Tailscale node (no tags for client machine)
