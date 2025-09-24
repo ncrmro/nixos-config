@@ -22,6 +22,7 @@
     ../common/optional/ollama.nix
     ../common/optional/nfs-client.nix
     ../common/optional/monitoring-client.nix
+    ../common/optional/alloy-client.nix
     ./nvidia.nix
   ];
 
@@ -37,6 +38,8 @@
 
   environment.systemPackages = with pkgs; [
     nvtopPackages.nvidia
+    alsa-utils
+    lsof
   ];
 
   environment.variables = {
@@ -54,6 +57,14 @@
   services.monitoring-client = {
     enable = true;
     listenAddress = "100.64.0.3";
+  };
+
+  services.alloy-client = {
+    enable = true;
+    extraLabels = {
+      environment = "home";
+      device_type = "workstation";
+    };
   };
 
   networking.hostId = "cb1216ed"; # generate with: head -c 8 /etc/machine-id
