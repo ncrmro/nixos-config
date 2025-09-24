@@ -7,6 +7,7 @@
 }: {
   imports = [
     ./base.nix
+    ../common/features/desktop/obs.nix
   ];
 
   wayland.windowManager.hyprland.settings = {
