@@ -6,6 +6,7 @@
     ./gitea.nix
     ./ingress-nginx.nix
     ./loki.nix
+    ./alloy.nix
     ./pgo.nix
     ./kube-prometheus-stack.nix
     ./vaultwarden.nix

@@ -9,6 +9,11 @@
       createNamespace = false;
       values = {
         loki = {
+          auth_enabled = false;
+          # https://grafana.com/docs/loki/latest/configuration/#common_config
+          commonConfig = {
+            replication_factor = 1;
+          };
           schemaConfig = {
             configs = [
               {

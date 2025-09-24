@@ -89,6 +89,20 @@
               }
             ];
           };
+          # Add Loki as a datasource
+          additionalDataSources = [
+            {
+              name = "Loki";
+              type = "loki";
+              access = "proxy";
+              url = "http://loki-gateway.monitoring.svc.cluster.local";
+              jsonData = {
+                manageAlerts = true;
+                maxLines = 1000;
+              };
+              editable = false;
+            }
+          ];
         };
         alertmanager = {
           alertmanagerSpec = {
