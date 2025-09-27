@@ -19,6 +19,7 @@
     ./k3s.nix
     ./k3s-storage-classes.nix
     ./nfs.nix
+    ../common/optional/smb-backup-shares.nix
     ../common/kubernetes/default.nix
     ../common/kubernetes/adguard-home.nix
     ../common/kubernetes/servarr.nix
@@ -34,6 +35,14 @@
   services.tailscale.node = {
     enable = true;
     tags = ["tag:k8s-cluster" "tag:k8s-master"];
+  };
+
+  # Configure SMB backup shares
+  services.smb-backup-shares = {
+    enable = true;
+    backupsRoot = "ocean/backups";
+    timeMachineQuota = "2T";
+    windowsBackupQuota = "1T";
   };
 
   services.openssh.settings.PermitRootLogin = "yes";
