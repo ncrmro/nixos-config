@@ -4,17 +4,18 @@
   inputs,
   ...
 }: {
-  #   imports = [
-  #     ./bash.nix
-  #     ./bat.nix
-  #     ./direnv.nix
-  #     ./fish.nix
-  #     ./git.nix
-  #     ./pnpm.nix
-  #     ./shellcolor.nix
-  #     ./starship.nix
-  #     ./zoxide.nix
-  #   ];
+  imports = [
+    ./playwright.nix
+    #     ./bash.nix
+    #     ./bat.nix
+    #     ./direnv.nix
+    #     ./fish.nix
+    #     ./git.nix
+    #     ./pnpm.nix
+    #     ./shellcolor.nix
+    #     ./starship.nix
+    #     ./zoxide.nix
+  ];
   programs.uv.enable = true;
   programs.k9s.enable = true;
   programs.git.lfs.enable = true;

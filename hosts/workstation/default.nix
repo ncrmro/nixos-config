@@ -23,6 +23,7 @@
     ../common/optional/nfs-client.nix
     ../common/optional/monitoring-client.nix
     ../common/optional/alloy-client.nix
+    ../common/optional/docker-rootless.nix
     ./nvidia.nix
   ];
 
