@@ -18,13 +18,14 @@
     workspace = [
       "1, monitor:desc:LG Electronics LG Ultra HD 0x000063ED, persistent:true"
       "2, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
-      "3, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
-      "4, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
-      "5, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
-      "6, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
-      "7, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
-      "8, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
-      "9, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:true"
+      "3, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:false"
+      "4, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:false"
+      "5, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:false"
+      "6, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:false"
+      "7, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:false"
+      "8, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:false"
+      "9, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:false"
+      "11, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:false"
     ];
   };
 
