@@ -27,6 +27,7 @@
     ../common/optional/monitoring-client.nix
     ../common/optional/alloy-client.nix
     ./zfs.remote-replication.nix
+    ../../modules/nixos/steam.nix
   ];
 
   programs.zsh.enable = true;
