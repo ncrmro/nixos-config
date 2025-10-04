@@ -9,7 +9,7 @@ on:
       - 'hosts/**'
       - 'modules/**'
       - 'home-manager/**'
-      - '.github/workflows/nixos-validation.yml'
+      - '.github/workflows/validate.yml'
 
 jobs:
   validate-flake:
