@@ -2,7 +2,12 @@
 # GitHub repo: https://github.com/openebs/zfs-localpv/tree/develop/deploy/helm/charts
 # Chart repo: https://openebs.github.io/zfs-localpv
 # Raw values: https://raw.githubusercontent.com/openebs/zfs-localpv/refs/heads/develop/deploy/helm/charts/values.yaml
-{pkgs, config, lib, ...}: {
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}: {
   # Install ZFS tools for LocalPV
   environment.systemPackages = [
     pkgs.zfs

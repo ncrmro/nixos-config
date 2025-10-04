@@ -1,15 +1,20 @@
-{config, pkgs, lib, ...}: {
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}: {
   # iSCSI is required for Longhorn distributed block storage
   services.openiscsi = {
     enable = true;
     name = "${config.networking.hostName}-initiatorhost";
   };
-  
+
   # Install iSCSI tools for Longhorn
   environment.systemPackages = [
     pkgs.openiscsi
   ];
-  
+
   # Make iSCSI tools available for Longhorn CSI driver (following ZFS pattern)
   systemd.services.iscsi-tools = {
     description = "iSCSI tools for Longhorn";
@@ -40,7 +45,7 @@
           defaultClass = false; # Don't make Longhorn the default storage class
           defaultClassReplicaCount = 2; # Default replica count for new volumes
         };
-        
+
         # Ingress configuration for Longhorn UI
         ingress = {
           enabled = true;
@@ -53,7 +58,7 @@
             "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true";
           };
         };
-        
+
         # Default settings for Longhorn
         defaultSettings = {
           backupstorePollInterval = "300";
@@ -75,7 +80,7 @@
           # Set reasonable timeout for node operations
           nodeDownPodDeletionPolicy = "delete-both-statefulset-and-deployment-pod";
         };
-        
+
         # Resource limits for Longhorn components
         longhornManager = {
           priorityClass = "";
@@ -92,7 +97,7 @@
           #   "kubernetes.io/hostname" = "ocean";
           # };
         };
-        
+
         longhornDriver = {
           priorityClass = "";
           tolerations = [
@@ -103,12 +108,12 @@
               effect = "NoSchedule";
             }
           ];
-          ## Node selector for driver pods  
+          ## Node selector for driver pods
           # nodeSelector = {
           #   "kubernetes.io/hostname" = "ocean";
           # };
         };
-        
+
         longhornUI = {
           priorityClass = "";
           tolerations = [
