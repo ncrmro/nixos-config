@@ -5,6 +5,7 @@ This repository contains my NixOS flake and host configurations.
 ## Documentation
 
 - [Installing NixOS with nixos-anywhere](docs/INSTALL_NIXOS_ANYWHERE.md) - Installation instructions, ZFS notes, Secure Boot (lanzaboote), TPM enrollment, and post-install commands
+- [GitHub CI NixOS Validation](docs/GITHUB_CI_VALIDATION.md) - **NEW!** Automated validation of NixOS configurations via GitHub Actions
 - [Headscale and Tailscale Setup](docs/HEADSCALE_SETUP.md) - Self-hosted Tailscale control server setup and client configuration
 - [Tailscale + GitHub Actions](docs/TAILSCALE_GITHUB_ACTIONS.md) - **NEW!** Comprehensive guide for Tailscale/Headscale integration with GitHub Actions
 - [Tailscale Quick Start](docs/TAILSCALE_QUICKSTART.md) - **NEW!** Quick setup guide for GitHub Actions with Tailscale
