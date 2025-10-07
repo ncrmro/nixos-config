@@ -24,7 +24,9 @@
     ../common/optional/monitoring-client.nix
     ../common/optional/alloy-client.nix
     ../common/optional/docker-rootless.nix
+    ../common/optional/virt-manager.nix
     ./nvidia.nix
+    ../../modules/nixos/steam.nix
   ];
 
   programs.zsh.enable = true;
@@ -46,6 +48,8 @@
   environment.variables = {
     TERM = "xterm-256color"; # Or your preferred terminal type
   };
+  programs.nix-ld.enable = true;
+
   hardware.keyboard.uhk.enable = true;
 
   # Configure Tailscale node (no tags for client machine)
