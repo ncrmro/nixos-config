@@ -630,6 +630,14 @@
         "owner": "ncrmro",
         "repo": "keystone",
         "rev": "d9f06231620030ff1f298a2bd9d00ae53620bf98",
+        ]
+      },
+      "locked": {
+        "lastModified": 1759412392,
+        "narHash": "sha256-/TiqmBBljmbBdkoQmTbKtjqpfJR8GgOwsdLbbyyZ9Jc=",
+        "owner": "ncrmro",
+        "repo": "keystone",
+        "rev": "eae24a33e402ad61b986b2669b54f558b9989e2d",
         "type": "github"
       },
       "original": {
