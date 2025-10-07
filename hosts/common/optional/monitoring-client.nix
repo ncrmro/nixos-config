@@ -21,5 +21,11 @@ in {
       enable = true;
       listenAddress = cfg.listenAddress;
     };
+
+    # Ensure node exporter waits for tailscale to be ready
+    systemd.services.prometheus-node-exporter = {
+      after = ["tailscaled.service"];
+      wants = ["tailscaled.service"];
+    };
   };
 }
