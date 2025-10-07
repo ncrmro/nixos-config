@@ -630,14 +630,6 @@
         "owner": "ncrmro",
         "repo": "keystone",
         "rev": "d9f06231620030ff1f298a2bd9d00ae53620bf98",
-        ]
-      },
-      "locked": {
-        "lastModified": 1759412392,
-        "narHash": "sha256-/TiqmBBljmbBdkoQmTbKtjqpfJR8GgOwsdLbbyyZ9Jc=",
-        "owner": "ncrmro",
-        "repo": "keystone",
-        "rev": "eae24a33e402ad61b986b2669b54f558b9989e2d",
         "type": "github"
       },
       "original": {
@@ -776,11 +768,11 @@
     },
     "nixpkgs-unstable": {
       "locked": {
-        "lastModified": 1756787288,
-        "narHash": "sha256-rw/PHa1cqiePdBxhF66V7R+WAP8WekQ0mCDG4CFqT8Y=",
+        "lastModified": 1759733170,
+        "narHash": "sha256-TXnlsVb5Z8HXZ6mZoeOAIwxmvGHp1g4Dw89eLvIwKVI=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "d0fc30899600b9b3466ddb260fd83deb486c32f1",
+        "rev": "8913c168d1c56dc49a7718685968f38752171c3b",
         "type": "github"
       },
       "original": {

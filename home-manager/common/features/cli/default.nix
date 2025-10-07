@@ -47,7 +47,6 @@
     eza # Better ls
     ripgrep # Better grep
     tree # Directory tree visualization
-    claude-code
     jq
     yq
     sops
@@ -72,6 +71,10 @@
       inherit (pkgs) system;
       config.allowUnfree = true;
     }).sbom-tool
+    (import inputs.nixpkgs-unstable {
+      inherit (pkgs) system;
+      config.allowUnfree = true;
+    }).claude-code
   ];
   programs.zsh = {
     enable = true;

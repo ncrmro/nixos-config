@@ -37,10 +37,6 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    keystone = {
-      url = "github:ncrmro/keystone";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     # Secret management
     agenix = {
