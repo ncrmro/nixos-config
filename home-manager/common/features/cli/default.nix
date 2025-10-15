@@ -71,10 +71,12 @@
       inherit (pkgs) system;
       config.allowUnfree = true;
     }).sbom-tool
-    (import inputs.nixpkgs-unstable {
-      inherit (pkgs) system;
-      config.allowUnfree = true;
-    }).claude-code
+    (
+      import inputs.nixpkgs-unstable {
+        inherit (pkgs) system;
+        config.allowUnfree = true;
+      }
+    ).claude-code
   ];
   programs.zsh = {
     enable = true;
@@ -109,7 +111,29 @@
     f = "fetch";
     p = "pull";
     rff = "reset --force";
-    r = "rebase";
-    #      rsdm = "git checkout orgin/main --"
+  };
+
+  programs.helix = {
+    enable = true;
+    languages = with pkgs; {
+      language-server.typescript-language-server = {
+        command = "${typescript-language-server}/bin/typescript-language-server";
+        args = ["--stdio"];
+        config = {
+          documentFormatting = false;
+          tsserver = {
+            path = "./node_modules/typescript/lib";
+            fallbackPath = "${typescript}/lib/node_modules/typescript/lib";
+          };
+        };
+      };
+      language = [
+        {
+          name = "nix";
+          auto-format = true;
+          formatter.command = "${pkgs.nixfmt}/bin/nixfmt";
+        }
+      ];
+    };
   };
 }
