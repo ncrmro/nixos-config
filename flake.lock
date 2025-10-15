@@ -638,6 +638,22 @@
         "type": "github"
       }
     },
+    "kinda-nvim-hx": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1745783249,
+        "narHash": "sha256-/DDLBjYQU29w8ey5HtzjI6YHlTBVYnudkdcNgDGncoU=",
+        "owner": "strash",
+        "repo": "kinda_nvim.hx",
+        "rev": "8ab90c10abc71dcc7625bd7961aec209f633564f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "strash",
+        "repo": "kinda_nvim.hx",
+        "type": "github"
+      }
+    },
     "lanzaboote": {
       "inputs": {
         "crane": "crane",
@@ -917,6 +933,7 @@
         "disko": "disko",
         "home-manager": "home-manager",
         "keystone": "keystone",
+        "kinda-nvim-hx": "kinda-nvim-hx",
         "lanzaboote": "lanzaboote",
         "nix-index-database": "nix-index-database",
         "nixos-hardware": "nixos-hardware",

@@ -5,6 +5,7 @@
   ...
 }: {
   imports = [
+    ./helix.nix
     ./playwright.nix
     #     ./bash.nix
     #     ./bat.nix
@@ -111,29 +112,5 @@
     f = "fetch";
     p = "pull";
     rff = "reset --force";
-  };
-
-  programs.helix = {
-    enable = true;
-    languages = with pkgs; {
-      language-server.typescript-language-server = {
-        command = "${typescript-language-server}/bin/typescript-language-server";
-        args = ["--stdio"];
-        config = {
-          documentFormatting = false;
-          tsserver = {
-            path = "./node_modules/typescript/lib";
-            fallbackPath = "${typescript}/lib/node_modules/typescript/lib";
-          };
-        };
-      };
-      language = [
-        {
-          name = "nix";
-          auto-format = true;
-          formatter.command = "${pkgs.nixfmt}/bin/nixfmt";
-        }
-      ];
-    };
   };
 }

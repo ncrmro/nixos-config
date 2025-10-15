@@ -50,6 +50,12 @@
       url = "github:ncrmro/keystone";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Helix editor themes
+    kinda-nvim-hx = {
+      url = "github:strash/kinda_nvim.hx";
+      flake = false;
+    };
   };
 
   outputs = inputs @ {
