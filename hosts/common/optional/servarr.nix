@@ -13,11 +13,13 @@
   services.radarr = {
     enable = true;
     openFirewall = false;
+    group = "media";
   };
 
   services.sonarr = {
     enable = true;
     openFirewall = false;
+    group = "media";
   };
 
   services.prowlarr = {
@@ -28,16 +30,19 @@
   services.bazarr = {
     enable = true;
     openFirewall = false;
+    group = "media";
   };
 
   services.lidarr = {
     enable = true;
     openFirewall = false;
+    group = "media";
   };
 
   services.readarr = {
     enable = true;
     openFirewall = false;
+    group = "media";
   };
 
   services.jellyseerr = {
