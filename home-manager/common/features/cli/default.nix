@@ -72,12 +72,14 @@
       inherit (pkgs) system;
       config.allowUnfree = true;
     }).sbom-tool
-    (
-      import inputs.nixpkgs-unstable {
-        inherit (pkgs) system;
-        config.allowUnfree = true;
-      }
-    ).claude-code
+    (import inputs.nixpkgs-unstable {
+      inherit (pkgs) system;
+      config.allowUnfree = true;
+    }).claude-code
+    (import inputs.nixpkgs-unstable {
+      inherit (pkgs) system;
+      config.allowUnfree = true;
+    }).github-copilot-cli
   ];
   programs.zsh = {
     enable = true;
