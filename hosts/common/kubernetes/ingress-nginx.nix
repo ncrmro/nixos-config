@@ -10,8 +10,12 @@
       createNamespace = false;
       values = {
         controller = {
+          replicaCount = 2;
           service = {
             type = "LoadBalancer";
+          };
+          config = {
+            "proxy-body-size" = "15m";
           };
           watchIngressWithoutClass = true;
           ingressClassResource = {
