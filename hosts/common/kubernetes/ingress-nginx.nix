@@ -11,12 +11,8 @@
       values = {
         controller = {
           replicaCount = 2;
-          service = {
-            type = "LoadBalancer";
-          };
-          config = {
-            "proxy-body-size" = "15m";
-          };
+          service = {type = "LoadBalancer";};
+          config = {"proxy-body-size" = "100m";};
           watchIngressWithoutClass = true;
           ingressClassResource = {
             name = "nginx";
@@ -49,11 +45,7 @@
             name = "letsencrypt-cloudflare";
             kind = "ClusterIssuer";
           };
-          dnsNames = [
-            "*.ncrmro.com"
-            "*.home.ncrmro.com"
-            "ncrmro.com"
-          ];
+          dnsNames = ["*.ncrmro.com" "*.home.ncrmro.com" "ncrmro.com"];
         };
       };
     };
