@@ -26,6 +26,7 @@
     ../common/optional/nfs-client.nix
     ../common/optional/monitoring-client.nix
     ../common/optional/alloy-client.nix
+    ../common/optional/iphone-tether.nix
     ./zfs.remote-replication.nix
     ../../modules/nixos/steam.nix
   ];
@@ -38,7 +39,8 @@
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
   home-manager.extraSpecialArgs = {inherit inputs outputs;};
-  home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-laptop.nix;
+  home-manager.users.ncrmro =
+    import ../../home-manager/ncrmro/ncrmro-laptop.nix;
 
   services.greetd = {
     enable = true;
@@ -84,9 +86,7 @@
   };
   services.fprintd.enable = true;
 
-  omarchy = {
-    scale = 1;
-  };
+  omarchy = {scale = 1;};
   # https://github.com/NixOS/nixpkgs/issues/231191#issuecomment-1664053176
   environment.etc."resolv.conf".mode = "direct-symlink";
 
@@ -107,9 +107,7 @@
   };
 
   # Configure Tailscale node (no tags for client machine)
-  services.tailscale.node = {
-    enable = true;
-  };
+  services.tailscale.node = {enable = true;};
 
   networking.hostName = "ncrmro-laptop";
   networking.hostId = "cac44b47";
