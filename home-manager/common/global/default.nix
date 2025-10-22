@@ -15,6 +15,11 @@
 
   programs.home-manager.enable = true;
 
+  # Enable Wayland support for Electron/Chromium applications
+  home.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
+  };
+
   programs.ssh = {
     enable = true;
     # extraConfig = ''
