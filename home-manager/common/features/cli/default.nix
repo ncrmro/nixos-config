@@ -26,7 +26,7 @@
     kubectl
     kubernetes-helm
     railway
-    traceroute
+    # traceroute # Does not work on macOS
     sqlite
     turso-cli
     htop
@@ -68,10 +68,10 @@
     inputs.agenix.packages.${pkgs.system}.default
 
     openssl
-    (import inputs.nixpkgs-unstable {
-      inherit (pkgs) system;
-      config.allowUnfree = true;
-    }).sbom-tool
+    # (import inputs.nixpkgs-unstable {
+    #   inherit (pkgs) system;
+    #   config.allowUnfree = true;
+    # }).sbom-tool
     (import inputs.nixpkgs-unstable {
       inherit (pkgs) system;
       config.allowUnfree = true;
