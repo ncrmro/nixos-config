@@ -17,6 +17,8 @@ in {
     helm-ls
     ruby-lsp
     solargraph
+    nodePackages.prettier
+    harper
     # rust-analyzer
   ];
 
@@ -89,6 +91,10 @@ in {
           command = "${solargraph}/bin/solargraph";
           args = ["stdio"];
         };
+        harper-ls = {
+          command = "${harper}/bin/harper-ls";
+          args = ["--stdio"];
+        };
         # rust-analyzer = {
         #   command = "${rust-analyzer}/bin/rust-analyzer";
         # };
@@ -98,10 +104,11 @@ in {
           name = "nix";
           auto-format = true;
           formatter.command = "${pkgs.nixfmt}/bin/nixfmt";
+          language-servers = ["harper-ls"];
         }
         {
           name = "bash";
-          language-servers = ["bash-language-server"];
+          language-servers = ["bash-language-server" "harper-ls"];
         }
         {
           name = "yaml";
@@ -129,7 +136,16 @@ in {
         }
         {
           name = "html";
-          language-servers = ["vscode-html-language-server"];
+          language-servers = ["vscode-html-language-server" "harper-ls"];
+        }
+        {
+          name = "typescript";
+          formatter = {
+            command = "prettier";
+            args = ["--parser" "typescript"];
+          };
+          auto-format = true;
+          language-servers = ["typescript-language-server" "harper-ls"];
         }
         {
           name = "helm";
@@ -137,7 +153,103 @@ in {
         }
         {
           name = "ruby";
-          language-servers = ["ruby-lsp" "solargraph"];
+          language-servers = ["ruby-lsp" "solargraph" "harper-ls"];
+        }
+        {
+          name = "markdown";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "c";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "cmake";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "cpp";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "c-sharp";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "dart";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "git-commit";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "go";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "haskell";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "java";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "javascript";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "jsx";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "lua";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "php";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "python";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "rust";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "scala";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "solidity";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "swift";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "toml";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "tsx";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "typst";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "kotlin";
+          language-servers = ["harper-ls"];
+        }
+        {
+          name = "clojure";
+          language-servers = ["harper-ls"];
         }
         # {
         #   name = "rust";
@@ -150,4 +262,10 @@ in {
   # Copy theme files from the flake input
   xdg.configFile."helix/themes/kinda_nvim.toml".source = "${inputs.kinda-nvim-hx}/kinda_nvim.toml";
   xdg.configFile."helix/themes/kinda_nvim_light.toml".source = "${inputs.kinda-nvim-hx}/kinda_nvim_light.toml";
+
+  # Set helix as default editor
+  home.sessionVariables = {
+    EDITOR = "hx";
+    VISUAL = "hx";
+  };
 }
