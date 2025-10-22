@@ -25,6 +25,7 @@
     ../common/optional/alloy-client.nix
     ../common/optional/docker-rootless.nix
     ../common/optional/virt-manager.nix
+    ../common/optional/shairport-sync.nix
     ./nvidia.nix
     ../../modules/nixos/steam.nix
   ];

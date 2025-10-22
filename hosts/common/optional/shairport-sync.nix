@@ -6,28 +6,22 @@
 }: {
   # user and group
   users = {
-    users.shairport = {
+    users.shairport-sync = {
       description = "Shairport user";
       isSystemUser = true;
       createHome = true;
       home = "/var/lib/shairport-sync";
-      group = "shairport";
+      group = "shairport-sync";
       extraGroups = ["pulse-access"];
     };
-    groups.shairport = {};
+    groups.shairport-sync = {};
   };
 
   # open firewall ports
   networking.firewall = {
-    interfaces."enp192s0" = {
-      allowedTCPPorts = [
-        3689
-        5353
-        5000
-      ];
-      allowedUDPPorts = [
-        5353
-      ];
+    interfaces."enp5s0" = {
+      allowedTCPPorts = [3689 5353 5000];
+      allowedUDPPorts = [5353];
       allowedTCPPortRanges = [
         {
           from = 7000;
@@ -79,7 +73,7 @@
     enable = true;
     publish.enable = true;
     publish.userServices = true;
-    allowInterfaces = ["enp192s0"];
+    allowInterfaces = ["enp5s0"];
   };
   #
   # systemd services
@@ -102,6 +96,8 @@
         ExecStart = "${pkgs.shairport-sync-airplay2}/bin/shairport-sync pa --name 'Desktop Speakers'";
         Restart = "on-failure";
         RuntimeDirectory = "shairport-sync";
+        User = "shairport-sync";
+        Group = "shairport-sync";
       };
     };
   };
