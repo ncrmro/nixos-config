@@ -18,7 +18,7 @@
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -88,8 +88,8 @@
       };
   in {
     # Code formatter
-    formatter.x86_64-linux = pkgsForSystem "x86_64-linux".alejandra;
-    formatter.aarch64-darwin = pkgsForSystem "aarch64-darwin".alejandra;
+    formatter.x86_64-linux = (pkgsForSystem "x86_64-linux").alejandra;
+    formatter.aarch64-darwin = (pkgsForSystem "aarch64-darwin").alejandra;
 
     # Import NixOS and Home Manager modules
     nixosModules = import ./modules/nixos;
@@ -189,6 +189,16 @@
       "ncrmro@mox" = home-manager.lib.homeManagerConfiguration {
         modules = [./home-manager/ncrmro/mox.nix];
         pkgs = pkgsForSystem "x86_64-linux";
+        extraSpecialArgs = {inherit inputs self;};
+      };
+      "nicholas@unsup-macbook" = home-manager.lib.homeManagerConfiguration {
+        modules = [./home-manager/ncrmro/unsup-macbook.nix];
+        pkgs = pkgsForSystem "aarch64-darwin";
+        extraSpecialArgs = {inherit inputs self;};
+      };
+      "ncrmro@ncrmro-macbook" = home-manager.lib.homeManagerConfiguration {
+        modules = [./home-manager/ncrmro/ncrmro-macbook.nix];
+        pkgs = pkgsForSystem "aarch64-darwin";
         extraSpecialArgs = {inherit inputs self;};
       };
     };

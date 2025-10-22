@@ -1,22 +1,5 @@
-{
-  lib,
-  pkgs,
-  inputs,
-  ...
-}: {
-  imports = [
-    ./helix.nix
-    ./playwright.nix
-    #     ./bash.nix
-    #     ./bat.nix
-    #     ./direnv.nix
-    #     ./fish.nix
-    #     ./git.nix
-    #     ./pnpm.nix
-    #     ./shellcolor.nix
-    #     ./starship.nix
-    #     ./zoxide.nix
-  ];
+{ lib, pkgs, inputs, ... }: {
+  imports = [ ./helix.nix ./playwright.nix ];
   programs.uv.enable = true;
   programs.k9s.enable = true;
   programs.git.lfs.enable = true;
@@ -25,8 +8,10 @@
     devbox
     kubectl
     kubernetes-helm
+    lazygit # TUI for git
+    lazydocker # TUI for docker
     railway
-    traceroute
+    # traceroute # Does not work on macOS
     sqlite
     turso-cli
     htop
@@ -68,10 +53,10 @@
     inputs.agenix.packages.${pkgs.system}.default
 
     openssl
-    (import inputs.nixpkgs-unstable {
-      inherit (pkgs) system;
-      config.allowUnfree = true;
-    }).sbom-tool
+    # (import inputs.nixpkgs-unstable {
+    #   inherit (pkgs) system;
+    #   config.allowUnfree = true;
+    # }).sbom-tool
     (import inputs.nixpkgs-unstable {
       inherit (pkgs) system;
       config.allowUnfree = true;
@@ -81,6 +66,21 @@
       config.allowUnfree = true;
     }).github-copilot-cli
   ];
+
+  # Starship - A minimal, blazing-fast, and infinitely customizable prompt for any shell
+  # Shows git status, language versions, execution time, and more in your terminal prompt
+  # https://starship.rs/
+  programs.starship.enable = true;
+
+  # Zoxide - A smarter cd command that learns your navigation patterns
+  # Tracks your most used directories and lets you jump to them with 'z <partial-name>'
+  # Example: 'z proj' jumps to ~/code/projects, 'zi' for interactive selection
+  # https://github.com/ajeetdsouza/zoxide
+  programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
   programs.zsh = {
     enable = true;
     # enableCompletions = true;
@@ -94,7 +94,7 @@
       grep = "rg";
       # Local Development
       g = "git";
-      lzg = "lazygit";
+      lg = "lazygit";
       "docker comppose" = "docker-compose";
       dc = "docker-compose";
       k = "kubectl";
@@ -104,7 +104,7 @@
     oh-my-zsh = {
       # "ohMyZsh" without Home Manager
       enable = true;
-      plugins = ["git"];
+      plugins = [ "git" ];
       theme = "robbyrussell";
     };
   };
