@@ -81,6 +81,8 @@
       config.allowUnfree = true;
     }).github-copilot-cli
   ];
+  programs.starship.enable = true;
+
   programs.zsh = {
     enable = true;
     # enableCompletions = true;
