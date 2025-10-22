@@ -15,4 +15,12 @@
   ];
 
   programs.home-manager.enable = true;
+
+  # Enable experimental Nix features on macOS
+  nix = {
+    package = pkgs.nix;
+    settings = {
+      experimental-features = ["nix-command" "flakes"];
+    };
+  };
 }
