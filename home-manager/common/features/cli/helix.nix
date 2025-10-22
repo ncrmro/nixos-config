@@ -8,6 +8,12 @@
     config.allowUnfree = true;
   };
 in {
+  # Set helix as the default editor
+  home.sessionVariables = {
+    EDITOR = "hx";
+    VISUAL = "hx";
+  };
+
   home.packages = with pkgs; [
     bash-language-server
     docker-compose-language-service
