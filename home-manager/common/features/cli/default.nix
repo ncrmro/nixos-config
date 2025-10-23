@@ -1,5 +1,10 @@
-{ lib, pkgs, inputs, ... }: {
-  imports = [ ./helix.nix ./playwright.nix ];
+{
+  lib,
+  pkgs,
+  inputs,
+  ...
+}: {
+  imports = [./helix.nix ./playwright.nix];
   programs.uv.enable = true;
   programs.k9s.enable = true;
   programs.git.lfs.enable = true;
@@ -67,6 +72,20 @@
     }).github-copilot-cli
   ];
 
+  # Direnv - Load directory-specific environment variables automatically
+  # Automatically loads .envrc files when entering directories
+  # Supports dotenv (.env) files for environment variable management
+  # https://direnv.net/
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+    config = {
+      global = {
+        load_dotenv = true;
+      };
+    };
+  };
+
   # Starship - A minimal, blazing-fast, and infinitely customizable prompt for any shell
   # Shows git status, language versions, execution time, and more in your terminal prompt
   # https://starship.rs/
@@ -104,7 +123,7 @@
     oh-my-zsh = {
       # "ohMyZsh" without Home Manager
       enable = true;
-      plugins = [ "git" ];
+      plugins = ["git"];
       theme = "robbyrussell";
     };
   };
