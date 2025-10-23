@@ -5,20 +5,16 @@
   lib,
   ...
 }: {
-  imports = [
-    inputs.omarchy-nix.homeManagerModules.default
-  ];
+  imports = [inputs.omarchy-nix.homeManagerModules.default];
 
   home.username = "ncrmro";
   home.homeDirectory = "/home/ncrmro";
-  home.stateVersion = "25.11";
+  home.stateVersion = "25.05";
 
   programs.home-manager.enable = true;
 
   # Enable Wayland support for Electron/Chromium applications
-  home.sessionVariables = {
-    NIXOS_OZONE_WL = "1";
-  };
+  home.sessionVariables = {NIXOS_OZONE_WL = "1";};
 
   programs.ssh = {
     enable = true;
