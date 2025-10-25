@@ -32,6 +32,7 @@
     python312Full
     python312Packages.pip
     chart-testing
+    asdf-vm
     # Does not support Network Manager
     # impala # TUI for managing wifi
     bottom # System viewer
@@ -98,6 +99,18 @@
   programs.zoxide = {
     enable = true;
     enableZshIntegration = true;
+  };
+
+  # Zellij - A terminal multiplexer with layouts, panes, and tabs
+  # Modern alternative to tmux/screen with built-in session management
+  # https://zellij.dev/
+  programs.zellij = {
+    enable = true;
+    enableZshIntegration = true;
+    settings = {
+      attach_to_session = true;
+      theme = "tokyo-night-dark";
+    };
   };
 
   programs.zsh = {
