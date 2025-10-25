@@ -59,10 +59,14 @@
 - UHK Fn2 layer sends Alt codes, which become Super after swap
 
 **Consistency Patterns**
-- Navigation: `j k i l` (Vim-style, home row focused) across all tools
+- **Spatial navigation**: `j k i l` (Vim-style, home row focused) across all tools
   - `j` = left, `k` = down, `i` = up, `l` = right
   - Stays on home row for maximum ergonomics
-- Common actions: `q` = quit, `r` = reload, `w` = write/save
+- **Tab navigation**: `w e r c` pattern (also home row)
+  - `w` = previous tab, `e` = new tab, `r` = next tab, `c` = close tab
+  - Mnemonic: W←E→R (left-to-right on keyboard), C for close
+  - Used consistently across browser, terminal, and multiplexer
+- Common actions: `q` = quit, `r` = reload (context-dependent)
 - Mnemonics: Actions should be memorable and consistent
 - Modal interactions: Submaps/modes for complex operations (resize, layout, etc.)
 
@@ -167,13 +171,35 @@ This configuration prioritizes **OS-level keybindings** over hardware-specific c
 
 ## Hyprland (Wayland Compositor)
 
+### Documentation Reference
+- Official docs: https://wiki.hypr.land/Configuring/Binds/
+- **Current keybindings file**: `~/.config/hypr/hyprland.conf`
+
 ### Current Configuration
-<!-- Reference: archive/home.nix, spikes/1757895719_hyprland_app_groups/ -->
+- Modifier: `$mod = SUPER`
+- Physical key: Alt (swapped via `altwin:swap_alt_win`)
+
+**Known Bindings:**
+- `Super+J/K/I/L` (physical Alt+J/K/I/L): Window focus navigation
+- `Alt+W` (physical Win+W): Close window ⚠️ **CONFLICTS with proposed tab navigation**
 
 ### Proposed Keybindings
 
 #### Window Management
-<!-- Navigation, focus, move, resize, float, fullscreen, close -->
+
+**Navigation:**
+- `Super+J` (Alt+J): Focus left window
+- `Super+K` (Alt+K): Focus down window
+- `Super+I` (Alt+I): Focus up window
+- `Super+L` (Alt+L): Focus right window
+
+**Close Window:**
+- **Current**: `Alt+W` (physical Win+W)
+- **Recommended**: Change to `Super+Q` (physical Alt+Q) to free up Alt+W for tab navigation
+  - Alternative: `Super+Shift+C` or `Super+X`
+
+**Move, Resize, Float, Fullscreen:**
+<!-- TBD -->
 
 #### Workspace Navigation
 <!-- 1-10, special workspaces, move windows between workspaces -->
@@ -194,9 +220,11 @@ This configuration prioritizes **OS-level keybindings** over hardware-specific c
 ### Documentation Reference
 - Official docs: https://ghostty.org/docs/config/keybind
 - Action reference: https://ghostty.org/docs/config/keybind/reference
+- **List default keybindings**: Run `ghostty +list-keybinds --default`
 
 ### Current Configuration
-<!-- None - using defaults -->
+- Using defaults (no custom keybindings configured)
+- **Strategy**: Not using Ghostty tabs; Zellij handles all multiplexing
 
 ### Proposed Keybindings
 
@@ -227,31 +255,112 @@ This configuration prioritizes **OS-level keybindings** over hardware-specific c
 ### Documentation Reference
 - Official docs: https://zellij.dev/documentation/keybindings.html
 - Binding guide: https://zellij.dev/documentation/keybindings-binding.html
+- **Default keybindings**: https://github.com/zellij-org/zellij/blob/main/zellij-utils/assets/config/default.kdl
 
 ### Current Configuration
 - Location: `/home/ncrmro/nixos-config/home-manager/common/features/cli/default.nix:107-114`
 - Using defaults with Tokyo Night theme
+- **Usage**: Runs inside Ghostty terminal
+
+### Tab Navigation Integration
+
+**Goal**: Use Zellij tabs (not Ghostty tabs) with UHK Mod layer keybindings (W/E/R/C pattern).
+
+**Current Status:**
+- ❌ UHK Mod+W/R/E/C sends Ctrl+PgUp/PgDn/T/W
+- ❌ Zellij doesn't respond to these keys by default
+- ✅ Can be configured with custom keybindings
 
 ### Proposed Keybindings
 
-#### Session Management
-<!-- Attach, detach, sessions -->
+#### Tab Navigation (Primary Use Case)
+
+**Option 1: Configure Zellij for Alt+W/E/R/C** (Recommended)
+
+After reconfiguring UHK Mod layer to send Alt codes:
+
+```nix
+programs.zellij = {
+  enable = true;
+  enableZshIntegration = true;
+  settings = {
+    attach_to_session = true;
+    theme = "tokyo-night-dark";
+
+    keybinds = {
+      normal = {
+        # Tab navigation using Alt+W/E/R/C
+        "bind \"Alt w\"" = { GoToPreviousTab = {}; };
+        "bind \"Alt r\"" = { GoToNextTab = {}; };
+        "bind \"Alt e\"" = { NewTab = {}; };
+        "bind \"Alt c\"" = { CloseTab = {}; };
+      };
+    };
+  };
+};
+```
+
+**Option 2: Configure Zellij for Ctrl+PgUp/PgDn/T/W** (Keep current UHK)
+
+```nix
+programs.zellij = {
+  enable = true;
+  enableZshIntegration = true;
+  settings = {
+    attach_to_session = true;
+    theme = "tokyo-night-dark";
+
+    keybinds = {
+      normal = {
+        # Tab navigation using Ctrl+PgUp/PgDn/T/W (current UHK output)
+        "bind \"Ctrl PageUp\"" = { GoToPreviousTab = {}; };
+        "bind \"Ctrl PageDown\"" = { GoToNextTab = {}; };
+        "bind \"Ctrl t\"" = { NewTab = {}; };
+        "bind \"Ctrl w\"" = { CloseTab = {}; };
+      };
+    };
+  };
+};
+```
 
 #### Pane Navigation
-<!-- Create, close, navigate, resize -->
+
+Use default Zellij pane navigation or configure custom:
+- `Ctrl+G → h/j/k/l` (default Zellij pattern)
+- Or customize to use Alt+J/K/I/L for panes (separate from Hyprland's Super+JKIL)
+
+#### Session Management
+
+<!-- Attach, detach, sessions -->
 
 #### Layout Management
+
 <!-- Switch layouts, custom layouts -->
 
 #### Mode Switching
-<!-- Normal, locked, pane, tab, resize, search modes -->
+
+Default Zellij modes:
+- Normal (Ctrl+G to enter mode)
+- Pane mode (Ctrl+G → p)
+- Tab mode (Ctrl+G → t)
+- Resize mode (Ctrl+G → r)
+- Locked mode (Ctrl+G → g)
 
 #### Integration with Ghostty
-<!-- How Zellij runs inside Ghostty -->
+
+**Strategy**: Use Zellij tabs, NOT Ghostty tabs
+- Ghostty acts as simple terminal emulator
+- Zellij provides all multiplexing (tabs, panes, sessions)
+- Alt+W/E/R/C controls Zellij tabs
+- Hyprland Super+JKIL navigates Ghostty windows (not Zellij panes)
 
 ---
 
 ## Helix (Text Editor)
+
+### Documentation Reference
+- Official keymap docs: https://docs.helix-editor.com/keymap.html
+- View in editor: Run `:help keymap` inside Helix
 
 ### Current Configuration
 - Location: `/home/ncrmro/nixos-config/home-manager/common/features/cli/helix.nix:43`
@@ -283,27 +392,78 @@ This configuration prioritizes **OS-level keybindings** over hardware-specific c
 - Vimium C: https://github.com/gdh1995/vimium-c
 
 ### Current Configuration
-<!-- None - manual installation only -->
+- Status: Manual installation only
+- **UHK Tab Navigation**: ✅ Works (Ctrl+PgUp/PgDn/T/W are browser standards)
+- **Framework**: ❌ Currently uses Win+number (not desired)
+
+### Tab Navigation Integration
+
+**Goal**: Consistent W/E/R/C pattern across browser, terminal, and multiplexer.
+
+**Current UHK Behavior:**
+- Mod+W (Ctrl+PgUp) = Previous tab ✅
+- Mod+E (Ctrl+T) = New tab ✅
+- Mod+R (Ctrl+PgDn) = Next tab ✅
+- Mod+C (Ctrl+W) = Close tab ✅
+
+**Future Strategy (when switching to Alt+W/E/R/C):**
+
+**Option 1: Browser Extension (Vimium)**
+Configure custom mappings in Vimium:
+```
+map <a-w> previousTab
+map <a-r> nextTab
+map <a-e> createTab
+map <a-c> removeTab
+```
+
+**Option 2: Browser Shortcuts (Firefox)**
+Configure in `about:config` or via Home Manager
+
+**Option 3: Keep Ctrl+PgUp/PgDn/T/W**
+If UHK stays with current config, browser already works. No changes needed.
 
 ### Proposed Keybindings
 
 #### Navigation
-<!-- j/k scroll, gg/G top/bottom, f/F link hints -->
+- `j` / `k` = Scroll down/up
+- `gg` / `G` = Scroll to top/bottom
+- `f` / `F` = Link hints (open in current/new tab)
+- `H` / `L` = History back/forward
 
-#### Tab Management
-<!-- t create, x close, J/K navigate tabs -->
+#### Tab Management (W/E/R/C Pattern)
+**Current (UHK works already):**
+- `Ctrl+PgUp` (`Alt+W` after reconfiguration) = Previous tab
+- `Ctrl+T` (`Alt+E` after reconfiguration) = New tab
+- `Ctrl+PgDn` (`Alt+R` after reconfiguration) = Next tab
+- `Ctrl+W` (`Alt+C` after reconfiguration) = Close tab
 
-#### History Navigation
-<!-- H/L back/forward -->
+**Vimium defaults (can coexist):**
+- `J` = Previous tab
+- `t` = New tab
+- `K` = Next tab
+- `x` = Close tab
 
 #### Search
-<!-- / search, n/N next/prev -->
+- `/` = Search on page
+- `n` / `N` = Next/previous search result
 
 #### Custom Mappings
-<!-- Consistency with other tools -->
+
+For consistency with other tools, configure Vimium to use:
+- Alt+W/E/R/C for tab navigation (matches Zellij)
+- Keep standard Vimium bindings (J/K/t/x) as alternatives
 
 ### Nix Configuration Strategy
-<!-- Export Vimium config, version control, apply across machines -->
+
+**Vimium Configuration Export:**
+1. Configure Vimium settings in browser
+2. Export settings to JSON
+3. Store in `/home-manager/common/features/browser/vimium/config.json`
+4. Document import process for new machines
+5. Track in git for reproducibility
+
+**Note**: Browser extensions can't be fully configured via Nix, but settings can be version-controlled and imported manually.
 
 ---
 
@@ -361,16 +521,68 @@ The UHK uses a layer system where each layer binds actions to keys. Layers are a
 - UHK sends Alt codes → system swaps them to Super → Hyprland receives Super
 - This allows using the ergonomically positioned Alt key for window management
 
-##### Mod Layer (Arrow Keys)
-**Purpose**: Vim-style arrow key navigation
+##### Mod Layer (Arrow Keys + Tab Navigation)
+**Purpose**: Vim-style arrow key navigation AND universal tab navigation
 
-**Expected Mappings**:
+**Current Mappings**:
+
+**Arrow Keys (JKIL):**
 - `Mod + J` → Left Arrow
 - `Mod + K` → Down Arrow
 - `Mod + I` → Up Arrow
 - `Mod + L` → Right Arrow
 
-This creates consistency between Fn2 (Hyprland navigation) and Mod (arrow keys), both using the same home row keys (JKIL).
+**Tab Navigation (WERC):**
+- `Mod + W` → `Ctrl + PgUp` (Previous tab)
+- `Mod + E` → `Ctrl + T` (New tab)
+- `Mod + R` → `Ctrl + PgDn` (Next tab)
+- `Mod + C` → `Ctrl + W` (Close tab)
+
+**Current Behavior:**
+- ✅ **Browser (Chrome/Firefox)**: All tab commands work (Ctrl+PgUp/PgDn/T/W are standard)
+- ✅ **Ghostty**: Tab navigation works (Ghostty responds to Ctrl+PgUp/PgDn/T)
+- ❌ **Zellij**: Does NOT work (Zellij doesn't respond to Ctrl+PgUp/PgDn by default)
+- ❌ **Close in Ghostty/Zellij**: Ctrl+W doesn't close tab/pane
+
+**Desired Behavior:**
+- Use **Zellij tabs** (not Ghostty tabs) for terminal multiplexing
+- Mod+W/E/R/C should control Zellij tabs
+- Framework laptop should replicate this pattern using Alt+W/E/R/C
+
+**Portability Strategy:**
+
+**⚠️ CONFLICT IDENTIFIED**: Hyprland currently uses `Alt+W` to close windows!
+
+With `altwin:swap_alt_win` active:
+- Physical `Alt+W` → System swaps to `Super+W` → Sent to applications/Hyprland
+- Physical `Win+W` → System swaps to `Alt+W` → Triggers Hyprland close window
+
+**Problem**: If we reconfigure for `Alt+W` tab navigation:
+- User presses physical `Alt+W` for "previous tab"
+- System swaps to `Super+W`
+- If Hyprland has `Super+W` bound, it conflicts with application keybindings
+
+**Solutions:**
+
+**Option 1: Change Hyprland close window binding** (Most portable)
+- Change Hyprland: `Alt+W` (close window) → `Super+Q` or `Super+Shift+C`
+- Then reconfigure UHK Mod+W → `Alt+W` for tab navigation
+- Physical `Alt+W` → swapped to `Super+W` → Goes to Zellij/Browser (no Hyprland conflict)
+- ✅ Enables portable `Alt+W/E/R/C` pattern across all keyboards
+
+**Option 2: Use different keys for tab navigation** (Alternative)
+- Keep Hyprland `Alt+W` for close window
+- Use different keys for tabs, e.g., `Alt+,/.` (comma/period) or `Alt+[/]`
+- Less mnemonic but avoids conflict
+
+**Option 3: Keep current Ctrl+PgUp/PgDn/T/W** (Works now, less portable)
+- Keep UHK sending `Ctrl+PgUp/PgDn/T/W`
+- No Hyprland conflicts (these keys not bound)
+- Configure Zellij custom keybindings for `Ctrl+PgUp/PgDn/T/W`
+- Framework requires different approach or additional key mapping layer
+- ❌ Less portable across keyboards
+
+**Recommendation**: Use **Option 1** - Change Hyprland close window to `Super+Q`, then use `Alt+W/E/R/C` for tabs universally.
 
 ##### Base Layer
 - Standard QWERTY layout
@@ -651,6 +863,10 @@ This table shows how the same window management operations are performed across 
 | **WM Focus Down** | Fn2 (thumb) + K → Alt+K → Super+K* | Alt + K → Super+K* | Lower (thumb) + K → Alt+K → Super+K* | Cmd + K† or Option+K via Karabiner |
 | **WM Focus Up** | Fn2 (thumb) + I → Alt+I → Super+I* | Alt + I → Super+I* | Lower (thumb) + I → Alt+I → Super+I* | Cmd + I† or Option+I via Karabiner |
 | **WM Focus Right** | Fn2 (thumb) + L → Alt+L → Super+L* | Alt + L → Super+L* | Lower (thumb) + L → Alt+L → Super+L* | Cmd + L† or Option+L via Karabiner |
+| **Previous Tab** | Mod + W → Ctrl+PgUp (current)‡ | Alt + W (recommended) | Mod + W → Alt+W | Cmd + W or Alt+W |
+| **New Tab** | Mod + E → Ctrl+T (current)‡ | Alt + E (recommended) | Mod + E → Alt+E | Cmd + E or Alt+E |
+| **Next Tab** | Mod + R → Ctrl+PgDn (current)‡ | Alt + R (recommended) | Mod + R → Alt+R | Cmd + R or Alt+R |
+| **Close Tab** | Mod + C → Ctrl+W (current)‡ | Alt + C (recommended) | Mod + C → Alt+C | Cmd + C or Alt+C |
 | **Arrow Keys** | Mod + JKIL → ←↓↑→ | Standard arrows | Firmware layer → ←↓↑→ | Standard arrows |
 | **Caps Lock Mouse Mode** | Remapped to Ctrl | Remapped to Ctrl | Remapped to Ctrl | TBD |
 | **Configuration Method** | UHK Agent (GUI) | N/A (built-in) | QMK/ZMK firmware | N/A (built-in) |
@@ -658,20 +874,33 @@ This table shows how the same window management operations are performed across 
 | **Portability** | Desktop use | Always available | Travel with laptop | macOS only |
 
 \* **NixOS/Linux**: All keyboards send Alt codes → `altwin:swap_alt_win` swaps to Super → Hyprland receives Super
+
 † **macOS**: Requires macOS window manager (Aerospace, yabai, etc.) configured for Cmd+JKIL navigation
 
+‡ **Tab Navigation - Current vs Recommended**:
+- **Current UHK**: Mod layer sends Ctrl+PgUp/PgDn/T/W (works in browser, Ghostty, but NOT Zellij)
+- **Recommended**: Reconfigure to send Alt+W/E/R/C for portability
+  - UHK: Mod layer → Alt+W/E/R/C
+  - Framework: Direct Alt+W/E/R/C
+  - Portable keyboard: Firmware layer → Alt+W/E/R/C
+  - Zellij, browser, all tools configured for Alt+W/E/R/C
+- **Alternative**: Keep Ctrl+PgUp/PgDn/T/W, configure Zellij to respond (less portable)
+
 **Key Insights:**
-1. **OS-Level Swap is Universal**: The `altwin:swap_alt_win` setting makes ALL keyboards work identically
-2. **Firmware Strategy**: Configure any programmable keyboard to send Alt+JKIL
-3. **Thumb Ergonomics**: UHK Fn2 and QMK/ZMK lower layer both provide thumb access
+1. **OS-Level Swap is Universal**: The `altwin:swap_alt_win` setting makes ALL keyboards work identically for window management
+2. **Firmware Strategy**: Configure any programmable keyboard to send Alt codes (for WM) and Alt+W/E/R/C (for tabs)
+3. **Thumb Ergonomics**: UHK Fn2/Mod and QMK/ZMK layers both provide thumb access
 4. **No OS Changes Needed**: Adding a new keyboard requires zero Nix/Hyprland configuration changes
-5. **Muscle Memory**: Physical pattern is identical across all keyboards (thumb + JKIL)
+5. **Muscle Memory**: Physical pattern is identical across all keyboards (thumb + home row keys)
+6. **Tab Navigation Portability**: Alt+W/E/R/C pattern works identically across all keyboards and platforms
 
 **Adding a New Programmable Keyboard:**
 1. Flash firmware (UHK Agent, QMK, or ZMK)
-2. Configure layer with Alt+JKIL mappings
+2. Configure navigation layer:
+   - Fn2/Lower + J/K/I/L → Alt+J/K/I/L (window management)
+   - Mod + W/E/R/C → Alt+W/E/R/C (tab navigation)
 3. Plug in keyboard
-4. Everything works immediately (OS swap setting already configured)
+4. Everything works immediately (OS swap setting and Zellij config already configured)
 
 ---
 
@@ -681,20 +910,23 @@ This table shows how the same window management operations are performed across 
 
 | Action | Hyprland | Ghostty | Zellij | Helix | Browser (Vimium) |
 |--------|----------|---------|--------|-------|------------------|
-| **Navigation** |
-| Focus/Move Left | `Super+J`* | TBD | `Ctrl+G h` | `h` | TBD |
-| Focus/Move Down | `Super+K`* | TBD | `Ctrl+G j` | `j` | `j` (scroll) |
-| Focus/Move Up | `Super+I`* | TBD | `Ctrl+G k` | `k` | `k` (scroll) |
-| Focus/Move Right | `Super+L`* | TBD | `Ctrl+G l` | `l` | TBD |
-| **Window/Tab/Pane Management** |
-| New Window/Tab | `Super+Return`* | TBD | TBD | TBD | `t` |
-| Close | `Super+Q`* | TBD | `Ctrl+G x` | `:q` | `x` |
-| Next | `Super+Tab`* | TBD | TBD | TBD | `J` |
-| Previous | `Super+Shift+Tab`* | TBD | TBD | TBD | `K` |
+| **Spatial Navigation** |
+| Focus/Move Left | `Super+J`* | N/A | `Ctrl+G h` | `h` | TBD |
+| Focus/Move Down | `Super+K`* | N/A | `Ctrl+G j` | `j` | `j` (scroll) |
+| Focus/Move Up | `Super+I`* | N/A | `Ctrl+G k` | `k` | `k` (scroll) |
+| Focus/Move Right | `Super+L`* | N/A | `Ctrl+G l` | `l` | TBD |
+| **Tab Navigation (W/E/R/C Pattern)** |
+| Previous Tab | N/A | Not used† | `Alt+W`‡ or `Ctrl+PgUp` | N/A | `Alt+W`‡ or `Ctrl+PgUp` or `J` |
+| New Tab | N/A | Not used† | `Alt+E`‡ or `Ctrl+T` | N/A | `Alt+E`‡ or `Ctrl+T` or `t` |
+| Next Tab | N/A | Not used† | `Alt+R`‡ or `Ctrl+PgDn` | N/A | `Alt+R`‡ or `Ctrl+PgDn` or `K` |
+| Close Tab | N/A | Not used† | `Alt+C`‡ or `Ctrl+W` | N/A | `Alt+C`‡ or `Ctrl+W` or `x` |
+| **Window/Pane Management** |
+| New Window/Pane | `Super+Return`* | TBD | `Ctrl+G → n` | `:vsplit` | N/A |
+| Close Window/Pane | `Super+Q`* (recommended, currently `Alt+W`) | TBD | `Ctrl+G → x` | `:q` | N/A |
 | **Common Actions** |
 | Reload/Refresh | `Super+R`* | TBD | TBD | `:reload` | `r` |
 | Search | TBD | TBD | TBD | `/` | `/` |
-| Quit | `Super+Shift+Q`* | TBD | TBD | `:q` | TBD |
+| Quit Application | `Super+Shift+Q`* | TBD | TBD | `:q` | TBD |
 | Save | N/A | N/A | N/A | `Return` | N/A |
 | **Special Functions** |
 | Fullscreen | `Super+F`* | TBD | TBD | TBD | TBD |
@@ -706,7 +938,293 @@ This table shows how the same window management operations are performed across 
 - On Framework: Alt + key sends Alt, swapped to Super
 - Both produce identical Super keycodes to Hyprland
 
+† **Ghostty tabs not used**: Strategy is to use Zellij tabs (inside Ghostty), not Ghostty's native tab feature
+
+‡ **Alt+W/E/R/C (Recommended)**: Future portable configuration
+- UHK Mod layer reconfigured to send Alt codes instead of Ctrl+PgUp/PgDn/T/W
+- Framework uses Alt keys directly
+- All keyboards work identically
+- Alternative: Keep current Ctrl+PgUp/PgDn/T/W (works now but less portable)
+
 *TBD = To Be Defined in implementation*
+
+---
+
+## Common Workflows & Use Cases
+
+This section demonstrates practical, real-world usage of the keybinding system, showing how different tools work together for common development tasks.
+
+### Application Launching
+
+**Quick Launch Keybindings:**
+- **Browser**: `Alt+B` (UHK: Fn2+B) → Opens Chrome/Firefox
+- **Terminal**: `Alt+Return` (UHK: Fn2+Return) → Opens Ghostty with Zellij
+- Physical key: Alt (swapped to Super, so Hyprland receives Super+B and Super+Return)
+
+### Terminal Workflow: Directory Navigation
+
+**Opening and Navigating:**
+1. Press `Alt+Return` to launch Ghostty terminal
+2. Zellij starts automatically inside Ghostty
+3. Use zoxide for fast directory navigation:
+   - `z <fuzzy-match>` → Jump to matching directory
+   - `zi` → Interactive fuzzy search
+
+**Example:**
+```bash
+# Quick jump to project directory
+z proj          # Jumps to ~/projects or ~/code/my-project
+
+# Interactive selection
+zi              # Shows list of frecent directories
+```
+
+**Why it's fast:** Muscle memory for `Alt+Return` → `z <partial-name>` → instant directory access
+
+### Text Navigation Patterns
+
+#### Universal Text Navigation (UHK Mod Layer)
+
+Works everywhere: Terminal, browser inputs, text editors, chat apps
+
+**UHK Mod Layer Text Navigation:**
+- `Mod+F`: Jump forward one word
+- `Mod+S`: Jump backward one word
+- `Mod+J/K/I/L`: Arrow keys (left/down/up/right)
+
+**What it sends:** [TBD - verify actual keycodes sent by UHK Mod layer]
+
+**Use cases:**
+- Editing command in terminal: `Mod+S` to jump back a word, fix typo
+- Browser address bar: `Mod+F` to navigate through URL segments
+- Form fields: Quick navigation without reaching for arrow keys
+
+#### Helix Editor Navigation
+
+**Character/Line Movement:**
+
+| Key | Direction | Movement | Command |
+|-----|-----------|----------|---------|
+| `h`, `←` | Left | Move one character left | move_char_left |
+| `j`, `↓` | Down | Move one visual line down | move_visual_line_down |
+| `k`, `↑` | Up | Move one visual line up | move_visual_line_up |
+| `l`, `→` | Right | Move one character right | move_char_right |
+
+**Word Navigation:**
+
+| Key | Movement | Command | Notes |
+|-----|----------|---------|-------|
+| `w` | Next word start | move_next_word_start | Stops at punctuation |
+| `b` | Previous word start | move_prev_word_start | Stops at punctuation |
+| `e` | Next word end | move_next_word_end | Stops at punctuation |
+| `W` | Next WORD start | move_next_long_word_start | Skips punctuation |
+| `B` | Previous WORD start | move_prev_long_word_start | Skips punctuation |
+| `E` | Next WORD end | move_next_long_word_end | Skips punctuation |
+
+**Line Navigation:**
+- `Ctrl+A`: Jump to start of line (Emacs-style)
+- `Ctrl+E`: Jump to end of line (Emacs-style)
+
+**Difference: word vs WORD**
+- `word`: Treats punctuation as boundaries
+  - Example: `my-variable-name` is **5 words** (my, -, variable, -, name)
+- `WORD`: Ignores punctuation, space-separated only
+  - Example: `my-variable-name` is **1 WORD**
+
+**Practical example:**
+```javascript
+const myVariableName = getUserData();
+//    ^w  ^w      ^w    ^w  ^w  ^w   (6 words)
+//    ^W           ^W    ^W           (3 WORDs)
+```
+
+### Complete Workflow Examples
+
+#### Scenario 1: Starting a Coding Session
+
+**Goal:** Open project, edit files, run development server
+
+1. **Launch terminal**
+   - Press: `Alt+Return`
+   - Result: Ghostty opens with Zellij
+
+2. **Navigate to project**
+   - Type: `zi`
+   - Select: `my-web-app` from interactive list
+   - Result: `cd ~/projects/my-web-app`
+
+3. **Open editor**
+   - Type: `hx .`
+   - Result: Helix opens in project directory
+
+4. **Find file**
+   - Press: `Space` (Helix command mode)
+   - Press: `f` (file picker)
+   - Type: `comp` (fuzzy match)
+   - Select: `components/Header.tsx`
+
+5. **Start editing**
+   - Use `w/b/e` for word navigation
+   - Use `Ctrl+A/E` for line start/end
+   - Press `Return` to save
+
+6. **Open new tab for dev server**
+   - Press: `Alt+E` (new Zellij tab)
+   - Type: `npm run dev`
+   - Press: `Alt+W` (return to editor tab)
+
+**Muscle memory pattern:** `Alt+Return` → `zi` → `hx .` → `Space f` → start coding
+
+#### Scenario 2: Web Development Workflow
+
+**Goal:** Edit code, preview in browser, check console
+
+1. **Open browser**
+   - Press: `Alt+B`
+   - Result: Chrome/Firefox opens
+
+2. **Navigate to localhost**
+   - Type: `localhost:3000`
+   - Result: Dev server page loads
+
+3. **Switch to terminal** (already open from Scenario 1)
+   - Press: `Alt+J/K/I/L` (navigate Hyprland windows)
+   - Or: Click terminal window (if mouse mode needed, use Caps Lock)
+
+4. **Edit code in Helix**
+   - Navigate in file: `w/b/e` for words, `j/k` for lines
+   - Make changes
+   - Press: `Return` to save (auto-reload in browser)
+
+5. **Check browser**
+   - Press: `Alt+J/K/I/L` to focus browser window
+   - Or: `Alt+R` to next tab if browser in adjacent tab
+
+6. **Navigate browser with Vimium**
+   - Press: `f` (show link hints)
+   - Type: hint letters to click link
+   - Press: `j/k` to scroll page
+   - Press: `/` to search on page
+
+**Muscle memory pattern:** Edit → `Return` (save) → `Alt+L` (browser) → `f` (Vimium links) → `Alt+J` (back to editor)
+
+#### Scenario 3: Multi-File Editing in Helix
+
+**Goal:** Edit multiple related files efficiently
+
+1. **Open first file**
+   - In Helix: `Space f` → type `util` → select `utils.ts`
+
+2. **Navigate to function**
+   - Press: `Space s` (symbol search)
+   - Type: `format` → select `formatDate` function
+   - Result: Cursor jumps to function
+
+3. **Edit function**
+   - Navigate: `w` to next word, `b` to previous
+   - Jump to line end: `Ctrl+E`
+   - Make changes, `Return` to save
+
+4. **Open related file (split)**
+   - Press: `Ctrl+W v` (vertical split)
+   - Press: `Space f` → type `comp` → select `Calendar.tsx`
+
+5. **Navigate between splits**
+   - Press: `Ctrl+W h/l` (focus left/right split)
+   - Or: `Ctrl+W w` (cycle through splits)
+
+6. **Jump to definition**
+   - Cursor on `formatDate` function call
+   - Press: `gd` (go to definition)
+   - Result: Jumps to definition (in split or new file)
+
+7. **Go back**
+   - Press: `Ctrl+O` (jump back to previous location)
+
+**Muscle memory pattern:** `Space f` (find) → edit → `Ctrl+W v` (split) → `gd` (definition) → `Ctrl+O` (back)
+
+#### Scenario 4: Terminal Tab & Pane Management
+
+**Goal:** Multiple terminal sessions for different tasks
+
+1. **Terminal already open** with Zellij
+   - Current tab: Running dev server
+
+2. **Create new tab for git**
+   - Press: `Alt+E` (new Zellij tab)
+   - Type: `git status`
+
+3. **Create another tab for tests**
+   - Press: `Alt+E` (new tab)
+   - Type: `npm test -- --watch`
+
+4. **Navigate between tabs**
+   - Press: `Alt+W` (previous tab)
+   - Press: `Alt+R` (next tab)
+   - Tabs: [Dev Server] ← → [Git] ← → [Tests]
+
+5. **Create pane in current tab** (for side-by-side view)
+   - Press: `Ctrl+G` (Zellij mode)
+   - Press: `n` (new pane)
+   - Result: Split pane created
+
+6. **Navigate between panes**
+   - Press: `Ctrl+G`
+   - Press: `h/j/k/l` (focus pane in direction)
+
+7. **Close tab when done**
+   - Press: `Alt+C` (close current Zellij tab)
+
+**Muscle memory pattern:** `Alt+E` (new tab) → work → `Alt+W/R` (navigate) → `Alt+C` (close)
+
+#### Scenario 5: Window Management Across Workspaces
+
+**Goal:** Organize different project contexts in separate workspaces
+
+1. **Current workspace 1:** Code editor + terminal
+
+2. **Switch to workspace 2 for browser/docs**
+   - Press: `Alt+2` (switch to workspace 2)
+   - Press: `Alt+B` (open browser if not already open)
+
+3. **Open documentation in split**
+   - Press: `Alt+Return` (open terminal)
+   - Type: `hx README.md`
+   - Press: `Alt+I/K` (move between windows)
+
+4. **Back to code workspace**
+   - Press: `Alt+1` (switch to workspace 1)
+   - Result: Return to editor + terminal
+
+5. **Move window to different workspace**
+   - Press: `Alt+Shift+3` (move current window to workspace 3)
+
+6. **Floating window for notes**
+   - Press: `Alt+V` (toggle floating)
+   - Press: `Alt+mouse drag` to position (if using mouse mode)
+
+**Muscle memory pattern:** `Alt+1-9` (workspaces) → `Alt+Shift+1-9` (move windows) → `Alt+J/K/I/L` (focus)
+
+### Key Takeaways
+
+**Consistent Patterns Across Tools:**
+1. **Tab Navigation:** `Alt+W/E/R/C` works in Zellij and browser
+2. **Window Navigation:** `Alt+J/K/I/L` works in Hyprland and as arrows everywhere
+3. **Text Navigation:** `w/b/e` in Helix, `Mod+F/S` on UHK for universal use
+4. **Line Navigation:** `Ctrl+A/E` works in Helix, terminal, and most text inputs
+
+**Muscle Memory Benefits:**
+- Same thumb position (Alt/Fn2) for all window/app operations
+- Home row navigation (JKIL, WERC) minimizes hand movement
+- Consistent patterns reduce cognitive load when switching contexts
+- No mouse needed for 95% of workflows
+
+**Workflow Efficiency:**
+- Launch app: 1 keystroke (`Alt+B/Return`)
+- Switch workspace: 1 keystroke (`Alt+1-9`)
+- Navigate tabs: 1 keystroke (`Alt+W/R`)
+- Navigate windows: 1 keystroke (`Alt+J/K/I/L`)
+- Edit text: Home row only (`hjkl`, `wbe`, `Ctrl+A/E`)
 
 ---
 
@@ -876,8 +1394,36 @@ This is a living document. As keybindings are implemented and tested, this docum
     - Hardware-independent approach (any programmable keyboard sends Alt codes)
     - Recommended keyboards: Corne, Planck, Preonic, Lily58, Kyria
     - Migration checklist for new keyboards
+  - **Documented tab navigation pattern (W/E/R/C)**
+    - UHK Mod layer: Current sends Ctrl+PgUp/PgDn/T/W, recommended Alt+W/E/R/C
+    - Works in: Browser (current), Ghostty (current), needs Zellij configuration
+    - Added Zellij keybinding configuration examples (both options)
+    - Browser/Vimium configuration for Alt+W/E/R/C
+    - Updated consistency matrix with tab navigation operations
+    - Updated hardware translation table with tab navigation for all keyboards
+    - Framework strategy: Use Alt+W/E/R/C directly (matches UHK recommended config)
   - Created hardware translation table for UHK ↔ Framework ↔ Portable Keyboard ↔ MacBook
   - Documented ergonomic principles and Caps Lock mouse mode
-  - Added keybinding consistency matrix across all tools
+  - Added keybinding consistency matrix across all tools (spatial nav + tab nav)
   - Outlined 7-phase migration path
   - **Emphasized portability-first strategy**: Single OS configuration works with any programmable keyboard
+  - **macOS clarifications**:
+    - MacBook runs macOS (not Hyprland)
+    - Home Manager manages cross-platform tool configs (Ghostty, Zellij, Helix)
+    - Window management requires macOS-specific tools (Aerospace, yabai)
+  - **Added Common Workflows & Use Cases section**:
+    - Application launching: Alt+B (browser), Alt+Return (terminal)
+    - Terminal workflow with zoxide (z/zi for directory navigation)
+    - Text navigation patterns: UHK Mod+F/S, Helix w/b/e, Ctrl+A/E
+    - Five detailed workflow scenarios:
+      1. Starting a coding session (terminal → editor → dev server)
+      2. Web development (edit → browser → Vimium)
+      3. Multi-file editing in Helix (splits, go-to-definition)
+      4. Terminal tab/pane management with Zellij
+      5. Window management across Hyprland workspaces
+    - Key takeaways: consistency, muscle memory, efficiency metrics
+  - **Added documentation references**:
+    - Helix: Official keymap docs and `:help keymap` command
+    - Hyprland: `~/.config/hypr/hyprland.conf` location
+    - Ghostty: `ghostty +list-keybinds --default` command
+    - Zellij: Default keybindings KDL file on GitHub
