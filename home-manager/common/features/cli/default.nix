@@ -4,7 +4,11 @@
   inputs,
   ...
 }: {
-  imports = [./helix.nix ./playwright.nix];
+  imports = [
+    ./helix.nix
+    ./playwright.nix
+    ../keybindings.nix
+  ];
   programs.uv.enable = true;
   programs.k9s.enable = true;
   programs.git.lfs.enable = true;
