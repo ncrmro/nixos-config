@@ -35,12 +35,26 @@
 
 **The primary goal of this keybinding configuration is to eliminate mouse usage entirely.** Every operation should be accessible via keyboard, optimized for speed, ergonomics, and muscle memory.
 
-**Mouse Avoidance Strategy**
-- **Caps Lock Mouse Mode**: Caps Lock key activates mouse mode for rare situations requiring mouse interaction
+**Hardware-Aware Mouse Strategy**
+
+Different hardware requires different mouse strategies:
+
+**Laptops (Framework/MacBook):**
+- **Built-in trackpad available** - use for mouse operations
+- **Caps Lock**: Remapped to Ctrl (Linux) or Cmd (macOS) at OS level
+- **No Caps Lock mouse mode needed** - trackpad is more efficient for laptop form factor
+- **Tab navigation**: Caps Lock (Ctrl/Cmd) + W/E/R/C
+
+**Dedicated Keyboards (UHK, portable programmable):**
+- **No trackpad available** - mouse mode essential
+- **Caps Lock Mouse Mode**: Caps Lock activates mouse mode for all mouse operations
   - `f` = left click
   - `s` = right click
-  - Navigation via home row (details TBD)
-- **Benefits**: Reduced hand movement, eliminated context switching, RSI prevention, increased speed
+  - `j/k/i/l` = cursor movement (left/down/up/right)
+  - Additional controls (scroll, middle click, etc.) - TBD
+- **Tab navigation**: Via Mod layer (sends Ctrl+PgUp/PgDn/T/W)
+
+**Benefits**: Hardware-optimized strategies, no OS-level remapping needed for laptops, reduced hand movement, RSI prevention, increased speed
 
 ### Design Principles
 
@@ -84,21 +98,51 @@
 4. Enable declarative configuration through Nix for reproducibility
 5. **Maximize portability**: OS-level configuration allows any programmable keyboard to work identically
 
-**Portability-First Strategy**
+**Hardware-Aware Portability Strategy**
 
-This configuration prioritizes **OS-level keybindings** over hardware-specific configurations to ensure seamless portability across different programmable keyboards:
+This configuration uses **hardware-specific optimizations** while maintaining **portable software configuration**:
 
-- **Current**: UHK (desktop/workstation)
-- **Current**: Framework laptop built-in keyboard (travel/portable)
-- **Future**: Portable programmable keyboard (40-60% layout for travel)
-  - Examples: Corne, Planck, Preonic, or other QMK/ZMK firmware keyboards
+### Hardware Types:
 
-**Why OS-level configuration?**
-1. **Hardware Independence**: Any programmable keyboard can be configured to send the same keycodes (Alt+JKIL)
-2. **Single Source of Truth**: OS handles the Alt→Super swap via `altwin:swap_alt_win`
-3. **No Hyprland Changes**: Hyprland config stays identical regardless of keyboard
-4. **Easy Migration**: New keyboard? Just configure it to send Alt codes, everything else works
-5. **Nix Management**: OS-level settings are declaratively managed in your NixOS config
+**Laptops (Framework/MacBook):**
+- **Caps Lock → Ctrl/Cmd**: Configured at OS level (more ergonomic than Alt)
+- **Tab Navigation**: Caps Lock + W/E/R/C (no OS remapping needed)
+- **Mouse**: Use built-in trackpad
+- **Why this works**: Caps Lock already remapped to Ctrl/Cmd, W/E/R/C send browser-standard shortcuts
+
+**Dedicated Keyboards (UHK):**
+- **Mod Layer**: Sends Ctrl+PgUp/PgDn/T/W for tab navigation
+- **Caps Lock**: Mouse mode activation
+- **Portability**: Same firmware works on desktop and with laptops
+
+**Portable Programmable Keyboards (Future - Corne, Planck, etc.):**
+- **Firmware Configuration**: Handles tab navigation and mouse mode
+- **Send Same Codes**: Ctrl+PgUp/PgDn/T/W (matches UHK)
+- **Portable**: Works identically to UHK, smaller form factor
+
+### Software Configuration:
+
+**Single Zellij Config Works Everywhere:**
+```nix
+keybinds = {
+  normal = {
+    # Laptop support (Caps Lock as Ctrl)
+    "bind \"Ctrl Shift Tab\"" = { GoToPreviousTab = {}; };
+    "bind \"Ctrl Tab\"" = { GoToNextTab = {}; };
+
+    # UHK/portable keyboard support
+    "bind \"Ctrl PageUp\"" = { GoToPreviousTab = {}; };
+    "bind \"Ctrl PageDown\"" = { GoToNextTab = {}; };
+  };
+};
+```
+
+**Why This Approach?**
+1. **Ergonomic**: Caps Lock more accessible than Alt on laptops
+2. **No Complex Remapping**: Uses standard Ctrl/Cmd, no Hyprland key injection needed
+3. **Hardware Optimized**: Each keyboard uses its strengths (trackpad vs mouse mode)
+4. **Single Software Config**: One Zellij config supports all hardware
+5. **Nix Module**: Centralized keybinding configuration in `home-manager/common/features/keybindings/`
 
 ---
 
@@ -486,6 +530,210 @@ alias = {
 
 ### Proposed Additions
 <!-- Additional workflow aliases, integration patterns -->
+
+---
+
+## Tab Navigation Across Tools
+
+### Universal Tab Navigation Standards
+
+Most applications support these browser-standard shortcuts for tab navigation:
+
+**Primary Shortcuts:**
+- `Ctrl+PgUp` - Previous tab
+- `Ctrl+PgDn` - Next tab
+- `Ctrl+T` - New tab
+- `Ctrl+W` - Close tab
+
+**Alternative (also browser-standard):**
+- `Ctrl+Shift+Tab` - Previous tab
+- `Ctrl+Tab` - Next tab
+
+Both sets work in modern browsers (Firefox, Chrome) and can be configured in Zellij.
+
+### Hardware-Specific Access
+
+#### Framework Laptop
+
+**PgUp/PgDn Access:**
+- `Fn + Arrow Up` = PgUp
+- `Fn + Arrow Down` = PgDn
+
+**Tab Navigation:**
+- `Fn + Ctrl + Arrow Up` = Ctrl+PgUp (previous tab)
+- `Fn + Ctrl + Arrow Down` = Ctrl+PgDn (next tab)
+- `Ctrl + T` = New tab
+- `Ctrl + W` = Close tab
+
+**Alternative (no Fn key needed):**
+- `Ctrl + Shift + Tab` = Previous tab
+- `Ctrl + Tab` = Next tab
+
+Both methods work - use whichever feels more natural.
+
+#### UHK (Desktop/Workstation)
+
+**Mod Layer provides direct access:**
+- `Mod + W` → Sends `Ctrl+PgUp` (previous tab)
+- `Mod + E` → Sends `Ctrl+T` (new tab)
+- `Mod + R` → Sends `Ctrl+PgDn` (next tab)
+- `Mod + C` → Sends `Ctrl+W` (close tab)
+
+**Benefits:**
+- No Fn key needed
+- Home row access (W/E/R/C)
+- Works identically in browser and Zellij
+
+#### Portable Programmable Keyboard (Future)
+
+**Configure firmware to match UHK:**
+- Same Mod layer mappings
+- Sends Ctrl+PgUp/PgDn/T/W
+- Portable muscle memory
+
+### Application Configuration
+
+#### Browser (Firefox/Chrome)
+
+**Works out of the box** - no configuration needed:
+- ✅ Ctrl+PgUp / Ctrl+PgDn - Navigate tabs
+- ✅ Ctrl+Shift+Tab / Ctrl+Tab - Also works
+- ✅ Ctrl+T - New tab
+- ✅ Ctrl+W - Close tab
+
+**UHK Mod layer works immediately** - all shortcuts are browser defaults.
+
+**Framework** - both methods work:
+- Fn+Ctrl+Arrow = Ctrl+PgUp/PgDn
+- Ctrl+Tab / Ctrl+Shift+Tab
+
+#### Zellij (Terminal Multiplexer)
+
+**Requires configuration** to support tab navigation shortcuts.
+
+**Configuration location**: `home-manager/common/features/keybindings/zellij.nix`
+
+```nix
+programs.zellij = {
+  enable = true;
+  enableZshIntegration = true;
+  settings = {
+    attach_to_session = true;
+    theme = "tokyo-night-dark";
+
+    keybinds = {
+      normal = {
+        # UHK Mod layer support (Ctrl+PgUp/PgDn)
+        "bind \"Ctrl PageUp\"" = { GoToPreviousTab = {}; };
+        "bind \"Ctrl PageDown\"" = { GoToNextTab = {}; };
+
+        # Framework alternative (Ctrl+Tab) - also works on all keyboards
+        "bind \"Ctrl Shift Tab\"" = { GoToPreviousTab = {}; };
+        "bind \"Ctrl Tab\"" = { GoToNextTab = {}; };
+
+        # New tab (works on all keyboards)
+        "bind \"Ctrl t\"" = { NewTab = {}; };
+
+        # Close tab (works on all keyboards)
+        "bind \"Ctrl w\"" = { CloseTab = {}; };
+      };
+    };
+  };
+};
+```
+
+**Why both Ctrl+PgUp/PgDn AND Ctrl+Tab?**
+- Ctrl+PgUp/PgDn: Works with UHK Mod layer, Framework Fn+Ctrl+Arrow
+- Ctrl+Tab: Works on all keyboards without Fn key
+- Having both gives flexibility across all hardware
+
+#### Ghostty (Terminal Emulator)
+
+**Strategy**: Disable Ghostty's native tab handling - Zellij manages all tabs.
+
+**Configuration location**: `home-manager/common/features/keybindings/ghostty.nix`
+
+```nix
+programs.ghostty = {
+  enable = true;
+  settings = {
+    # Disable Ghostty native tabs - Zellij handles all multiplexing
+    keybind = [
+      "ctrl+shift+t=unbind"
+      "ctrl+shift+w=unbind"
+      "ctrl+page_up=unbind"
+      "ctrl+page_down=unbind"
+      "ctrl+tab=unbind"
+      "ctrl+shift+tab=unbind"
+    ];
+  };
+};
+```
+
+**Why disable Ghostty tabs?**
+1. Zellij provides superior tab/pane/session management
+2. Avoids conflicts between Ghostty and Zellij tab shortcuts
+3. Single interface (Zellij) = consistent, predictable behavior
+4. Same keybindings work across all keyboards
+
+### Workflow Examples
+
+#### UHK at Desktop:
+
+**Terminal (Zellij):**
+1. Open terminal: Fn2+Return
+2. Zellij starts automatically
+3. New tab: `Mod+E` (Ctrl+T)
+4. Navigate forward: `Mod+R` (Ctrl+PgDn)
+5. Navigate backward: `Mod+W` (Ctrl+PgUp)
+6. Close tab: `Mod+C` (Ctrl+W)
+
+**Browser:**
+- Same Mod+W/E/R/C shortcuts work immediately
+- No configuration needed
+
+#### Framework Laptop:
+
+**Terminal (Zellij):**
+1. Open terminal
+2. Zellij starts automatically
+3. New tab: `Ctrl+T`
+4. Navigate forward: `Fn+Ctrl+Down` or `Ctrl+Tab`
+5. Navigate backward: `Fn+Ctrl+Up` or `Ctrl+Shift+Tab`
+6. Close tab: `Ctrl+W`
+
+**Browser:**
+- Same shortcuts work (both Fn+Ctrl+Arrow and Ctrl+Tab methods)
+
+#### Framework + Portable Keyboard:
+
+Same as UHK - Mod+W/E/R/C pattern works identically.
+
+### Configuration Module Structure
+
+All keybinding configurations are centralized in a single file:
+
+**File**: `home-manager/common/features/keybindings.nix`
+
+**Contains:**
+- Zellij tab navigation keybindings (`programs.zellij.settings.keybinds`)
+- Ghostty tab unbinding (`programs.ghostty.settings.keybind`)
+- Future: Helix, browser, and other tool keybindings
+
+**Imported by**: `home-manager/common/features/cli/default.nix`
+
+**Separation of concerns:**
+- `keybindings.nix`: ONLY keybinding configurations
+- `cli/default.nix`: Program enable, theme, and other settings
+- Zellij's `enable`, `enableZshIntegration`, `theme`, `attach_to_session` stay in cli/default.nix
+- Ghostty's `enable` stays in its respective module
+
+**Benefits:**
+- Single file for all keybinding config
+- Easy to find and update all keybindings
+- Portable across machines
+- Version controlled in Nix
+- Clean separation from enable/theme settings
 
 ---
 
@@ -1427,3 +1675,12 @@ This is a living document. As keybindings are implemented and tested, this docum
     - Hyprland: `~/.config/hypr/hyprland.conf` location
     - Ghostty: `ghostty +list-keybinds --default` command
     - Zellij: Default keybindings KDL file on GitHub
+  - **Implemented unified tab navigation**:
+    - Created `home-manager/common/features/keybindings.nix` module
+    - Configured Zellij for Ctrl+PgUp/PgDn (UHK/portable) and Ctrl+Tab (Framework/all)
+    - Disabled Ghostty native tabs (Zellij handles all multiplexing)
+    - Updated cli/default.nix to import keybindings module
+    - Documented Framework PgUp/PgDn access: Fn+Arrow Up/Down
+    - Added complete "Tab Navigation Across Tools" section
+    - Included workflow examples for UHK and Framework
+    - Module structure: Single keybindings.nix for all tools, keeps enable settings in original locations
