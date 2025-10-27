@@ -42,7 +42,8 @@ in {
 
     # LogCLI - Grafana Loki's command-line tool for querying logs
     # https://grafana.com/docs/loki/latest/tools/logcli/
-    logcli
+    # no package in nixos atm
+    #logcli
 
     # Lazygit - Simple terminal UI for git commands
     # https://github.com/jesseduffield/lazygit
@@ -216,11 +217,7 @@ in {
   programs.direnv = {
     enable = true;
     enableZshIntegration = true;
-    config = {
-      global = {
-        load_dotenv = true;
-      };
-    };
+    config = { global = { load_dotenv = true; }; };
   };
 
   # Starship - A minimal, blazing-fast, and infinitely customizable prompt for any shell
@@ -274,7 +271,7 @@ in {
     oh-my-zsh = {
       # "ohMyZsh" without Home Manager
       enable = true;
-      plugins = ["git"];
+      plugins = [ "git" ];
       theme = "robbyrussell";
     };
   };
