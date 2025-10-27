@@ -3,7 +3,9 @@
   pkgs,
   inputs,
   ...
-}: {
+}: let
+  zesh = pkgs.callPackage ../../../../packages/zesh {};
+in {
   imports = [
     ./helix.nix
     ./playwright.nix
@@ -202,6 +204,9 @@
       inherit (pkgs) system;
       config.allowUnfree = true;
     }).github-copilot-cli
+
+    # Session management
+    zesh # Zellij session manager with zoxide integration
   ];
 
   # Direnv - Load directory-specific environment variables automatically
@@ -237,10 +242,10 @@
   # https://zellij.dev/
   programs.zellij = {
     enable = true;
-    enableZshIntegration = true;
+    enableZshIntegration = false;
     settings = {
-      attach_to_session = true;
       theme = "tokyo-night-dark";
+      startup_tips = false;
     };
   };
 
@@ -261,6 +266,8 @@
       "docker comppose" = "docker-compose";
       dc = "docker-compose";
       k = "kubectl";
+      # Session management
+      zs = "zesh connect";
     };
     history.size = 100000;
     zplug.enable = lib.mkForce false;

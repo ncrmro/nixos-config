@@ -49,6 +49,20 @@
       # - Framework: Ctrl+W
       # - Universal browser/app standard
       "bind \"Ctrl w\"" = {CloseTab = {};};
+
+      # Unbind default Ctrl+G (which normally enters locked mode)
+      # Conflict avoided: Ctrl+G is used by Claude Code for "open prompt in editor"
+      "unbind \"Ctrl g\"" = [];
+
+      # Lock mode: Ctrl+Shift+G (custom binding, replaces default Ctrl+G)
+      "bind \"Ctrl Shift g\"" = {SwitchToMode = "locked";};
+
+      # Unbind default Ctrl+O (which normally enters session mode)
+      # Conflicts avoided: Ctrl+O is used by Claude Code for "view thinking" and lazygit for "copy"
+      "unbind \"Ctrl o\"" = [];
+
+      # Session mode: Ctrl+Shift+O (custom binding, replaces default Ctrl+O)
+      "bind \"Ctrl Shift o\"" = {SwitchToMode = "session";};
     };
   };
 
