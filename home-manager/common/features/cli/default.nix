@@ -9,6 +9,7 @@ in {
   imports = [
     ./helix.nix
     ./playwright.nix
+    ./ssh.nix
     ../keybindings.nix
   ];
   # UV - Fast Python package installer and resolver written in Rust
@@ -177,6 +178,10 @@ in {
     # https://nmap.org/
     nmap
 
+    # Socat - Multipurpose relay for bidirectional data transfer
+    # https://www.dest-unreach.org/socat/
+    socat
+
     # secret management
 
     # Agenix - Age-encrypted secrets for NixOS
@@ -217,7 +222,7 @@ in {
   programs.direnv = {
     enable = true;
     enableZshIntegration = true;
-    config = { global = { load_dotenv = true; }; };
+    config = {global = {load_dotenv = true;};};
   };
 
   # Starship - A minimal, blazing-fast, and infinitely customizable prompt for any shell
@@ -271,7 +276,7 @@ in {
     oh-my-zsh = {
       # "ohMyZsh" without Home Manager
       enable = true;
-      plugins = [ "git" ];
+      plugins = ["git"];
       theme = "robbyrussell";
     };
   };
