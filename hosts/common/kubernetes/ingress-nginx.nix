@@ -11,8 +11,17 @@
       values = {
         controller = {
           replicaCount = 2;
-          service = {type = "LoadBalancer";};
-          config = {"proxy-body-size" = "100m";};
+          service = {
+            type = "LoadBalancer";
+            # Preserve client source IP - required for whitelist-source-range to work
+            # Without this, K8s NAT replaces client IP with internal pod IP
+            externalTrafficPolicy = "Local";
+          };
+          config = {
+            "proxy-body-size" = "100m";
+            # With externalTrafficPolicy: Local, $remote_addr contains the actual client IP
+            # No need for X-Forwarded-For header parsing
+          };
           watchIngressWithoutClass = true;
           ingressClassResource = {
             name = "nginx";

@@ -563,5 +563,149 @@
         };
       };
     };
+
+    # Transmission Service and Ingress
+    transmission-service = {
+      enable = true;
+      target = "transmission-service.yaml";
+      content = {
+        apiVersion = "v1";
+        kind = "Service";
+        metadata = {
+          name = "transmission";
+          namespace = "servarr";
+        };
+        spec = {
+          type = "ExternalName";
+          externalName = "ocean.mercury";
+          ports = [
+            {
+              port = 9091;
+              targetPort = 9091;
+              protocol = "TCP";
+            }
+          ];
+        };
+      };
+    };
+
+    transmission-ingress = {
+      enable = true;
+      target = "transmission-ingress.yaml";
+      content = {
+        apiVersion = "networking.k8s.io/v1";
+        kind = "Ingress";
+        metadata = {
+          name = "transmission";
+          namespace = "servarr";
+          annotations = {
+            "kubernetes.io/ingress.class" = "nginx";
+          };
+        };
+        spec = {
+          tls = [
+            {
+              hosts = ["transmission.ncrmro.com"];
+            }
+          ];
+          rules = [
+            {
+              host = "transmission.ncrmro.com";
+              http = {
+                paths = [
+                  {
+                    path = "/";
+                    pathType = "Prefix";
+                    backend = {
+                      service = {
+                        name = "transmission";
+                        port = {
+                          number = 9091;
+                        };
+                      };
+                    };
+                  }
+                ];
+              };
+            }
+          ];
+        };
+      };
+    };
+
+    # SABnzbd Service and Ingress
+    sabnzbd-service = {
+      enable = true;
+      target = "sabnzbd-service.yaml";
+      content = {
+        apiVersion = "v1";
+        kind = "Service";
+        metadata = {
+          name = "sabnzbd";
+          namespace = "servarr";
+        };
+        spec = {
+          type = "ExternalName";
+          externalName = "ocean.mercury";
+          ports = [
+            {
+              port = 8080;
+              targetPort = 8080;
+              protocol = "TCP";
+            }
+          ];
+        };
+      };
+    };
+
+    sabnzbd-ingress = {
+      enable = true;
+      target = "sabnzbd-ingress.yaml";
+      content = {
+        apiVersion = "networking.k8s.io/v1";
+        kind = "Ingress";
+        metadata = {
+          name = "sabnzbd";
+          namespace = "servarr";
+          annotations = {
+            "kubernetes.io/ingress.class" = "nginx";
+            # Restrict access to Tailscale network and K8s pod network
+            # 100.64.0.0/10 = Tailscale VPN network
+            # 10.42.0.0/16 = K8s pod network (allows cluster-internal and same-node access)
+            "nginx.ingress.kubernetes.io/whitelist-source-range" = "100.64.0.0/10,10.42.0.0/16";
+            # Preserve original Host header for sabnzbd's host_whitelist check
+            "nginx.ingress.kubernetes.io/upstream-vhost" = "sabnzbd.ncrmro.com";
+          };
+        };
+        spec = {
+          tls = [
+            {
+              hosts = ["sabnzbd.ncrmro.com"];
+            }
+          ];
+          rules = [
+            {
+              host = "sabnzbd.ncrmro.com";
+              http = {
+                paths = [
+                  {
+                    path = "/";
+                    pathType = "Prefix";
+                    backend = {
+                      service = {
+                        name = "sabnzbd";
+                        port = {
+                          number = 8080;
+                        };
+                      };
+                    };
+                  }
+                ];
+              };
+            }
+          ];
+        };
+      };
+    };
   };
 }
