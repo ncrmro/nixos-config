@@ -5,6 +5,9 @@
   lib,
   ...
 }: {
+  # Hypridle configuration - ignore D-Bus inhibit locks from Chrome/Claude
+  services.hypridle.settings.general.ignore_dbus_inhibit = true;
+
   programs.chromium.enable = true;
   programs.chromium.extensions = [
     {id = "nngceckbapebfimnlniiiahkandclblb";} # bitwarden
