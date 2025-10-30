@@ -3,11 +3,10 @@
 """
 Claude Code wrapper with ops MCP configurations
 Usage:
-  ./claude [--admin] [--cluster NAME] [claude args...]  # Ops mode with k8s/Grafana
+  ./claude [--admin] [claude args...]  # Ops mode with k8s/Grafana
 
 Operations Mode Flags:
   --admin          Use admin role (write access to k8s, default: read-only)
-  --cluster NAME   Override cluster filter for Grafana queries (default: auto-detected)
 """
 
 import sys
@@ -171,7 +170,6 @@ def main():
 
     # Parse flags
     use_admin = False
-    cluster_override = None
     claude_args = []
 
     i = 1
@@ -179,14 +177,6 @@ def main():
         arg = sys.argv[i]
         if arg == "--admin":
             use_admin = True
-        elif arg == "--cluster":
-            # Get the next argument as the cluster name
-            if i + 1 < len(sys.argv):
-                cluster_override = sys.argv[i + 1]
-                i += 1  # Skip the next argument
-            else:
-                print("Error: --cluster requires a cluster name", file=sys.stderr)
-                sys.exit(1)
         elif arg == "--help" or arg == "-h":
             print(__doc__)
             sys.exit(0)
@@ -195,7 +185,7 @@ def main():
         i += 1
 
     # Get current k8s context for display
-    current_context = cluster_override if cluster_override else (get_current_k8s_context() or "Not detected")
+    current_context = get_current_k8s_context() or "Not detected"
 
     # Print configuration summary
     print()
@@ -221,7 +211,7 @@ def main():
     mcp_config_json = json.dumps(mcp_config)
 
     # Build system prompt
-    system_prompt = build_system_prompt(cluster_override)
+    system_prompt = build_system_prompt()
 
     # Print system prompt
     print_info("  Appended System Prompt:")
