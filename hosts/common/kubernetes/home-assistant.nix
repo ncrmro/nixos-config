@@ -13,6 +13,8 @@
     };
 
     # Home Assistant Service and Ingress
+    # NOTE: When changing the domain, also update the DNS record in:
+    # - /modules/nixos/headscale/default.nix (extra_records section)
     home-assistant-service = {
       enable = true;
       target = "home-assistant-service.yaml";
@@ -53,12 +55,12 @@
         spec = {
           tls = [
             {
-              hosts = ["home-assistant.ncrmro.com"];
+              hosts = ["home.ncrmro.com"];
             }
           ];
           rules = [
             {
-              host = "home-assistant.ncrmro.com";
+              host = "home.ncrmro.com";
               http = {
                 paths = [
                   {

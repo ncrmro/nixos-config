@@ -69,6 +69,13 @@ in {
               type = "A";
               value = "100.64.0.6";
             }
+            # Home Assistant ingress - kept in sync with:
+            # - /hosts/common/kubernetes/home-assistant.nix
+            {
+              name = "home.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
             {
               name = "longhorn.ncrmro.com";
               type = "A";
