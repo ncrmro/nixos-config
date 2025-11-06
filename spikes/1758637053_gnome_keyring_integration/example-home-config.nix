@@ -7,11 +7,11 @@
 }: {
   # Example Home Manager configuration with full GNOME Keyring integration
   # This configuration enables comprehensive credential management
-  
+
   imports = [
     # Import the GNOME Keyring integration module
     ../../../home-manager/common/features/security.nix
-    
+
     # Common configurations
     ../../../home-manager/common/global
   ];
@@ -19,18 +19,18 @@
   # Enable comprehensive GNOME Keyring integration
   programs.gnome-keyring-integration = {
     enable = true;
-    
+
     # SSH agent integration (default: true)
     ssh.enable = true;
-    
-    # Docker credential helper (default: true)  
+
+    # Docker credential helper (default: true)
     docker.enable = true;
-    
+
     # Password managers
     passwordManagers = {
       # Enable 1Password CLI integration
       onePassword = true;
-      
+
       # Enable Bitwarden CLI integration
       bitwarden = true;
     };
@@ -40,11 +40,11 @@
   home.packages = with pkgs; [
     # Development tools that benefit from credential management
     git
-    gh  # GitHub CLI (uses keyring for auth)
+    gh # GitHub CLI (uses keyring for auth)
     docker-compose
-    
+
     # Optional: GUI tools for keyring management
-    seahorse  # GNOME Keyring GUI
+    seahorse # GNOME Keyring GUI
   ];
 
   # Git configuration that works with keyring
@@ -55,7 +55,7 @@
     extraConfig = {
       # Use credential helper that integrates with keyring
       credential.helper = "libsecret";
-      
+
       # SSH signing with keys from keyring
       gpg.format = "ssh";
       commit.gpgsign = true;
@@ -68,11 +68,11 @@
     # Keyring status and management
     "keyring-status" = "keyring-status";
     "keyring-unlock" = "gnome-keyring-daemon --unlock";
-    
+
     # Password manager shortcuts
     "bw-login" = "bw-keyring-login";
     "op-login" = "op-keyring-login";
-    
+
     # SSH key management
     "ssh-keys" = "ssh-add -l";
     "ssh-add-all" = "ssh-add ~/.ssh/id_*";
