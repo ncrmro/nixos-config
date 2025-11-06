@@ -1,7 +1,20 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
     quickemu
+    virt-viewer
+    pkg-config
+    libvirt
+    python3Packages.libvirt
+    # Build tools needed for compiling Python C extensions (like libvirt-python)
+    gcc
   ];
+
+  # Set up PKG_CONFIG_PATH for libvirt development
+  # Required when building Python libvirt bindings (libvirt-python) outside of Nix
+  # (e.g., via uv, pip, or poetry) as they need to compile against libvirt C headers
+  home.sessionVariables = {
+    PKG_CONFIG_PATH = "${pkgs.libvirt}/lib/pkgconfig:$PKG_CONFIG_PATH";
+  };
 
   home.file.".config/libvirt/libvirt.conf".text = ''
     uri_default = "qemu:///system"

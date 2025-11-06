@@ -27,6 +27,7 @@
     ../common/optional/virt-manager.nix
     ../common/optional/shairport-sync.nix
     ./nvidia.nix
+    ./windows11-vm.nix
     ../../modules/nixos/steam.nix
   ];
 

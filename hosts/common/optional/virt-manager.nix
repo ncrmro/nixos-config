@@ -3,6 +3,7 @@
   ovmfPkg = pkgs.OVMF.override {
     secureBoot = true;
     tpmSupport = true;
+    msVarsTemplate = true; # Creates OVMF_VARS.ms.fd with Microsoft keys enrolled
   };
 
   # QEMU package for accessing EDK2 firmware files
@@ -23,6 +24,13 @@ in {
   programs.virt-manager.enable = true;
   users.users.ncrmro.extraGroups = ["libvirtd"];
 
+  # Prevent NetworkManager from managing libvirt bridges
+  # This allows libvirt to fully manage NAT networking for VMs
+  networking.networkmanager.unmanaged = [
+    "interface-name:virbr*"
+    "interface-name:vnet*"
+  ];
+
   # Create consistent symlinks for firmware files that VM XML files can reference
   # This ensures portable VM configurations across different nix store paths
   systemd.tmpfiles.rules = [
@@ -33,9 +41,15 @@ in {
     "L+ /run/libvirt/nix-ovmf/OVMF_CODE.fd - - - - ${ovmfPkg.fd}/FV/OVMF_CODE.fd"
     "L+ /run/libvirt/nix-ovmf/OVMF_VARS.fd - - - - ${ovmfPkg.fd}/FV/OVMF_VARS.fd"
 
+    # OVMF firmware files with Microsoft Secure Boot keys enrolled
+    "L+ /run/libvirt/nix-ovmf/OVMF_CODE.ms.fd - - - - ${ovmfPkg.fd}/FV/OVMF_CODE.fd"
+    "L+ /run/libvirt/nix-ovmf/OVMF_VARS.ms.fd - - - - ${ovmfPkg.fd}/FV/OVMF_VARS.ms.fd"
+
     # ARM64 firmware files (if available)
     "L+ /run/libvirt/nix-ovmf/AAVMF_CODE.fd - - - - ${ovmfPkg.fd}/FV/AAVMF_CODE.fd"
     "L+ /run/libvirt/nix-ovmf/AAVMF_VARS.fd - - - - ${ovmfPkg.fd}/FV/AAVMF_VARS.fd"
+    "L+ /run/libvirt/nix-ovmf/AAVMF_CODE.ms.fd - - - - ${ovmfPkg.fd}/FV/AAVMF_CODE.fd"
+    "L+ /run/libvirt/nix-ovmf/AAVMF_VARS.ms.fd - - - - ${ovmfPkg.fd}/FV/AAVMF_VARS.ms.fd"
 
     # EDK2 firmware files from QEMU package (for additional compatibility)
     "L+ /run/libvirt/nix-ovmf/edk2-i386-vars.fd - - - - ${qemuPkg}/share/qemu/edk2-i386-vars.fd"
