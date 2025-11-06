@@ -12,6 +12,7 @@
   time.timeZone = "America/Chicago";
 
   environment.systemPackages = with pkgs; [
+    home-manager
     lm_sensors
   ];
 }
