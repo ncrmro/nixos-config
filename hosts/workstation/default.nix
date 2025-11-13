@@ -18,6 +18,7 @@
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
     ../common/optional/tailscale.node.nix
+    ../common/optional/ssh-mosh.nix
     ../common/optional/secureboot.nix
     ../common/optional/ollama.nix
     ../common/optional/nfs-client.nix
