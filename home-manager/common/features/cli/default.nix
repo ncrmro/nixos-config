@@ -6,12 +6,7 @@
 }: let
   zesh = pkgs.callPackage ../../../../packages/zesh {};
 in {
-  imports = [
-    ./helix.nix
-    ./playwright.nix
-    ./ssh.nix
-    ../keybindings.nix
-  ];
+  imports = [./helix.nix ./playwright.nix ./ssh.nix ../keybindings.nix];
   # UV - Fast Python package installer and resolver written in Rust
   # https://github.com/astral-sh/uv
   programs.uv.enable = true;
@@ -213,6 +208,12 @@ in {
 
     # Session management
     zesh # Zellij session manager with zoxide integration
+
+    # Espup - Tool for installing and maintaining ESP Rust toolchain
+    # https://github.com/esp-rs/espup
+    espup
+
+    csview
   ];
 
   # Direnv - Load directory-specific environment variables automatically
@@ -270,6 +271,8 @@ in {
       k = "kubectl";
       # Session management
       zs = "zesh connect";
+      # AI Tools
+      opencode = "/home/ncrmro/.opencode/bin/opencode";
     };
     history.size = 100000;
     zplug.enable = lib.mkForce false;
