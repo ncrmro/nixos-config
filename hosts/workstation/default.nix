@@ -27,7 +27,6 @@
     ../common/optional/docker-rootless.nix
     ../common/optional/virt-manager.nix
     ../common/optional/shairport-sync.nix
-    ./nvidia.nix
     ./windows11-vm.nix
     ../../modules/nixos/steam.nix
   ];
@@ -43,9 +42,14 @@
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-workstation.nix;
 
   environment.systemPackages = with pkgs; [
-    nvtopPackages.nvidia
     alsa-utils
     lsof
+    # llama-cpp with ROCm support for AMD GPU acceleration
+    ((llama-cpp.overrideAttrs (finalAttrs: previousAttrs: {
+        cmakeFlags = (previousAttrs.cmakeFlags or []) ++ ["-DGGML_HIP=ON"];
+      })).override {
+        rocmSupport = true;
+      })
   ];
 
   environment.variables = {
@@ -54,6 +58,11 @@
   programs.nix-ld.enable = true;
 
   hardware.keyboard.uhk.enable = true;
+
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+  };
 
   # Configure Tailscale node (no tags for client machine)
   services.tailscale.node = {
