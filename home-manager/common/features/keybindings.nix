@@ -13,9 +13,10 @@
   # - Framework laptop: Fn+Ctrl+Arrow (PgUp/PgDn) or Ctrl+Tab (no Fn needed)
   # - Both methods supported for flexibility across hardware
 
-  # Zellij - Terminal Multiplexer Tab Navigation
+  # Zellij - Terminal Multiplexer Tab and Pane Navigation
   programs.zellij.settings.keybinds = {
     normal = {
+      # ===== TAB NAVIGATION =====
       # Previous tab: Ctrl+PgUp
       # - UHK: Mod+W → Ctrl+PgUp
       # - Framework: Fn+Ctrl+Arrow Up → Ctrl+PgUp
@@ -50,6 +51,26 @@
       # - Universal browser/app standard
       "bind \"Ctrl w\"" = {CloseTab = {};};
 
+      # ===== PANE NAVIGATION =====
+      # Direct pane navigation using Alt+J/K/I/L
+      # - Matches Hyprland's ergonomic JKIL pattern (Super+JKIL for windows)
+      # - No mode switching required (faster than Ctrl+P → hjkl)
+      # - Works over SSH identically to local navigation
+      # - No conflict with Hyprland (Hyprland uses Super, apps receive Alt)
+
+      # Navigate to pane on the left: Alt+J
+      "bind \"Alt j\"" = {MoveFocus = "Left";};
+
+      # Navigate to pane below: Alt+K
+      "bind \"Alt k\"" = {MoveFocus = "Down";};
+
+      # Navigate to pane above: Alt+I
+      "bind \"Alt i\"" = {MoveFocus = "Up";};
+
+      # Navigate to pane on the right: Alt+L
+      "bind \"Alt l\"" = {MoveFocus = "Right";};
+
+      # ===== MODE SWITCHING =====
       # Unbind default Ctrl+G (which normally enters locked mode)
       # Conflict avoided: Ctrl+G is used by Claude Code for "open prompt in editor"
       "unbind \"Ctrl g\"" = [];
@@ -63,6 +84,11 @@
 
       # Session mode: Ctrl+Shift+O (custom binding, replaces default Ctrl+O)
       "bind \"Ctrl Shift o\"" = {SwitchToMode = "session";};
+
+      # Unbind default Ctrl+P (pane mode) navigation from normal mode
+      # We're using direct Alt+JKIL navigation instead
+      # Keep Ctrl+P for entering pane mode (for split creation, etc.)
+      # but navigation is now direct via Alt+JKIL
     };
   };
 

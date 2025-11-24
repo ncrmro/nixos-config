@@ -10,13 +10,14 @@
 
 1. [Overview & Philosophy](#overview--philosophy)
 2. [Current State Analysis](#current-state-analysis)
-3. [Hyprland (Wayland Compositor)](#hyprland-wayland-compositor)
-4. [Ghostty (Terminal Emulator)](#ghostty-terminal-emulator)
-5. [Zellij (Terminal Multiplexer)](#zellij-terminal-multiplexer)
-6. [Helix (Text Editor)](#helix-text-editor)
-7. [Browser (Firefox/Chrome with Vimium)](#browser-firefoxchrome-with-vimium)
-8. [Git Aliases](#git-aliases)
-9. [Hardware-Specific Configurations](#hardware-specific-configurations)
+3. [Window & Pane Splitting Across All Tools](#window--pane-splitting-across-all-tools)
+4. [Hyprland (Wayland Compositor)](#hyprland-wayland-compositor)
+5. [Ghostty (Terminal Emulator)](#ghostty-terminal-emulator)
+6. [Zellij (Terminal Multiplexer)](#zellij-terminal-multiplexer)
+7. [Helix (Text Editor)](#helix-text-editor)
+8. [Browser (Firefox/Chrome with Vimium)](#browser-firefoxchrome-with-vimium)
+9. [Git Aliases](#git-aliases)
+10. [Hardware-Specific Configurations](#hardware-specific-configurations)
    - [Ultimate Hacking Keyboard (UHK)](#ultimate-hacking-keyboard-uhk)
    - [Framework Laptop](#framework-laptop)
    - [Portable Programmable Keyboard (Future)](#portable-programmable-keyboard-future)
@@ -291,6 +292,226 @@ keybinds = {
 # keybind = global:cmd+backquote=toggle_quick_terminal
 # keybind = ctrl+shift+t=new_tab
 ```
+
+---
+
+## Window & Pane Splitting Across All Tools
+
+### Overview
+
+This section documents splitting and navigation keybindings across four different layers of the desktop environment:
+
+1. **Hyprland** (Window Manager) - Manages application windows, local only
+2. **Ghostty** (Terminal Emulator) - Terminal splits (not used, Zellij handles this)
+3. **Zellij** (Terminal Multiplexer) - Terminal panes, works over SSH
+4. **Helix** (Text Editor) - Editor windows/buffers, works over SSH
+
+### Critical Consideration: SSH Usage
+
+**Local vs SSH contexts:**
+- **Local (desktop)**: All four layers available
+  - Hyprland manages application windows
+  - Ghostty provides terminal (no splits used)
+  - Zellij manages terminal panes
+  - Helix manages editor splits
+
+- **SSH (remote)**: Only terminal-based tools available
+  - Hyprland keybindings don't work (window manager is local)
+  - Ghostty is just the terminal window (local)
+  - **Zellij manages terminal panes** ✓ Works over SSH
+  - **Helix manages editor splits** ✓ Works over SSH
+
+**Implication**: Zellij and Helix keybindings must be muscle-memory consistent since they're used both locally and over SSH.
+
+### Navigation Conflict Resolution
+
+**Current Conflict:**
+- Hyprland (local): `Super+J/K/I/L` for window navigation (physically `Alt+J/K/I/L` due to `altwin:swap_alt_win`)
+- Zellij (local + SSH): Default `Ctrl+P` then `h/j/k/l` for pane navigation (modal)
+
+**Problem**: Modal navigation in Zellij is slower than direct navigation, and the default doesn't match Hyprland's ergonomic JKIL pattern.
+
+**Solution**: Configure Zellij for direct pane navigation using `Alt+J/K/I/L`:
+- `Alt+J`: Focus pane left
+- `Alt+K`: Focus pane down
+- `Alt+I`: Focus pane up
+- `Alt+L`: Focus pane right
+
+**Why this works:**
+1. **No conflict with Hyprland**: Hyprland uses `Super` (swapped from `Alt`), applications receive the actual `Alt` key
+2. **Ergonomic**: Same JKIL home-row pattern as Hyprland
+3. **Works over SSH**: Alt+JKIL navigation works identically when SSH'd into remote machines
+4. **Consistent muscle memory**: Same physical keys (Alt+JKIL) for navigation at both window and pane levels
+
+**Layer separation:**
+- **Window level** (local only): `Super+J/K/I/L` = physically press `Alt+J/K/I/L` → swapped to `Super` → Hyprland navigation
+- **Pane level** (local + SSH): `Alt+J/K/I/L` = applications receive `Alt+J/K/I/L` → Zellij navigation
+
+### Unified Keybinding Scheme
+
+#### Hyprland (Window Manager - Local Only)
+
+**Window Navigation:**
+- `Super+J` (`Alt+J` on keyboard): Focus left window
+- `Super+K` (`Alt+K` on keyboard): Focus down window
+- `Super+I` (`Alt+I` on keyboard): Focus up window
+- `Super+L` (`Alt+L` on keyboard): Focus right window
+
+**Window Movement:**
+- `Super+Shift+J`: Move window left
+- `Super+Shift+K`: Move window down
+- `Super+Shift+I`: Move window up
+- `Super+Shift+L`: Move window right
+
+**Window Splitting:**
+- Hyprland's Dwindle layout auto-determines split direction
+- `Super+D`: Toggle split orientation (if needed)
+- **Note**: Opening a new window automatically creates a split
+
+**Window Closing:**
+- `Super+Q`: Close focused window (recommended, avoids conflict with tab navigation)
+
+#### Ghostty (Terminal Emulator - Local Only)
+
+**Strategy**: Disable native splits - Zellij handles all terminal multiplexing
+
+**Rationale:**
+- Avoids confusion between Ghostty splits and Zellij panes
+- Zellij provides superior pane management (layouts, sessions, works over SSH)
+- Single consistent interface for terminal multiplexing
+
+**Configuration**: Ghostty split keybindings disabled/unbound
+
+#### Zellij (Terminal Multiplexer - Local + SSH)
+
+**Direct Pane Navigation** (recommended, works everywhere):
+- `Alt+J`: Focus pane left
+- `Alt+K`: Focus pane down
+- `Alt+I`: Focus pane up
+- `Alt+L`: Focus pane right
+
+**Pane Creation** (modal):
+- `Ctrl+P` → `d`: New pane down (horizontal split)
+- `Ctrl+P` → `r`: New pane right (vertical split)
+- `Ctrl+P` → `n`: New pane (auto-direction)
+
+**Alternative** (keep defaults if preferred):
+- `Ctrl+P` → `h`: Navigate left (in pane mode)
+- `Ctrl+P` → `j`: Navigate down (in pane mode)
+- `Ctrl+P` → `k`: Navigate up (in pane mode)
+- `Ctrl+P` → `l`: Navigate right (in pane mode)
+
+**Pane Management** (modal):
+- `Ctrl+P` → `x`: Close focused pane
+- `Ctrl+P` → `f`: Toggle pane fullscreen
+- `Ctrl+N` → `h/j/k/l`: Resize pane (in resize mode)
+
+**Why Alt+J/K/I/L is recommended:**
+1. No mode switching required (faster)
+2. Matches Hyprland's ergonomic JKIL pattern
+3. Works identically over SSH
+4. No conflict with local window manager
+
+#### Helix (Text Editor - Local + SSH)
+
+**Window Creation:**
+- `Ctrl+W` → `v`: Vertical split (vsplit)
+- `Ctrl+W` → `s`: Horizontal split (hsplit)
+
+**Window Navigation:**
+- `Ctrl+W` → `h`: Move to left window
+- `Ctrl+W` → `j`: Move to below window
+- `Ctrl+W` → `k`: Move to above window
+- `Ctrl+W` → `l`: Move to right window
+- `Ctrl+W` → `w`: Cycle to next window
+
+**Window Management:**
+- `Ctrl+W` → `q`: Close current window
+- `Ctrl+W` → `o`: Close all other windows
+
+**Note**: Helix uses `h/j/k/l` (Vim-style) instead of `j/k/i/l`. This is intentional to match Vim/Neovim conventions. Since it's a modal interface (Ctrl+W prefix), it doesn't conflict with direct Alt+J/K/I/L navigation in Zellij.
+
+### Navigation Hierarchy
+
+Understanding the navigation layers helps build correct muscle memory:
+
+```
+┌─────────────────────────────────────────────────────┐
+│ HYPRLAND WINDOW MANAGER (Local Only)               │
+│ Super+J/K/I/L = Navigate between application windows│
+│ (Ghostty, Browser, VSCode, etc.)                   │
+│                                                     │
+│  ┌───────────────────────────────────────────────┐ │
+│  │ GHOSTTY TERMINAL (Local container)           │ │
+│  │ No splits - just provides terminal window    │ │
+│  │                                               │ │
+│  │  ┌─────────────────────────────────────────┐ │ │
+│  │  │ ZELLIJ MULTIPLEXER (Local + SSH)       │ │ │
+│  │  │ Alt+J/K/I/L = Navigate between panes   │ │ │
+│  │  │                                         │ │ │
+│  │  │  ┌───────────────────────────────────┐ │ │ │
+│  │  │  │ HELIX EDITOR (Local + SSH)       │ │ │ │
+│  │  │  │ Ctrl+W h/j/k/l = Navigate splits │ │ │ │
+│  │  │  └───────────────────────────────────┘ │ │ │
+│  │  └─────────────────────────────────────────┘ │ │
+│  └───────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────┘
+```
+
+**Key Insight**: Each layer uses a different modifier/mode, preventing conflicts:
+- Hyprland: `Super` (swapped from Alt at OS level)
+- Zellij: `Alt` (passed through to application)
+- Helix: `Ctrl+W` modal prefix (Vim-style)
+
+### SSH Workflow Example
+
+**Scenario**: SSH into remote server to edit code
+
+1. **On local machine**:
+   - Press `Alt+Return` (physically) → Hyprland opens Ghostty terminal
+   - Zellij starts automatically in terminal
+
+2. **SSH to remote**:
+   ```bash
+   ssh user@remote-server
+   # Zellij is still running locally, you're just in a remote shell in one pane
+   ```
+
+3. **Create panes for workflow**:
+   - Press `Ctrl+P` → `d` → New pane below (for running dev server)
+   - Press `Alt+I` → Navigate back to top pane
+   - Press `Ctrl+P` → `r` → New pane right (for logs)
+   - Press `Alt+J` → Navigate back to left pane
+
+4. **Edit files**:
+   ```bash
+   hx my-project/
+   ```
+   - Inside Helix: `Ctrl+W` → `v` → Vertical split
+   - `Ctrl+W` → `l` → Navigate to right split
+   - Edit files using Helix navigation
+
+5. **Navigate between panes**:
+   - `Alt+J/K/I/L` → Works identically to local navigation
+   - No Hyprland shortcuts available (window manager is local)
+   - Muscle memory transfers perfectly from local to SSH
+
+**Why this matters**: Using the same `Alt+J/K/I/L` pattern for Zellij panes (both locally and over SSH) ensures you don't have to relearn navigation when SSH'd into servers.
+
+### Comparison Table: Default vs Unified Scheme
+
+| Tool | Context | Default Navigation | Unified Scheme | Works over SSH? |
+|------|---------|-------------------|----------------|-----------------|
+| **Hyprland** | Local only | SUPER+Arrows (custom) | `Super+J/K/I/L` (Alt+JKIL on keyboard) | ❌ No |
+| **Ghostty** | Local only | Super+Alt+Arrows | Disabled (not used) | ❌ No |
+| **Zellij** | Local + SSH | `Ctrl+P` → `h/j/k/l` (modal) | `Alt+J/K/I/L` (direct) | ✅ Yes |
+| **Helix** | Local + SSH | `Ctrl+W` → `h/j/k/l` (modal) | Same (keep default) | ✅ Yes |
+
+**Key improvements in unified scheme:**
+1. **Faster Zellij navigation**: Direct `Alt+JKIL` instead of modal `Ctrl+P` → `hjkl`
+2. **Consistent ergonomics**: JKIL pattern at both window and pane levels
+3. **SSH-ready**: Same navigation works locally and remotely
+4. **No conflicts**: Each layer uses different modifiers
 
 ---
 
