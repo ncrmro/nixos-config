@@ -194,10 +194,8 @@ in {
 
     # Claude Code - AI-powered CLI assistant from Anthropic
     # https://claude.com/claude-code
-    (import inputs.nixpkgs-unstable {
-      inherit (pkgs) system;
-      config.allowUnfree = true;
-    }).claude-code
+    # See overlays/default.nix and pkgs/claude-code for custom package version
+    claude-code
 
     # GitHub Copilot CLI - AI pair programmer in your terminal
     # https://githubnext.com/projects/copilot-cli

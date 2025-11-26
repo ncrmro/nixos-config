@@ -69,6 +69,9 @@
     agenix,
     ...
   }: let
+    # Import custom overlays
+    overlays = import ./overlays {inherit inputs;};
+
     # Function to create system-specific packages with allowUnfree enabled
     pkgsForSystem = system:
       import nixpkgs {
@@ -76,6 +79,7 @@
         config = {
           allowUnfree = true;
         };
+        overlays = overlays;
       };
 
     # Same for unstable packages
@@ -85,11 +89,18 @@
         config = {
           allowUnfree = true;
         };
+        overlays = overlays;
       };
   in {
     # Code formatter
     formatter.x86_64-linux = (pkgsForSystem "x86_64-linux").alejandra;
     formatter.aarch64-darwin = (pkgsForSystem "aarch64-darwin").alejandra;
+
+    # Custom packages
+    packages = {
+      x86_64-linux.claude-code = (pkgsForSystem "x86_64-linux").claude-code;
+      aarch64-darwin.claude-code = (pkgsForSystem "aarch64-darwin").claude-code;
+    };
 
     # Import NixOS and Home Manager modules
     nixosModules = import ./modules/nixos;
