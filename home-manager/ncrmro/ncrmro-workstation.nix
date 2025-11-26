@@ -8,6 +8,7 @@
   imports = [
     ./base.nix
     ../common/features/desktop/obs.nix
+    ../common/features/desktop/openscad.nix
   ];
 
   wayland.windowManager.hyprland.settings = {
