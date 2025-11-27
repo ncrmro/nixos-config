@@ -3,6 +3,10 @@
     ./hardware-configuration.nix
     ../../modules/nixos/headscale
     ../common/optional/alloy-client.nix
+    ../common/optional/tailscale.node.nix
+    ../common/optional/agenix.nix
+    ./adguard-home.nix
+    ./nginx.nix
   ];
 
   boot.tmp.cleanOnBoot = true;
@@ -19,6 +23,13 @@
       device_type = "vps";
       service = "headscale";
     };
+  };
+
+  # Configure Tailscale node
+  services.tailscale.node = {
+    enable = true;
+    tags = ["tag:server"];
+    loginServer = "https://mercury.ncrmro.com";
   };
 
   system.stateVersion = "25.05";

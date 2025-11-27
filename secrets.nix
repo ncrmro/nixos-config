@@ -7,6 +7,7 @@ let
   systems = {
     ocean = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO7Oo3b71YDnN2i3vOsXrE4PFhmByjCIW5YtH7VkrTtC";
     maia = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAtdLpd4fI4U4JSQeo0z/m2KdB+qAGyURSPko7/1BCIa";
+    mercury = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK80XMxx82fVvZgZ5djaXKvy1fRriQwkO4OAtf65ElhU";
   };
 
   # Convenience aliases for common key combinations
@@ -19,4 +20,7 @@ in {
 
   # K3s agent token - accessible by admin and K3s agent nodes only
   "secrets/k3s-agent-token.age".publicKeys = adminKeys ++ k3sAgents;
+
+  # Cloudflare API token for ACME DNS-01 challenge
+  "secrets/cloudflare-api-token.age".publicKeys = adminKeys ++ [systems.mercury];
 }

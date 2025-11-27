@@ -6,12 +6,15 @@
   "tagOwners": {
     // GitHub Actions runners
     "tag:github-actions": ["ncrmro"],
-    
+
     // Kubernetes cluster nodes
     "tag:k8s-cluster": ["ncrmro"],
     "tag:k8s-master": ["ncrmro"],
     "tag:k8s-worker": ["ncrmro"],
-    
+
+    // Server nodes (infrastructure servers like mercury)
+    "tag:server": ["ncrmro"],
+
     // Nodes running node exporter for monitoring
     "tag:node-exporter": ["ncrmro"]
   },
@@ -54,7 +57,24 @@
         "ncrmro:9100"                // Node exporter on ncrmro's devices
       ]
     },
-    
+
+    // Server nodes have full access (infrastructure servers)
+    {
+      "action": "accept",
+      "src": ["tag:server"],
+      "dst": ["*:*"]
+    },
+
+    // All nodes can access server nodes (for services like AdGuard DNS)
+    {
+      "action": "accept",
+      "src": ["*"],
+      "dst": [
+        "tag:server:53",             // DNS
+        "tag:server:3000"            // AdGuard Home web interface
+      ]
+    },
+
     // Admin user has full access to everything
     {
       "action": "accept",
