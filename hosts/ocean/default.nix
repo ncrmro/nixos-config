@@ -17,6 +17,7 @@
     ../common/optional/adguard-home.nix
     ../common/optional/servarr.nix
     ../common/optional/home-assistant.nix
+    ../common/optional/octoprint.nix
     ./k3s.nix
     ./k3s-storage-classes.nix
     ./nfs.nix
@@ -25,6 +26,7 @@
     ../common/kubernetes/adguard-home.nix
     ../common/kubernetes/servarr.nix
     ../common/kubernetes/home-assistant.nix
+    ./vms.nix
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
   ];
