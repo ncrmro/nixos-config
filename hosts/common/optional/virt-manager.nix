@@ -15,10 +15,7 @@ in {
       package = qemuPkg;
       runAsRoot = true;
       swtpm.enable = true;
-      ovmf = {
-        enable = true;
-        packages = [ovmfPkg.fd];
-      };
+      # ovmf option removed in unstable - OVMF is now included by default with QEMU
     };
   };
   programs.virt-manager.enable = true;

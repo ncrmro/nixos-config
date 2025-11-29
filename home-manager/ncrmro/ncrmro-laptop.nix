@@ -7,6 +7,7 @@
 }: {
   imports = [
     ./base.nix
+    ../common/features/virt-manager.nix
   ];
 
   wayland.windowManager.hyprland.settings = {

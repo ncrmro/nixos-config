@@ -9,6 +9,7 @@
     ./base.nix
     ../common/features/desktop/obs.nix
     ../common/features/desktop/openscad.nix
+    ../common/features/virt-manager.nix
   ];
 
   wayland.windowManager.hyprland.settings = {
