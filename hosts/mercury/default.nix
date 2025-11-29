@@ -5,12 +5,14 @@
     ../common/optional/alloy-client.nix
     ../common/optional/tailscale.node.nix
     ../common/optional/agenix.nix
+    ../common/optional/stalwart-mail.nix
     ./adguard-home.nix
     ./nginx.nix
   ];
 
   boot.tmp.cleanOnBoot = true;
   zramSwap.enable = true;
+  time.timeZone = "America/Chicago";
   networking.hostName = "mercury";
   networking.domain = "";
   services.openssh.enable = true;
