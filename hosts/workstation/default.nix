@@ -27,6 +27,7 @@
     ../common/optional/docker-rootless.nix
     ../common/optional/virt-manager.nix
     ../common/optional/shairport-sync.nix
+    ../common/optional/keystone-desktop.nix
     ./windows11-vm.nix
     ../../modules/nixos/steam.nix
   ];
@@ -44,12 +45,8 @@
   environment.systemPackages = with pkgs; [
     alsa-utils
     lsof
-    # llama-cpp with ROCm support for AMD GPU acceleration
-    ((llama-cpp.overrideAttrs (finalAttrs: previousAttrs: {
-        cmakeFlags = (previousAttrs.cmakeFlags or []) ++ ["-DGGML_HIP=ON"];
-      })).override {
-        rocmSupport = true;
-      })
+    # llama-cpp from upstream flake with ROCm support for AMD GPU acceleration
+    # inputs.llama-cpp.packages.${pkgs.system}.rocm
   ];
 
   environment.variables = {
@@ -83,6 +80,10 @@
       device_type = "workstation";
     };
   };
+
+  # Disable HDA Intel audio (GPU HDMI + onboard) - keep only USB audio devices
+  # This may help with Hyprland crashes caused by snd_hda_intel spurious responses
+  boot.blacklistedKernelModules = ["snd_hda_intel"];
 
   networking.hostId = "cb1216ed"; # generate with: head -c 8 /etc/machine-id
   networking.hostName = "ncrmro-workstation";
