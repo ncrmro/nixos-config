@@ -40,9 +40,9 @@ in {
           base_domain = "mercury";
           magic_dns = true;
           nameservers = {
-            # Use AdGuard Home running on mercury for DNS
-            # AdGuard provides ad-blocking and forwards to upstream DNS (Cloudflare)
-            global = ["100.64.0.38"];
+            # Use AdGuard Home instances for DNS with ad-blocking
+            # 100.64.0.38 = mercury (primary), 100.64.0.6 = ocean (secondary)
+            global = ["100.64.0.6" "100.64.0.38"];
           };
           override_local_dns = true;
           extra_records = [
