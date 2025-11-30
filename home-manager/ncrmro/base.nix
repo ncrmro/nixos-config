@@ -1,11 +1,13 @@
 {
   inputs,
+  outputs,
   config,
   pkgs,
   lib,
   ...
 }: {
   imports = [
+    outputs.homeManagerModules.keystone-terminal
     ../common/global
     ../common/features/cli
     ../common/features/desktop
@@ -16,6 +18,8 @@
     ../common/optional/mcp/playwright.nix
     inputs.nix-index-database.homeModules.nix-index
   ];
+
+  keystone.terminal.enable = true;
 
   wayland.windowManager.hyprland.settings = {
     windowrule = [

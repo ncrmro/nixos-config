@@ -56,6 +56,15 @@
       url = "github:strash/kinda_nvim.hx";
       flake = false;
     };
+
+    # llama.cpp - latest for MXFP4 support
+    llama-cpp = {
+      url = "github:ggml-org/llama.cpp";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Declarative Flatpak management
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
   outputs = inputs @ {
@@ -76,9 +85,7 @@
     pkgsForSystem = system:
       import nixpkgs {
         inherit system;
-        config = {
-          allowUnfree = true;
-        };
+        config = {allowUnfree = true;};
         overlays = overlays;
       };
 
@@ -86,21 +93,13 @@
     unstablePkgsForSystem = system:
       import nixpkgs-unstable {
         inherit system;
-        config = {
-          allowUnfree = true;
-        };
+        config = {allowUnfree = true;};
         overlays = overlays;
       };
   in {
     # Code formatter
     formatter.x86_64-linux = (pkgsForSystem "x86_64-linux").alejandra;
     formatter.aarch64-darwin = (pkgsForSystem "aarch64-darwin").alejandra;
-
-    # Custom packages
-    packages = {
-      x86_64-linux.claude-code = (pkgsForSystem "x86_64-linux").claude-code;
-      aarch64-darwin.claude-code = (pkgsForSystem "aarch64-darwin").claude-code;
-    };
 
     # Import NixOS and Home Manager modules
     nixosModules = import ./modules/nixos;

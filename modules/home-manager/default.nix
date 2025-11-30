@@ -1,3 +1,3 @@
 {
-  # Home Manager custom modules can be added here
+  keystone-terminal = import ../keystone/terminal/default.nix;
 }

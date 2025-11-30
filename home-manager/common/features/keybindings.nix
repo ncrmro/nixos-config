@@ -67,14 +67,16 @@
   };
 
   # Ghostty - Tab Navigation with Shift Modifier
-  # Strategy: Ghostty tabs use Ctrl+Shift+W/E/R/C to avoid conflict with Zellij
-  # Zellij uses Ctrl+PgUp/PgDn/Tab/T/W (no shift)
-  # This allows both to coexist if needed, with Zellij as primary
+  # Strategy: Ghostty acts as simple terminal emulator, Zellij handles all multiplexing
+  # - Ghostty tabs use Ctrl+Shift+W/E/R/C to avoid conflict with Zellij
+  # - Ghostty splits are DISABLED (Zellij handles all panes)
+  # - Zellij uses Ctrl+PgUp/PgDn/Tab/T/W (no shift)
   programs.ghostty.settings.keybind = [
     # Previous tab: Ctrl+Shift+W (original W + shift)
     "ctrl+shift+w=previous_tab"
 
     # New tab: Ctrl+Shift+E (original E + shift)
+    # Note: Overrides Ghostty's default Ctrl+Shift+E (new_split:down)
     "ctrl+shift+e=new_tab"
 
     # Next tab: Ctrl+Shift+R (original R + shift)
@@ -83,10 +85,18 @@
     # Close tab: Ctrl+Shift+C (original C + shift)
     "ctrl+shift+c=close_surface"
 
-    # Unbind conflicting shortcuts to ensure Zellij receives them
+    # Unbind Zellij tab shortcuts to ensure Zellij receives them
     "ctrl+page_up=unbind"
     "ctrl+page_down=unbind"
     "ctrl+tab=unbind"
+
+    # Unbind Ghostty splits - Zellij handles all pane management
+    # Conflict resolution: Ctrl+Shift+O would conflict with Zellij session mode
+    "ctrl+shift+o=unbind" # Default: new_split:right
+    "ctrl+alt+up=unbind" # Default: navigate to pane above
+    "ctrl+alt+down=unbind" # Default: navigate to pane below
+    "ctrl+alt+left=unbind" # Default: navigate to pane left
+    "ctrl+alt+right=unbind" # Default: navigate to pane right
   ];
 
   # Future keybinding configurations:
