@@ -46,6 +46,20 @@ in {
     };
   };
 
+  # Personal Website - PUBLIC (proxied to k8s)
+  services.nginx.virtualHosts."ncrmro.com" = {
+    forceSSL = true;
+    useACMEHost = "wildcard-ncrmro-com";
+    locations."/" = {
+      proxyPass = "https://${k8sIngressHttps}";
+      proxyWebsockets = true;
+      extraConfig = ''
+        proxy_ssl_server_name on;
+        proxy_set_header Host $host;
+      '';
+    };
+  };
+
   # Radarr - Tailscale only
   services.nginx.virtualHosts."radarr.ncrmro.com" = {
     forceSSL = true;

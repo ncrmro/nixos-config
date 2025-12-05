@@ -1,6 +1,7 @@
 {...}: {
   services.k3s.autoDeployCharts = {
     # Ingress NGINX Controller Helm Chart: https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx
+    # NixOS nginx is the front-end on 80/443, forwarding K8s traffic to these internal ports
     ingress-nginx = {
       name = "ingress-nginx";
       repo = "https://kubernetes.github.io/ingress-nginx";
@@ -12,15 +13,18 @@
         controller = {
           replicaCount = 2;
           service = {
-            type = "LoadBalancer";
-            # Preserve client source IP - required for whitelist-source-range to work
-            # Without this, K8s NAT replaces client IP with internal pod IP
-            externalTrafficPolicy = "Local";
+            type = "ClusterIP";
+          };
+          hostNetwork = false;
+          hostPort = {
+            enabled = true;
+            ports = {
+              http = 8080;
+              https = 8443;
+            };
           };
           config = {
             "proxy-body-size" = "100m";
-            # With externalTrafficPolicy: Local, $remote_addr contains the actual client IP
-            # No need for X-Forwarded-For header parsing
           };
           watchIngressWithoutClass = true;
           ingressClassResource = {

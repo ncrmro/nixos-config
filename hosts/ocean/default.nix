@@ -22,10 +22,8 @@
     ./k3s-storage-classes.nix
     ./nfs.nix
     ../common/optional/smb-backup-shares.nix
+    ./nginx.nix
     ../common/kubernetes/default.nix
-    ../common/kubernetes/adguard-home.nix
-    ../common/kubernetes/servarr.nix
-    ../common/kubernetes/home-assistant.nix
     ./vms.nix
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
