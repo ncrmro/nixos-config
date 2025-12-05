@@ -22,5 +22,5 @@ in {
   "secrets/k3s-agent-token.age".publicKeys = adminKeys ++ k3sAgents;
 
   # Cloudflare API token for ACME DNS-01 challenge
-  "secrets/cloudflare-api-token.age".publicKeys = adminKeys ++ [systems.mercury];
+  "secrets/cloudflare-api-token.age".publicKeys = adminKeys ++ [systems.mercury systems.ocean];
 }
