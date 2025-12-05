@@ -27,10 +27,13 @@
     ../common/optional/docker-rootless.nix
     ../common/optional/virt-manager.nix
     ../common/optional/shairport-sync.nix
-    ../common/optional/keystone-desktop.nix
+    outputs.nixosModules.keystone-desktop
+    outputs.nixosModules.bambu-studio
     ./windows11-vm.nix
     ../../modules/nixos/steam.nix
   ];
+
+  programs.bambu-studio.enable = true;
 
   programs.zsh.enable = true;
   users.mutableUsers = true;
@@ -67,6 +70,8 @@
   };
 
   services.openssh.settings.PermitRootLogin = "yes";
+
+  keystone.desktop.enable = true;
 
   services.monitoring-client = {
     enable = true;
