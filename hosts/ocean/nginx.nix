@@ -1,5 +1,5 @@
 {config, ...}: let
-  k8sIngressHttps = "127.0.0.1:8443";
+  k8sIngressHttp = "127.0.0.1:8080";
   # Allow/deny config for Tailscale-only services
   tailscaleOnly = ''
     allow 100.64.0.0/10;
@@ -51,12 +51,8 @@ in {
     forceSSL = true;
     useACMEHost = "wildcard-ncrmro-com";
     locations."/" = {
-      proxyPass = "https://${k8sIngressHttps}";
+      proxyPass = "http://${k8sIngressHttp}";
       proxyWebsockets = true;
-      extraConfig = ''
-        proxy_ssl_server_name on;
-        proxy_set_header Host $host;
-      '';
     };
   };
 
@@ -154,7 +150,7 @@ in {
     useACMEHost = "wildcard-ncrmro-com";
     extraConfig = tailscaleOnly;
     locations."/" = {
-      proxyPass = "http://127.0.0.1:8080";
+      proxyPass = "http://127.0.0.1:8085";
       proxyWebsockets = true;
     };
   };
@@ -187,12 +183,8 @@ in {
     useACMEHost = "wildcard-ncrmro-com";
     extraConfig = tailscaleOnly;
     locations."/" = {
-      proxyPass = "https://${k8sIngressHttps}";
+      proxyPass = "http://${k8sIngressHttp}";
       proxyWebsockets = true;
-      extraConfig = ''
-        proxy_ssl_server_name on;
-        proxy_set_header Host $host;
-      '';
     };
   };
 
@@ -201,12 +193,8 @@ in {
     useACMEHost = "wildcard-ncrmro-com";
     extraConfig = tailscaleOnly;
     locations."/" = {
-      proxyPass = "https://${k8sIngressHttps}";
+      proxyPass = "http://${k8sIngressHttp}";
       proxyWebsockets = true;
-      extraConfig = ''
-        proxy_ssl_server_name on;
-        proxy_set_header Host $host;
-      '';
     };
   };
 
@@ -215,12 +203,8 @@ in {
     useACMEHost = "wildcard-ncrmro-com";
     extraConfig = tailscaleOnly;
     locations."/" = {
-      proxyPass = "https://${k8sIngressHttps}";
+      proxyPass = "http://${k8sIngressHttp}";
       proxyWebsockets = true;
-      extraConfig = ''
-        proxy_ssl_server_name on;
-        proxy_set_header Host $host;
-      '';
     };
   };
 
@@ -229,12 +213,8 @@ in {
     useACMEHost = "wildcard-ncrmro-com";
     extraConfig = tailscaleOnly;
     locations."/" = {
-      proxyPass = "https://${k8sIngressHttps}";
+      proxyPass = "http://${k8sIngressHttp}";
       proxyWebsockets = true;
-      extraConfig = ''
-        proxy_ssl_server_name on;
-        proxy_set_header Host $host;
-      '';
     };
   };
 
@@ -243,12 +223,8 @@ in {
     useACMEHost = "wildcard-ncrmro-com";
     extraConfig = tailscaleOnly;
     locations."/" = {
-      proxyPass = "https://${k8sIngressHttps}";
+      proxyPass = "http://${k8sIngressHttp}";
       proxyWebsockets = true;
-      extraConfig = ''
-        proxy_ssl_server_name on;
-        proxy_set_header Host $host;
-      '';
     };
   };
 
@@ -257,12 +233,8 @@ in {
     useACMEHost = "wildcard-ncrmro-com";
     extraConfig = tailscaleOnly;
     locations."/" = {
-      proxyPass = "https://${k8sIngressHttps}";
+      proxyPass = "http://${k8sIngressHttp}";
       proxyWebsockets = true;
-      extraConfig = ''
-        proxy_ssl_server_name on;
-        proxy_set_header Host $host;
-      '';
     };
   };
 }

@@ -2,8 +2,14 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
-}: {
+}: let
+  pkgs-unstable = import inputs.nixpkgs-unstable {
+    inherit (pkgs) system;
+    config.allowUnfree = true;
+  };
+in {
   # Allow unfree packages needed by sabnzbd (unrar)
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
@@ -12,6 +18,7 @@
 
   services.jellyfin = {
     enable = true;
+    package = pkgs-unstable.jellyfin;
     openFirewall = false;
     group = "media";
   };
@@ -74,8 +81,9 @@
     configFile = pkgs.writeText "sabnzbd.ini" ''
       [misc]
       host = 0.0.0.0
-      port = 8080
-      host_whitelist = sabnzbd.ncrmro.com
+      port = 8085
+      host_whitelist = sabnzbd.ncrmro.com, localhost, 127.0.0.1
+      enable_https = 0
       # inet_exposure = 4 enables Full Web Interface
       # This is safe because access is restricted to Tailscale network only via:
       # 1. Firewall: Port 8080 only allowed on tailscale0 interface (see networking.firewall.interfaces.tailscale0 in this file)
@@ -108,7 +116,7 @@
       8787 # Readarr
       5055 # Jellyseerr
       9091 # Transmission
-      8080 # SABnzbd
+      8085 # SABnzbd
     ];
   };
 

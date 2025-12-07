@@ -25,6 +25,11 @@
           };
           config = {
             "proxy-body-size" = "100m";
+            # Trust X-Forwarded-* headers from NixOS nginx (localhost)
+            "use-forwarded-headers" = "true";
+            "compute-full-forwarded-for" = "true";
+            # Only trust forwarded headers from localhost (NixOS nginx)
+            "proxy-real-ip-cidr" = "127.0.0.0/8";
           };
           watchIngressWithoutClass = true;
           ingressClassResource = {
