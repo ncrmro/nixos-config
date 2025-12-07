@@ -134,6 +134,16 @@ in {
               value = "100.64.0.6";
             }
             {
+              name = "transmission.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
+            {
+              name = "sabnzbd.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
+            {
               name = "git.ncrmro.com";
               type = "A";
               value = "100.64.0.6";

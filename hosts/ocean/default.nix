@@ -68,6 +68,9 @@
 
   networking.nameservers = ["1.1.1.1" "8.8.8.8"];
 
+  boot.kernel.sysctl."fs.inotify.max_user_watches" = 524288;
+  boot.kernel.sysctl."fs.inotify.max_user_instances" = 512;
+
   environment.systemPackages = [
     pkgs.sbctl
     pkgs.htop
