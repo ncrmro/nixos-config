@@ -8,9 +8,7 @@
 } @ args: {
   imports = [
     inputs.disko.nixosModules.disko
-    # inputs.omarchy-nix.nixosModules.default
     inputs.home-manager.nixosModules.default
-    outputs.nixosModules.omarchy-config
     ./disk-config.nix
     ../common/optional/zfs.luks.root.nix
     ./hardware-configuration.nix
@@ -48,8 +46,9 @@
   environment.systemPackages = with pkgs; [
     alsa-utils
     lsof
-    # llama-cpp from upstream flake with ROCm support for AMD GPU acceleration
-    # inputs.llama-cpp.packages.${pkgs.system}.rocm
+    amdgpu_top
+    # llama-cpp from upstream flake with Vulkan support for AMD GPU acceleration
+    inputs.llama-cpp.packages.${pkgs.system}.vulkan
   ];
 
   environment.variables = {
