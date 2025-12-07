@@ -9,6 +9,84 @@
     inherit (pkgs) system;
     config.allowUnfree = true;
   };
+
+  # Base SABnzbd config (non-sensitive settings)
+  sabnzbdBaseConfig = pkgs.writeText "sabnzbd-base.ini" ''
+    [misc]
+    host = 0.0.0.0
+    port = 8085
+    host_whitelist = sabnzbd.ncrmro.com, localhost, 127.0.0.1
+    enable_https = 0
+    api_key = __API_KEY__
+    nzb_key = __NZB_KEY__
+    # inet_exposure = 4 enables Full Web Interface
+    # This is safe because access is restricted to Tailscale network only via:
+    # 1. Firewall: Port 8085 only allowed on tailscale0 interface
+    # 2. nginx reverse proxy with Tailscale IP restrictions
+    inet_exposure = 4
+    download_dir = /ocean/downloads/usenet/incomplete
+    complete_dir = /ocean/downloads/usenet/complete
+    log_dir = /var/lib/sabnzbd/logs
+    nzb_backup_dir = /var/lib/sabnzbd/backup
+    admin_dir = /var/lib/sabnzbd/admin
+    cache_dir = /var/lib/sabnzbd/cache
+    dirscan_dir = /var/lib/sabnzbd/nzb
+
+    [logging]
+    max_log_size = 5242880
+    log_backups = 5
+
+    [categories]
+    [[*]]
+    name = *
+    order = 0
+    dir =
+    newzbin =
+    priority = 0
+
+    [[movies]]
+    name = movies
+    order = 1
+    dir = /ocean/downloads/usenet/complete/movies
+    newzbin =
+    priority = 0
+
+    [[tv]]
+    name = tv
+    order = 2
+    dir = /ocean/downloads/usenet/complete/tv
+    newzbin =
+    priority = 0
+
+    [[music]]
+    name = music
+    order = 3
+    dir = /ocean/downloads/usenet/complete/music
+    newzbin =
+    priority = 0
+
+    [[prowlarr]]
+    name = prowlarr
+    order = 4
+    dir = /ocean/downloads/usenet/complete/prowlarr
+    newzbin =
+    priority = 0
+
+    [schedules]
+    [[1]]
+    action = speedlimit
+    arguments = 10M
+    schedtype = Day
+    hour = 7
+    minute = 0
+
+    [[2]]
+    action = speedlimit
+    arguments = 0
+    schedtype = Day
+    hour = 23
+    minute = 0
+  '';
 in {
   # Allow unfree packages needed by sabnzbd (unrar)
   nixpkgs.config.allowUnfreePredicate = pkg:
@@ -75,31 +153,42 @@ in {
     };
   };
 
+  # SABnzbd server credentials (usenet providers)
+  age.secrets.sabnzbd-servers = {
+    file = ../../../secrets/sabnzbd-servers.age;
+    owner = "sabnzbd";
+    group = "media";
+    mode = "0440";
+  };
+
   services.sabnzbd = {
     enable = true;
     group = "media";
-    configFile = pkgs.writeText "sabnzbd.ini" ''
-      [misc]
-      host = 0.0.0.0
-      port = 8085
-      host_whitelist = sabnzbd.ncrmro.com, localhost, 127.0.0.1
-      enable_https = 0
-      # inet_exposure = 4 enables Full Web Interface
-      # This is safe because access is restricted to Tailscale network only via:
-      # 1. Firewall: Port 8080 only allowed on tailscale0 interface (see networking.firewall.interfaces.tailscale0 in this file)
-      # 2. Ingress: nginx.ingress.kubernetes.io/whitelist-source-range in hosts/common/kubernetes/servarr.nix
-      inet_exposure = 4
-      download_dir = /ocean/downloads/usenet/incomplete
-      complete_dir = /ocean/downloads/usenet/complete
-      log_dir = /var/lib/sabnzbd/logs
-      nzb_backup_dir = /var/lib/sabnzbd/backup
-      admin_dir = /var/lib/sabnzbd/admin
-      cache_dir = /var/lib/sabnzbd/cache
-      dirscan_dir = /var/lib/sabnzbd/nzb
+  };
 
-      [logging]
-      max_log_size = 5242880
-      log_backups = 5
+  # Combine base config with encrypted server credentials before sabnzbd starts
+  systemd.services.sabnzbd = {
+    preStart = lib.mkBefore ''
+      # Start with base config
+      cp ${sabnzbdBaseConfig} /var/lib/sabnzbd/sabnzbd.ini
+
+      # Read API keys from secret file and substitute placeholders
+      # Handles both "key=value" and "key = value" formats
+      API_KEY=$(${pkgs.gnugrep}/bin/grep -m1 -E '^api_key\s*=' ${config.age.secrets.sabnzbd-servers.path} | ${pkgs.gnused}/bin/sed 's/^api_key\s*=\s*//')
+      NZB_KEY=$(${pkgs.gnugrep}/bin/grep -m1 -E '^nzb_key\s*=' ${config.age.secrets.sabnzbd-servers.path} | ${pkgs.gnused}/bin/sed 's/^nzb_key\s*=\s*//')
+
+      echo "DEBUG: API_KEY='$API_KEY' NZB_KEY='$NZB_KEY'" >> /var/lib/sabnzbd/prestart.log
+      echo "DEBUG: Secret file contents:" >> /var/lib/sabnzbd/prestart.log
+      head -5 ${config.age.secrets.sabnzbd-servers.path} >> /var/lib/sabnzbd/prestart.log
+
+      ${pkgs.gnused}/bin/sed -i "s/__API_KEY__/$API_KEY/" /var/lib/sabnzbd/sabnzbd.ini
+      ${pkgs.gnused}/bin/sed -i "s/__NZB_KEY__/$NZB_KEY/" /var/lib/sabnzbd/sabnzbd.ini
+
+      # Append [servers] section from secret
+      ${pkgs.gnused}/bin/sed -n '/^\[servers\]/,$p' ${config.age.secrets.sabnzbd-servers.path} >> /var/lib/sabnzbd/sabnzbd.ini
+
+      chown sabnzbd:media /var/lib/sabnzbd/sabnzbd.ini
+      chmod 0600 /var/lib/sabnzbd/sabnzbd.ini
     '';
   };
 

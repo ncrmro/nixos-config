@@ -23,4 +23,7 @@ in {
 
   # Cloudflare API token for ACME DNS-01 challenge
   "secrets/cloudflare-api-token.age".publicKeys = adminKeys ++ [systems.mercury systems.ocean];
+
+  # SABnzbd usenet server configuration (contains credentials)
+  "secrets/sabnzbd-servers.age".publicKeys = adminKeys ++ [systems.ocean];
 }
