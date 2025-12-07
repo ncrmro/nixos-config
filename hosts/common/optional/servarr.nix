@@ -19,6 +19,7 @@
     enable_https = 0
     api_key = __API_KEY__
     nzb_key = __NZB_KEY__
+    schedlines = 1 0 7 1234567 speedlimit 10M, 1 0 23 1234567 speedlimit 0
     # inet_exposure = 4 enables Full Web Interface
     # This is safe because access is restricted to Tailscale network only via:
     # 1. Firewall: Port 8085 only allowed on tailscale0 interface
@@ -71,21 +72,6 @@
     dir = /ocean/downloads/usenet/complete/prowlarr
     newzbin =
     priority = 0
-
-    [schedules]
-    [[1]]
-    action = speedlimit
-    arguments = 10M
-    schedtype = Day
-    hour = 7
-    minute = 0
-
-    [[2]]
-    action = speedlimit
-    arguments = 0
-    schedtype = Day
-    hour = 23
-    minute = 0
   '';
 in {
   # Allow unfree packages needed by sabnzbd (unrar)
