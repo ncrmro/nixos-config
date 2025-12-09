@@ -16,7 +16,7 @@
   home.sessionVariables.PATH = "${config.home.profileDirectory}/bin:$PATH";
 
   # Also ensure it's in the shell initialization for interactive shells
-  programs.zsh.initExtra = lib.mkIf config.programs.zsh.enable ''
+  programs.zsh.initContent = lib.mkIf config.programs.zsh.enable ''
     export PATH="${config.home.profileDirectory}/bin:$PATH"
   '';
 

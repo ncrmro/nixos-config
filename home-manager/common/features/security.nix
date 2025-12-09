@@ -242,7 +242,7 @@
     ];
 
     # Add shell integration for session restoration
-    programs.zsh.initExtra = lib.mkIf (config.programs.gnome-keyring-integration.passwordManagers.bitwarden || config.programs.gnome-keyring-integration.passwordManagers.onePassword) ''
+    programs.zsh.initContent = lib.mkIf (config.programs.gnome-keyring-integration.passwordManagers.bitwarden || config.programs.gnome-keyring-integration.passwordManagers.onePassword) ''
       # Load password manager sessions from keyring if available
       ${lib.optionalString config.programs.gnome-keyring-integration.passwordManagers.bitwarden ''
         if [ -f "$HOME/.bitwarden-session" ]; then
