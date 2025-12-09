@@ -1,0 +1,80 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
+  cfg = config.keystone.desktop.hyprland;
+in {
+  imports = [
+    ./appearance.nix
+    ./autostart.nix
+    ./bindings.nix
+    ./environment.nix
+    ./hypridle.nix
+    ./hyprlock.nix
+    ./hyprpaper.nix
+    ./hyprsunset.nix
+    ./input.nix
+    ./layout.nix
+  ];
+
+  options.keystone.desktop.hyprland = {
+    enable = mkEnableOption "Hyprland window manager configuration";
+
+    monitors = mkOption {
+      type = types.listOf types.str;
+      default = [",preferred,auto,1"];
+      description = "Monitor configuration strings for Hyprland";
+    };
+
+    terminal = mkOption {
+      type = types.str;
+      default = "uwsm app -- ghostty";
+      description = "Default terminal application";
+    };
+
+    fileManager = mkOption {
+      type = types.str;
+      default = "uwsm app -- nautilus --new-window";
+      description = "Default file manager application";
+    };
+
+    browser = mkOption {
+      type = types.str;
+      default = "uwsm app -- chromium --new-window --ozone-platform=wayland";
+      description = "Default browser application";
+    };
+  };
+
+  config = mkIf cfg.enable {
+    wayland.windowManager.hyprland = {
+      enable = true;
+
+      settings = {
+        # Default applications
+        "$terminal" = mkDefault cfg.terminal;
+        "$fileManager" = mkDefault cfg.fileManager;
+        "$browser" = mkDefault cfg.browser;
+
+        # Monitor configuration
+        monitor = mkDefault cfg.monitors;
+      };
+    };
+
+    # Supporting packages
+    home.packages = with pkgs; [
+      wofi
+      waybar
+      libnotify
+      wl-clipboard
+      wl-clip-persist
+      clipse
+      grim
+      slurp
+      brightnessctl
+      playerctl
+    ];
+  };
+}

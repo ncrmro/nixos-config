@@ -8,7 +8,11 @@ with lib; let
   cfg = config.keystone.desktop;
 in {
   imports = [
-    ./hyprland.nix
+    ./components
+    ./hyprland
+    ./scripts
+    ./theming
+    ../../terminal
   ];
 
   options.keystone.desktop = {
@@ -16,6 +20,9 @@ in {
   };
 
   config = mkIf cfg.enable {
+    # Desktop implies terminal
+    keystone.terminal.enable = true;
+
     home.packages = with pkgs; [
       # Core utilities
     ];

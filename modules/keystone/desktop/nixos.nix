@@ -9,11 +9,121 @@ with lib; let
 in {
   options.keystone.desktop = {
     enable = mkEnableOption "Keystone Desktop - Core desktop packages and utilities";
+
+    hyprland = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable Hyprland window manager";
+      };
+    };
+
+    greetd = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable Greetd display manager";
+      };
+    };
+
+    audio = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable Pipewire audio stack";
+      };
+    };
+
+    bluetooth = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable Bluetooth support";
+      };
+    };
   };
 
   config = mkIf cfg.enable {
+    # Hyprland with UWSM
+    programs.hyprland = mkIf cfg.hyprland.enable {
+      enable = mkDefault true;
+      withUWSM = mkDefault true;
+      portalPackage = mkDefault pkgs.xdg-desktop-portal-hyprland;
+    };
+
+    # Greetd display manager
+    services.greetd = mkIf cfg.greetd.enable {
+      enable = mkDefault true;
+      settings.default_session.command = mkDefault "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd 'uwsm start -S -F Hyprland'";
+    };
+
+    # Pipewire audio stack
+    security.rtkit.enable = mkIf cfg.audio.enable (mkDefault true);
+    services.pulseaudio.enable = mkIf cfg.audio.enable (mkDefault false);
+    services.pipewire = mkIf cfg.audio.enable {
+      enable = mkDefault true;
+      alsa.enable = mkDefault true;
+      pulse.enable = mkDefault true;
+      jack.enable = mkDefault true;
+    };
+
+    # Bluetooth
+    hardware.bluetooth.enable = mkIf cfg.bluetooth.enable (mkDefault true);
+    services.blueman.enable = mkIf cfg.bluetooth.enable (mkDefault true);
+
+    # Fonts
+    fonts.packages = with pkgs; [
+      noto-fonts
+      noto-fonts-emoji
+      nerd-fonts.jetbrains-mono
+      nerd-fonts.caskaydia-mono
+    ];
+
+    # System packages for desktop environment
     environment.systemPackages = with pkgs; [
+      # Screen recording
       gpu-screen-recorder
+
+      # File management
+      nautilus
+      file-roller
+
+      # System utilities
+      pavucontrol
+      networkmanagerapplet
+      blueberry
+
+      # XDG portals and desktop integration
+      xdg-utils
+      xdg-user-dirs
+
+      # Polkit agent
+      hyprpolkitagent
+
+      # Cursor themes
+      adwaita-icon-theme
+
+      # Additional Hyprland tools
+      hyprsunset
+      hyprlock
+      hypridle
+      hyprpaper
+    ];
+
+    # Enable polkit
+    security.polkit.enable = mkDefault true;
+
+    # XDG portal configuration
+    xdg.portal = {
+      enable = mkDefault true;
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-gtk
+      ];
+    };
+
+    # This allows shell scripts to resolve /bin/bash
+    systemd.tmpfiles.rules = [
+      "L+ /bin/bash - - - - ${pkgs.bash}/bin/bash"
     ];
   };
 }
