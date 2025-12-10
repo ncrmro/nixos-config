@@ -18,6 +18,11 @@ in {
       '';
     };
 
+    timeMachinePasswordFile = lib.mkOption {
+      type = lib.types.path;
+      description = "Path to agenix-encrypted file containing the Time Machine samba password";
+    };
+
     timeMachineQuota = lib.mkOption {
       type = lib.types.str;
       default = "500G";
@@ -70,9 +75,9 @@ in {
         "timemachine" = {
           # Convert ZFS dataset path to filesystem mount point by prepending "/"
           "path" = "/${cfg.backupsRoot}/timemachine";
-          "valid users" = "backup";
-          "force user" = "backup";
-          "force group" = "backup";
+          "valid users" = "timemachine";
+          "force user" = "timemachine";
+          "force group" = "timemachine";
           "read only" = "no";
           "browseable" = "yes";
           "create mask" = "0600";
@@ -173,7 +178,7 @@ in {
       '';
     };
 
-    # Create backup user and group
+    # Create backup user and group for Windows backups
     users.groups.backup = {};
     users.users.backup = {
       isSystemUser = true;
@@ -182,41 +187,51 @@ in {
       createHome = false;
     };
 
+    # Create timemachine user and group for Time Machine backups
+    users.groups.timemachine = {};
+    users.users.timemachine = {
+      isSystemUser = true;
+      group = "timemachine";
+      home = "/${cfg.backupsRoot}/timemachine";
+      createHome = false;
+    };
+
     # Ensure backup directories exist with correct permissions
     systemd.tmpfiles.rules = [
       "d /${cfg.backupsRoot} 0755 backup backup -"
-      "d /${cfg.backupsRoot}/timemachine 0700 backup backup -"
+      "d /${cfg.backupsRoot}/timemachine 0700 timemachine timemachine -"
       "d /${cfg.backupsRoot}/windows 0755 backup backup -"
     ];
 
-    # Set up Samba user with generated password for headless operation
-    system.activationScripts.samba_user_setup = ''
-      if [ ! -f /var/lib/samba/private/smbpasswd ]; then
-        echo "=== Setting up Samba backup user for headless operation ==="
+    # Agenix secret for Time Machine password
+    age.secrets.samba-timemachine-password = {
+      file = cfg.timeMachinePasswordFile;
+      owner = "root";
+      group = "root";
+      mode = "0400";
+    };
 
-        # Generate a random password
-        SAMBA_PASSWORD=$(${pkgs.openssl}/bin/openssl rand -base64 32)
+    # Set up Samba timemachine user with password from agenix secret
+    systemd.services.samba-timemachine-user = {
+      description = "Set up Samba timemachine user";
+      wantedBy = ["multi-user.target"];
+      before = ["samba-smbd.service"];
+      after = ["network.target"];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+      script = ''
+        # Read password from agenix secret (strip any trailing newline)
+        TIMEMACHINE_PASSWORD=$(tr -d '\n' < ${config.age.secrets.samba-timemachine-password.path})
 
-        # Create the backup user in Samba with the generated password
-        echo -e "$SAMBA_PASSWORD\n$SAMBA_PASSWORD" | ${pkgs.samba}/bin/smbpasswd -a -s backup
+        # Create or update the timemachine samba user
+        echo "Setting up Samba timemachine user..."
+        (echo "$TIMEMACHINE_PASSWORD"; echo "$TIMEMACHINE_PASSWORD") | ${pkgs.samba}/bin/smbpasswd -a -s timemachine
 
-        # Save the password to a secure location
-        echo "backup:$SAMBA_PASSWORD" > /etc/samba/backup-credentials
-        chmod 600 /etc/samba/backup-credentials
-        chown root:root /etc/samba/backup-credentials
-
-        echo "=== Samba Backup User Setup Complete ==="
-        echo "Username: backup"
-        echo "Password saved to: /etc/samba/backup-credentials"
-        echo ""
-        echo "To view the password later, run:"
-        echo "  sudo cat /etc/samba/backup-credentials"
-        echo ""
-        echo "SMB shares are now accessible at:"
-        echo "  Time Machine: smb://$(hostname)/timemachine"
-        echo "  Windows Backup: smb://$(hostname)/windows-backup"
-        echo "======================================"
-      fi
-    '';
+        echo "Samba timemachine user configured"
+        echo "Time Machine share: smb://$(hostname)/timemachine (user: timemachine)"
+      '';
+    };
   };
 }

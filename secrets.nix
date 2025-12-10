@@ -26,4 +26,7 @@ in {
 
   # SABnzbd usenet server configuration (contains credentials)
   "secrets/sabnzbd-servers.age".publicKeys = adminKeys ++ [systems.ocean];
+
+  # Samba Time Machine password
+  "secrets/samba-timemachine-password.age".publicKeys = adminKeys ++ [systems.ocean];
 }

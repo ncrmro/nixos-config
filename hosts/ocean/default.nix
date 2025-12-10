@@ -43,6 +43,7 @@
   services.smb-backup-shares = {
     enable = true;
     backupsRoot = "ocean/backups";
+    timeMachinePasswordFile = ../../secrets/samba-timemachine-password.age;
     timeMachineQuota = "2T";
     windowsBackupQuota = "1T";
   };
