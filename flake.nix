@@ -51,6 +51,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Omarchy themes (original arch version)
+    omarchy = {
+      url = "github:basecamp/omarchy";
+      flake = false;
+    };
+
     # Helix editor themes
     kinda-nvim-hx = {
       url = "github:strash/kinda_nvim.hx";
@@ -125,13 +131,20 @@
         };
       };
 
-      # Test VM configuration
+      # Test VM configuration - Desktop testing VM
       test-vm = nixpkgs.lib.nixosSystem {
         modules = [
-          disko.nixosModules.disko
+          home-manager.nixosModules.default
           {
-            disko.devices.disk.disk1.device = "/dev/disk/by-id/virtio-virtio-rando123";
             boot.initrd.systemd.emergencyAccess = true;
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.extraSpecialArgs = {
+              inherit inputs;
+              outputs = self;
+            };
+            home-manager.users.ncrmro = import ./home-manager/ncrmro/test-vm.nix;
           }
           ./hosts/test-vm
         ];

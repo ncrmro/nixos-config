@@ -1,29 +1,46 @@
 {
+  inputs,
+  outputs,
   modulesPath,
   lib,
   pkgs,
   ...
-} @ args: {
+}: {
   imports = [
-    (modulesPath + "/installer/scan/not-detected.nix")
-    ../common/global/disk-config.nix
+    (modulesPath + "/profiles/qemu-guest.nix")
     ./hardware-configuration.nix
+    ../common/global
+    ../../modules/users/ncrmro.nix
+    outputs.nixosModules.keystone-desktop
   ];
 
+  # Make users deterministic for test VM
+  users.mutableUsers = false;
+
+  # Set simple password for testing
+  users.users.ncrmro.initialPassword = "test";
+
+  # Set root password too for emergency access
+  users.users.root.initialPassword = "test";
+
+  # Enable keystone desktop
+  keystone.desktop.enable = true;
+
+  # Auto-login to Hyprland
+  services.greetd.settings.initial_session = {
+    command = "Hyprland";
+    user = "ncrmro";
+  };
+
+  # Keep SSH for debugging
   services.openssh.enable = true;
 
-  environment.systemPackages = map lib.lowPrio [
-    pkgs.curl
-    pkgs.gitMinimal
+  # Basic packages
+  environment.systemPackages = with pkgs; [
+    curl
+    git
   ];
 
-  users.users.root.openssh.authorizedKeys.keys =
-    [
-      # change this to your ssh key
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyrDBVcGK+pUZOTUA7MLoD5vYK/kaPF6TNNyoDmwNl2 ncrmro@ncrmro-laptop-fw7k"
-    ]
-    ++ (args.extraPublicKeys or []); # this is used for unit-testing this module and can be removed if not needed
   networking.hostId = "00000000";
-
   system.stateVersion = "24.05";
 }

@@ -1,10 +1,12 @@
 {
   inputs,
+  outputs,
   pkgs,
   ...
 }: {
   imports = [
     inputs.disko.nixosModules.disko
+    inputs.home-manager.nixosModules.default
     ./hardware-configuration.nix
     ./disk-config.nix
     ../common/optional/zfs.luks.root.nix
@@ -28,6 +30,16 @@
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
   ];
+
+  # Home Manager configuration
+  programs.zsh.enable = true;
+  users.users.ncrmro.shell = pkgs.zsh;
+
+  home-manager.useGlobalPkgs = true;
+  home-manager.useUserPackages = true;
+  home-manager.backupFileExtension = "backup";
+  home-manager.extraSpecialArgs = {inherit inputs outputs;};
+  home-manager.users.ncrmro = import ../../home-manager/ncrmro/ocean.nix;
 
   environment.variables = {
     TERM = "xterm-256color"; # Or your preferred terminal type
