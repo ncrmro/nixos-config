@@ -40,6 +40,12 @@ in {
       default = ["100.64.0.0/10" "192.168.1.0/24" "127.0.0.1"];
       description = "List of networks allowed to access SMB shares";
     };
+
+    netbiosName = lib.mkOption {
+      type = lib.types.str;
+      default = config.networking.hostName;
+      description = "NetBIOS name for Samba server. Defaults to system hostname.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -53,7 +59,7 @@ in {
         global = {
           "workgroup" = "WORKGROUP";
           "server string" = "NixOS NAS";
-          "netbios name" = "nixos-nas";
+          "netbios name" = cfg.netbiosName;
           "security" = "user";
           "hosts allow" = lib.concatStringsSep " " cfg.allowedNetworks;
           "hosts deny" = "0.0.0.0/0";
