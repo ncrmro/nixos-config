@@ -12,6 +12,7 @@
     ../common/optional/zfs.luks.root.nix
     ./zpool.ocean.noblock.nix
     ./zfs.users.nix
+    ./zfs.local-replication.nix
     ../common/global
     ../common/optional/tailscale.node.nix
     ../common/optional/secureboot.nix
