@@ -32,6 +32,14 @@
   systemd.services.syncoid-local-backup = {
     description = "Sync rpool snapshots to ocean pool local backup";
 
+    # Don't start on boot, only via timer
+    wantedBy = lib.mkForce [];
+
+    # Don't restart during nixos-rebuild (prevents blocking)
+    unitConfig = {
+      X-RestartIfChanged = false;
+    };
+
     # Dependencies - wait for ocean pool to be imported
     wants = ["import-ocean.service"];
     after = ["import-ocean.service"];
