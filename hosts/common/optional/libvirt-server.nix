@@ -1,13 +1,15 @@
 # Libvirt server for hosting VMs with remote virt-manager access
 # Connect from workstation/laptop using: qemu+ssh://ncrmro@ocean/system
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   ovmfPkg = pkgs.OVMF.override {
     secureBoot = true;
     tpmSupport = true;
     msVarsTemplate = true;
   };
   qemuPkg = pkgs.qemu_kvm;
-in {
+in
+{
   virtualisation.libvirtd = {
     enable = true;
     qemu = {
@@ -16,7 +18,7 @@ in {
       swtpm.enable = true;
       ovmf = {
         enable = true;
-        packages = [ovmfPkg.fd];
+        packages = [ ovmfPkg.fd ];
       };
     };
   };
@@ -32,7 +34,7 @@ in {
     });
   '';
 
-  users.users.ncrmro.extraGroups = ["libvirtd"];
+  users.users.ncrmro.extraGroups = [ "libvirtd" ];
 
   # Directories and firmware symlinks
   systemd.tmpfiles.rules = [
@@ -52,6 +54,4 @@ in {
     virt-viewer
     libguestfs
   ];
-
-  networking.firewall.checkReversePath = false;
 }
