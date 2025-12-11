@@ -3,9 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.services.monitoring-client;
-in {
+in
+{
   options.services.monitoring-client = {
     enable = lib.mkEnableOption "monitoring client with Prometheus exporters";
 
@@ -23,9 +25,17 @@ in {
     };
 
     # Ensure node exporter waits for tailscale to be ready
+    # Don't block nixos-rebuild if it fails to start
     systemd.services.prometheus-node-exporter = {
-      after = ["tailscaled.service"];
-      wants = ["tailscaled.service"];
+      after = [ "tailscaled.service" ];
+      wants = [ "tailscaled.service" ];
+      serviceConfig = {
+        Restart = "on-failure";
+        RestartSec = "5s";
+      };
+      unitConfig = {
+        StartLimitIntervalSec = 0;
+      };
     };
   };
 }
