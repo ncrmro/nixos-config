@@ -2,11 +2,26 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 with lib; let
   cfg = config.keystone.desktop;
+  themeDir = "${config.xdg.configHome}/keystone/current/theme";
+
+  # Read and substitute the walker style.css template
+  walkerStyleCss = builtins.replaceStrings
+    ["\${themeDir}"]
+    [themeDir]
+    (builtins.readFile ./walker-style.css);
+
+  # Read the layout XML
+  walkerLayoutXml = builtins.readFile ./walker-layout.xml;
 in {
+  imports = [
+    inputs.walker.homeManagerModules.default
+  ];
+
   config = mkIf cfg.enable {
     # Wofi as the application launcher
     programs.wofi = {
@@ -26,55 +41,70 @@ in {
       '';
     };
 
-    # Walker package available but not as a home-manager program module
-    home.packages = with pkgs; [
-      walker
-    ];
+    # Walker launcher using the official home-manager module
+    programs.walker = {
+      enable = mkDefault true;
+      runAsService = true;
 
-    # Walker configuration file
-    xdg.configFile."walker/config.toml".text = mkDefault ''
-      force_keyboard_focus = true
-      selection_wrap = true
-      theme = "keystone"
-      additional_theme_location = "${config.xdg.configHome}/keystone/current/theme/walker/"
-      hide_action_hints = true
+      config = {
+        force_keyboard_focus = true;
+        selection_wrap = true;
+        theme = "keystone";
+        hide_action_hints = true;
 
-      [placeholders]
-      "default" = { input = " Search...", list = "No Results" }
+        placeholders = {
+          default = {
+            input = " Search...";
+            list = "No Results";
+          };
+        };
 
-      [keybinds]
-      quick_activate = []
+        keybinds = {
+          quick_activate = [];
+        };
 
-      [providers]
-      max_results = 256
-      default = [
-        "desktopapplications",
-        "websearch",
-      ]
+        providers = {
+          max_results = 256;
+          default = [
+            "desktopapplications"
+            "websearch"
+          ];
+          prefixes = [
+            {
+              prefix = "/";
+              provider = "providerlist";
+            }
+            {
+              prefix = ".";
+              provider = "files";
+            }
+            {
+              prefix = ":";
+              provider = "symbols";
+            }
+            {
+              prefix = "=";
+              provider = "calc";
+            }
+            {
+              prefix = "@";
+              provider = "websearch";
+            }
+            {
+              prefix = "$";
+              provider = "clipboard";
+            }
+          ];
+        };
+      };
 
-      [[providers.prefixes]]
-      prefix = "/"
-      provider = "providerlist"
-
-      [[providers.prefixes]]
-      prefix = "."
-      provider = "files"
-
-      [[providers.prefixes]]
-      prefix = ":"
-      provider = "symbols"
-
-      [[providers.prefixes]]
-      prefix = "="
-      provider = "calc"
-
-      [[providers.prefixes]]
-      prefix = "@"
-      provider = "websearch"
-
-      [[providers.prefixes]]
-      prefix = "$"
-      provider = "clipboard"
-    '';
+      # Define the keystone theme
+      themes.keystone = {
+        style = walkerStyleCss;
+        layouts = {
+          layout = walkerLayoutXml;
+        };
+      };
+    };
   };
 }

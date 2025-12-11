@@ -30,8 +30,6 @@
     };
 
     # Additional tools
-    alejandra.url = "github:kamadorueda/alejandra/4.0.0";
-    alejandra.inputs.nixpkgs.follows = "nixpkgs";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
@@ -74,6 +72,12 @@
 
     # Declarative Flatpak management
     nix-flatpak.url = "github:gmodena/nix-flatpak";
+
+    # Walker launcher
+    walker = {
+      url = "github:abenz1267/walker";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
   };
 
   outputs = inputs @ {
@@ -106,9 +110,9 @@
         overlays = overlays;
       };
   in {
-    # Code formatter
-    formatter.x86_64-linux = (pkgsForSystem "x86_64-linux").alejandra;
-    formatter.aarch64-darwin = (pkgsForSystem "aarch64-darwin").alejandra;
+    # Code formatter (official NixOS formatter)
+    formatter.x86_64-linux = (pkgsForSystem "x86_64-linux").nixfmt-rfc-style;
+    formatter.aarch64-darwin = (pkgsForSystem "aarch64-darwin").nixfmt-rfc-style;
 
     # Import NixOS and Home Manager modules
     nixosModules = import ./modules/nixos;
