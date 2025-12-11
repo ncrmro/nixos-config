@@ -48,6 +48,12 @@ in {
       default = "uwsm app -- chromium --new-window --ozone-platform=wayland";
       description = "Default browser application";
     };
+
+    scale = mkOption {
+      type = types.int;
+      default = 2;
+      description = "Display scale factor (1 for 1x displays, 2 for 2x/HiDPI displays)";
+    };
   };
 
   config = mkIf cfg.enable {

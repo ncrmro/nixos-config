@@ -22,6 +22,9 @@ in {
       env = mkDefault (
         (optionals hasNvidiaDrivers nvidiaEnv)
         ++ [
+          # Display scaling
+          "GDK_SCALE,${toString cfg.scale}"
+
           # Cursor size
           "XCURSOR_SIZE,24"
           "HYPRCURSOR_SIZE,24"
