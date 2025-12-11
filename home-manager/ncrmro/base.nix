@@ -5,7 +5,8 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   imports = [
     outputs.homeManagerModules.keystone-desktop
     ../common/global
@@ -17,6 +18,12 @@
     ../common/optional/mcp/mcp-language-server.nix
     ../common/optional/mcp/playwright.nix
     inputs.nix-index-database.homeModules.nix-index
+  ];
+
+  home.packages = with pkgs; [
+    nixfmt-rfc-style
+    google-chrome
+    zig
   ];
 
   # Keystone desktop includes terminal
@@ -40,11 +47,6 @@
       # "tile, match:title .*YouTube Music.*"
     ];
   };
-
-  home.packages = with pkgs; [
-    google-chrome
-    zig
-  ];
 
   programs.git.extraConfig = {
     credential.helper = "store";
