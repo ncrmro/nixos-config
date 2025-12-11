@@ -46,7 +46,7 @@ in {
           # Font settings
           font-family = "JetBrainsMono Nerd Font";
           font-style = "Regular";
-          font-size = 9;
+          font-size = 12;
 
           # Cursor settings
           cursor-style = "block";
