@@ -3,9 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.services.alloy-client;
-in {
+in
+{
   options.services.alloy-client = {
     enable = lib.mkEnableOption "Grafana Alloy log shipping client";
 
@@ -23,7 +25,7 @@ in {
 
     extraLabels = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
-      default = {};
+      default = { };
       description = "Additional static labels to attach to logs";
       example = {
         environment = "production";
@@ -43,79 +45,87 @@ in {
       # ];
     };
 
+    # Reduce shutdown timeout from default 1m30s to 10s
+    systemd.services.alloy.serviceConfig.TimeoutStopSec = 10;
+
     # Create Alloy configuration
-    environment.etc."alloy/config.alloy".text = let
-      allLabels = {host = cfg.hostLabel;} // cfg.extraLabels;
-      labelsList = lib.mapAttrsToList (k: v: "            ${k} = \"${v}\"") allLabels;
-      labelsStr = lib.concatStringsSep ",\n" labelsList + ",";
-      staticLabels = ''
-                stage.static_labels {
-                  values = {
-        ${labelsStr}
-                  }
-                }'';
-    in ''
-      // System journal logs collection
-      loki.source.journal "system_logs" {
-        format_as_json = true
-        forward_to     = [loki.process.system.receiver]
-        labels         = {
-          job = "systemd-journal",
-          host = "${cfg.hostLabel}",
+    environment.etc."alloy/config.alloy".text =
+      let
+        allLabels = {
+          host = cfg.hostLabel;
         }
-      }
-
-      // Process system logs
-      loki.process "system" {
-        forward_to = [loki.write.default.receiver]
-
-        ${staticLabels}
-
-        // Extract log level from journal priority
-        stage.json {
-          expressions = {
-            priority = "PRIORITY",
-            unit = "_SYSTEMD_UNIT",
-            message = "MESSAGE",
+        // cfg.extraLabels;
+        labelsList = lib.mapAttrsToList (k: v: "            ${k} = \"${v}\"") allLabels;
+        labelsStr = lib.concatStringsSep ",\n" labelsList + ",";
+        staticLabels = ''
+                  stage.static_labels {
+                    values = {
+          ${labelsStr}
+                    }
+                  }'';
+      in
+      ''
+        // System journal logs collection
+        loki.source.journal "system_logs" {
+          format_as_json = true
+          forward_to     = [loki.process.system.receiver]
+          labels         = {
+            job = "systemd-journal",
+            host = "${cfg.hostLabel}",
           }
         }
 
-        // Map journal priority to log level
-        stage.template {
-          source = "priority"
-          template = "{{ if eq . \"0\" }}emergency{{ else if eq . \"1\" }}alert{{ else if eq . \"2\" }}critical{{ else if eq . \"3\" }}error{{ else if eq . \"4\" }}warning{{ else if eq . \"5\" }}notice{{ else if eq . \"6\" }}info{{ else }}debug{{ end }}"
-        }
+        // Process system logs
+        loki.process "system" {
+          forward_to = [loki.write.default.receiver]
 
-        stage.labels {
-          values = {
-            level = "priority",
-            unit = "unit",
+          ${staticLabels}
+
+          // Extract log level from journal priority
+          stage.json {
+            expressions = {
+              priority = "PRIORITY",
+              unit = "_SYSTEMD_UNIT",
+              message = "MESSAGE",
+            }
+          }
+
+          // Map journal priority to log level
+          stage.template {
+            source = "priority"
+            template = "{{ if eq . \"0\" }}emergency{{ else if eq . \"1\" }}alert{{ else if eq . \"2\" }}critical{{ else if eq . \"3\" }}error{{ else if eq . \"4\" }}warning{{ else if eq . \"5\" }}notice{{ else if eq . \"6\" }}info{{ else }}debug{{ end }}"
+          }
+
+          stage.labels {
+            values = {
+              level = "priority",
+              unit = "unit",
+            }
+          }
+
+          // Use MESSAGE as the log line content
+          stage.output {
+            source = "message"
           }
         }
 
-        // Use MESSAGE as the log line content
-        stage.output {
-          source = "message"
-        }
-      }
+        // Write to remote Loki
+        loki.write "default" {
+          endpoint {
+            url = "${cfg.lokiEndpoint}"
 
-      // Write to remote Loki
-      loki.write "default" {
-        endpoint {
-          url = "${cfg.lokiEndpoint}"
+            // Optional: Add authentication if needed
+            // basic_auth {
+            //   username = "user"
+            //   password = "pass"
+            // }
+          }
 
-          // Optional: Add authentication if needed
-          // basic_auth {
-          //   username = "user"
-          //   password = "pass"
-          // }
+          // Batch configuration for efficiency
+          external_labels = {
+            cluster = "nixos-home",
+          }
         }
-
-        // Batch configuration for efficiency
-        external_labels = {
-          cluster = "nixos-home",
-        }
-      }
-    '';
+      '';
   };
 }
