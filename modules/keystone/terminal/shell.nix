@@ -79,6 +79,10 @@ in {
     };
 
     home.packages = with pkgs; [
+      # GNU Make - Build automation tool
+      # https://www.gnu.org/software/make/
+      gnumake
+
       # Lazygit - Simple terminal UI for git commands
       # https://github.com/jesseduffield/lazygit
       lazygit
