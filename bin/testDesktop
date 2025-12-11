@@ -31,4 +31,4 @@ warn "Fullscreen: Press Ctrl+Alt+F"
 echo ""
 
 # Run the VM
-exec "${RESULT_LINK}/bin/run-${VM_NAME}-vm"
+exec "${RESULT_LINK}/bin/run-nixos-vm"

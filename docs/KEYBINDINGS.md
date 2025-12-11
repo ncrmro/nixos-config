@@ -267,13 +267,40 @@ keybinds = {
 - **List default keybindings**: Run `ghostty +list-keybinds --default`
 
 ### Current Configuration
-- Using defaults (no custom keybindings configured)
-- **Strategy**: Not using Ghostty tabs; Zellij handles all multiplexing
+- Location: `/home/ncrmro/nixos-config/home-manager/common/features/keybindings.nix`
+- **Strategy**: Ghostty acts as simple terminal emulator; Zellij handles all multiplexing (tabs AND panes)
+
+### Tab Navigation
+- `Ctrl+Shift+W` = Previous tab
+- `Ctrl+Shift+E` = New tab (overrides default split binding)
+- `Ctrl+Shift+R` = Next tab
+- `Ctrl+Shift+C` = Close tab
+
+### Pane/Split Management
+**Status**: ❌ **DISABLED** - All pane management handled by Zellij
+
+**Unbinded Ghostty Split Keybindings:**
+- `Ctrl+Shift+O` - Would conflict with Zellij session mode (unbinded)
+- `Ctrl+Alt+Up/Down/Left/Right` - Pane navigation (unbinded)
+
+**Reason**: Avoiding conflicts with Zellij keybindings and maintaining single source of multiplexing control.
+
+### Keybinding Conflicts Resolved
+
+#### Conflict 1: Ctrl+Shift+O
+- **Ghostty Default**: `new_split:right` (vertical split)
+- **Zellij Custom**: Session mode (moved from Ctrl+O)
+- **Resolution**: Ghostty split unbinded, Zellij session mode takes priority
+
+#### Conflict 2: Ctrl+Shift+E
+- **Ghostty Default**: `new_split:down` (horizontal split)
+- **Ghostty Custom**: `new_tab` (our configuration)
+- **Resolution**: Custom binding overrides default split behavior
 
 ### Proposed Keybindings
 
 #### Tab/Pane Management
-<!-- Create, close, navigate tabs/splits -->
+✅ **IMPLEMENTED** - Tab navigation configured, splits disabled (Zellij handles all panes)
 
 #### Font Size Controls
 <!-- Increase, decrease, reset -->
@@ -367,11 +394,81 @@ programs.zellij = {
 };
 ```
 
-#### Pane Navigation
+#### Pane Navigation & Switching
 
-Use default Zellij pane navigation or configure custom:
-- `Ctrl+G → h/j/k/l` (default Zellij pattern)
-- Or customize to use Alt+J/K/I/L for panes (separate from Hyprland's Super+JKIL)
+Zellij provides multiple methods for pane navigation. For the fastest workflow, use the **Shared Keybindings** (Method 2) which work directly in normal mode without entering pane mode first.
+
+**Method 1: Pane Mode (Modal Navigation)**
+
+Enter pane mode to access full pane management:
+- `Ctrl+P` - Enter pane mode
+- Once in pane mode:
+  - `h/j/k/l` or `←/↓/↑/→` - Move focus to pane in that direction
+  - `p` - Cycle/toggle focus between panes (useful for quick two-pane switching)
+  - `n` - Create new pane
+  - `x` - Close current pane
+  - `z` - Toggle fullscreen for current pane
+  - `Esc` or `Enter` - Return to normal mode
+
+**Method 2: Shared Keybindings (Fastest - Recommended)**
+
+These work directly in normal mode without entering pane mode first:
+
+**Directional Navigation:**
+- `Alt+h` or `Alt+←` - Focus pane to the left
+- `Alt+j` or `Alt+↓` - Focus pane below
+- `Alt+k` or `Alt+↑` - Focus pane above
+- `Alt+l` or `Alt+→` - Focus pane to the right
+
+**Why this is fastest:**
+- No mode switching required (always available in normal mode)
+- Single keystroke navigation
+- Ergonomic for UHK users: Alt key (Fn2 on UHK) + home row keys (h/j/k/l)
+- Works consistently with Vim-style navigation muscle memory
+
+**Method 3: Quick Two-Pane Toggle**
+
+For rapid switching between exactly two panes:
+
+**Option A: Directional Toggle**
+- Horizontal splits (side-by-side): `Alt+h` and `Alt+l` (or `Alt+←` / `Alt+→`)
+- Vertical splits (top-bottom): `Alt+k` and `Alt+j` (or `Alt+↑` / `Alt+↓`)
+
+**Option B: Cycling**
+- `Ctrl+P` then `p` - Cycle between panes
+- Each press of `p` moves to next pane
+- With two panes, this toggles between them
+
+**Method Comparison:**
+
+| Method | Keystrokes | Mode Switch | Best For |
+|--------|------------|-------------|----------|
+| Alt+h/j/k/l | 1 | No | Quick directional navigation (recommended) |
+| Ctrl+P then p | 2 | Yes | Cycling through 3+ panes |
+| Ctrl+P then h/j/k/l | 2 | Yes | When already in pane mode for management |
+
+**Ergonomic Recommendations for UHK Users:**
+
+1. **Primary Navigation**: Use `Alt+h/j/k/l` (shared keybindings)
+   - UHK: Fn2 (thumb) + h/j/k/l
+   - Stays on home row, minimal finger movement
+   - No mode switching overhead
+
+2. **Two-Pane Workflow**:
+   - Editing code in left pane, running tests in right pane
+   - `Alt+h` (focus left/code), `Alt+l` (focus right/tests)
+   - Fast iteration: edit → save → `Alt+l` → check output → `Alt+h` → continue editing
+
+3. **Multi-Pane Layouts**:
+   - Use directional navigation (`Alt+h/j/k/l`) when you know the pane position
+   - Use cycling (`Ctrl+P` then `p`) when exploring unfamiliar layouts
+
+**Integration with Hyprland:**
+
+Important distinction between window and pane navigation:
+- **Hyprland** (window manager): `Super+J/K/I/L` (physical Alt+JKIL after swap) - Navigate between Ghostty windows
+- **Zellij** (inside terminal): `Alt+h/j/k/l` - Navigate between panes within a single Ghostty window
+- Different modifiers prevent conflicts: Super for windows, Alt for panes
 
 #### Session Management
 
@@ -1158,11 +1255,18 @@ This table shows how the same window management operations are performed across 
 
 | Action | Hyprland | Ghostty | Zellij | Helix | Browser (Vimium) |
 |--------|----------|---------|--------|-------|------------------|
-| **Spatial Navigation** |
-| Focus/Move Left | `Super+J`* | N/A | `Ctrl+G h` | `h` | TBD |
-| Focus/Move Down | `Super+K`* | N/A | `Ctrl+G j` | `j` | `j` (scroll) |
-| Focus/Move Up | `Super+I`* | N/A | `Ctrl+G k` | `k` | `k` (scroll) |
-| Focus/Move Right | `Super+L`* | N/A | `Ctrl+G l` | `l` | TBD |
+| **Window Navigation (Hyprland Level)** |
+| Focus Left Window | `Super+J`* | N/A | N/A | N/A | N/A |
+| Focus Down Window | `Super+K`* | N/A | N/A | N/A | N/A |
+| Focus Up Window | `Super+I`* | N/A | N/A | N/A | N/A |
+| Focus Right Window | `Super+L`* | N/A | N/A | N/A | N/A |
+| **Pane Navigation (Within Application)** |
+| Focus/Move Left | N/A | ❌ Disabled | `Alt+h` or `Alt+←` | `h` | TBD |
+| Focus/Move Down | N/A | ❌ Disabled | `Alt+j` or `Alt+↓` | `j` | `j` (scroll) |
+| Focus/Move Up | N/A | ❌ Disabled | `Alt+k` or `Alt+↑` | `k` | `k` (scroll) |
+| Focus/Move Right | N/A | ❌ Disabled | `Alt+l` or `Alt+→` | `l` | TBD |
+| Pane Mode Navigation | N/A | ❌ Disabled | `Ctrl+P` then `h/j/k/l` | N/A | N/A |
+| Cycle/Toggle Panes | N/A | ❌ Disabled | `Ctrl+P` then `p` | N/A | N/A |
 | **Tab Navigation (W/E/R/C Pattern)** |
 | Previous Tab | N/A | Not used† | `Alt+W`‡ or `Ctrl+PgUp` | N/A | `Alt+W`‡ or `Ctrl+PgUp` or `J` |
 | New Tab | N/A | Not used† | `Alt+E`‡ or `Ctrl+T` | N/A | `Alt+E`‡ or `Ctrl+T` or `t` |
@@ -1399,31 +1503,52 @@ const myVariableName = getUserData();
    - Current tab: Running dev server
 
 2. **Create new tab for git**
-   - Press: `Alt+E` (new Zellij tab)
+   - Press: `Ctrl+T` (new Zellij tab)
    - Type: `git status`
 
 3. **Create another tab for tests**
-   - Press: `Alt+E` (new tab)
+   - Press: `Ctrl+T` (new tab)
    - Type: `npm test -- --watch`
 
 4. **Navigate between tabs**
-   - Press: `Alt+W` (previous tab)
-   - Press: `Alt+R` (next tab)
+   - Press: `Ctrl+Shift+Tab` (previous tab)
+   - Press: `Ctrl+Tab` (next tab)
+   - Or: `Ctrl+PgUp` / `Ctrl+PgDn` on UHK
    - Tabs: [Dev Server] ← → [Git] ← → [Tests]
 
 5. **Create pane in current tab** (for side-by-side view)
-   - Press: `Ctrl+G` (Zellij mode)
+   - Press: `Ctrl+P` (enter pane mode)
    - Press: `n` (new pane)
-   - Result: Split pane created
+   - Result: Vertical split created
+   - Press: `Esc` (return to normal mode)
 
-6. **Navigate between panes**
-   - Press: `Ctrl+G`
+6. **Navigate between panes (Fastest Method)**
+   - Press: `Alt+h` (focus left pane) - UHK: Fn2+h
+   - Press: `Alt+l` (focus right pane) - UHK: Fn2+l
+   - **No mode switching needed!**
+
+7. **Alternative: Pane Mode Navigation**
+   - Press: `Ctrl+P` (enter pane mode)
    - Press: `h/j/k/l` (focus pane in direction)
+   - Or: `p` to cycle/toggle between panes
+   - Press: `Esc` (return to normal mode)
 
-7. **Close tab when done**
-   - Press: `Alt+C` (close current Zellij tab)
+8. **Quick Two-Pane Toggle Example**
+   - Scenario: Code in left pane, output in right pane
+   - Edit code → `Alt+l` (check output) → `Alt+h` (back to code)
+   - Single keystroke switching!
 
-**Muscle memory pattern:** `Alt+E` (new tab) → work → `Alt+W/R` (navigate) → `Alt+C` (close)
+9. **Close pane when done**
+   - Method 1: `Ctrl+P` → `x` (close current pane)
+   - Method 2: `Ctrl+D` (exit shell, closes pane)
+
+10. **Close tab when done**
+    - Press: `Ctrl+W` (close current Zellij tab)
+
+**Muscle memory patterns:**
+- **Tab navigation**: `Ctrl+T` (new) → `Ctrl+Tab` (next) → `Ctrl+W` (close)
+- **Pane navigation**: `Alt+h/j/k/l` (directional, fastest)
+- **Two-pane toggle**: `Alt+h` ↔ `Alt+l` (horizontal) or `Alt+j` ↔ `Alt+k` (vertical)
 
 #### Scenario 5: Window Management Across Workspaces
 
@@ -1580,6 +1705,115 @@ home-manager/common/features/
 - [ ] Refine based on real-world usage
 - [ ] Measure productivity improvements
 - [ ] Document lessons learned
+
+---
+
+## Known Conflicts & Resolutions
+
+This section documents keybinding conflicts discovered during implementation and their resolutions.
+
+### Conflict 1: Ctrl+O - Zellij Session Mode vs Claude Code/Lazygit
+
+**Issue:**
+- **Zellij Default**: `Ctrl+O` enters session mode
+- **Claude Code**: `Ctrl+O` = "view thinking"
+- **Lazygit**: `Ctrl+O` = "copy"
+
+**Impact**: Pressing Ctrl+O in terminal would trigger Zellij session mode instead of application-specific actions
+
+**Resolution**: ✅ **RESOLVED**
+- Unbinded Zellij's `Ctrl+O` binding
+- Remapped session mode to `Ctrl+Shift+O`
+- Location: `home-manager/common/features/keybindings.nix:60-65`
+
+**Result**: Claude Code and Lazygit can now use Ctrl+O without conflict
+
+---
+
+### Conflict 2: Ctrl+Shift+O - Zellij Session Mode vs Ghostty Split
+
+**Issue:**
+- **Zellij Custom**: `Ctrl+Shift+O` = session mode (after moving from Ctrl+O)
+- **Ghostty Default**: `Ctrl+Shift+O` = `new_split:right` (vertical split)
+
+**Impact**: Pressing Ctrl+Shift+O could trigger both Ghostty split AND Zellij session mode
+
+**Resolution**: ✅ **RESOLVED**
+- Unbinded Ghostty's `Ctrl+Shift+O` split binding
+- Strategy: Ghostty acts purely as terminal emulator, Zellij handles ALL multiplexing
+- Location: `home-manager/common/features/keybindings.nix:93-95`
+
+**Result**: Ctrl+Shift+O reliably opens Zellij session mode, no split conflicts
+
+---
+
+### Conflict 3: Ctrl+Shift+E - Ghostty New Tab vs Ghostty Split
+
+**Issue:**
+- **Ghostty Default**: `Ctrl+Shift+E` = `new_split:down` (horizontal split)
+- **Ghostty Custom**: `Ctrl+Shift+E` = `new_tab` (our configuration)
+
+**Impact**: Dual binding definition could cause unpredictable behavior
+
+**Resolution**: ✅ **RESOLVED**
+- Custom `new_tab` binding overrides default split binding
+- Documented explicitly in configuration
+- Location: `home-manager/common/features/keybindings.nix:78-80`
+
+**Result**: Ctrl+Shift+E creates new Ghostty tab, split functionality disabled
+
+---
+
+### Conflict 4: Ctrl+G - Zellij Lock Mode vs Claude Code
+
+**Issue:**
+- **Zellij Default**: `Ctrl+G` enters locked mode
+- **Claude Code**: `Ctrl+G` = "open prompt in editor"
+
+**Impact**: Pressing Ctrl+G in terminal would lock Zellij instead of opening Claude Code editor
+
+**Resolution**: ✅ **RESOLVED**
+- Unbinded Zellij's `Ctrl+G` binding
+- Remapped lock mode to `Ctrl+Shift+G`
+- Location: `home-manager/common/features/keybindings.nix:53-58`
+
+**Result**: Claude Code can use Ctrl+G without triggering Zellij lock mode
+
+---
+
+### Strategy Summary: Ghostty Splits Disabled
+
+**Decision**: Disable ALL Ghostty split/pane management features
+
+**Rationale**:
+1. **Single Source of Multiplexing**: Zellij provides superior tab AND pane management
+2. **Avoid Keybinding Conflicts**: Prevents collisions with Zellij session/mode bindings
+3. **Consistent Interface**: Users learn ONE multiplexer (Zellij), not two
+4. **Simplified Mental Model**: Ghostty = terminal emulator, Zellij = multiplexer
+
+**Unbinded Ghostty Keybindings**:
+- `Ctrl+Shift+O` - new_split:right
+- `Ctrl+Alt+Up/Down/Left/Right` - pane navigation
+
+**Location**: `home-manager/common/features/keybindings.nix:93-99`
+
+---
+
+### Prevention: How to Avoid Future Conflicts
+
+**Before adding new keybindings:**
+
+1. **Check tool defaults**: Run `<tool> +list-keybinds --default` (if available)
+2. **Search existing config**: Check `keybindings.nix` for potential conflicts
+3. **Document the binding**: Add comment explaining purpose and any overrides
+4. **Test in practice**: Verify keybinding works as expected in real usage
+
+**Conflict checklist:**
+- [ ] Does this conflict with Zellij modes (Ctrl+O, Ctrl+G, Ctrl+P, etc.)?
+- [ ] Does this conflict with Claude Code shortcuts?
+- [ ] Does this conflict with application-specific bindings (lazygit, helix, etc.)?
+- [ ] Is this tool's default behavior being overridden?
+- [ ] Should we unbind the default to prevent confusion?
 
 ---
 
