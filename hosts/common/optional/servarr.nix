@@ -4,7 +4,8 @@
   pkgs,
   inputs,
   ...
-}: let
+}:
+let
   pkgs-unstable = import inputs.nixpkgs-unstable {
     inherit (pkgs) system;
     config.allowUnfree = true;
@@ -32,6 +33,8 @@
     admin_dir = /var/lib/sabnzbd/admin
     cache_dir = /var/lib/sabnzbd/cache
     dirscan_dir = /var/lib/sabnzbd/nzb
+    permissions = 660
+    folder_permissions = 770
 
     [logging]
     max_log_size = 5242880
@@ -73,9 +76,11 @@
     newzbin =
     priority = 0
   '';
-in {
+in
+{
   # Allow unfree packages needed by sabnzbd (unrar)
-  nixpkgs.config.allowUnfreePredicate = pkg:
+  nixpkgs.config.allowUnfreePredicate =
+    pkg:
     builtins.elem (lib.getName pkg) [
       "unrar"
     ];
@@ -89,46 +94,54 @@ in {
 
   services.radarr = {
     enable = true;
+    package = pkgs-unstable.radarr;
     openFirewall = false;
     group = "media";
   };
 
   services.sonarr = {
     enable = true;
+    package = pkgs-unstable.sonarr;
     openFirewall = false;
     group = "media";
   };
 
   services.prowlarr = {
     enable = true;
+    package = pkgs-unstable.prowlarr;
     openFirewall = false;
   };
 
   services.bazarr = {
     enable = true;
+    package = pkgs-unstable.bazarr;
     openFirewall = false;
     group = "media";
   };
 
   services.lidarr = {
     enable = true;
+    package = pkgs-unstable.lidarr;
     openFirewall = false;
     group = "media";
   };
 
   services.readarr = {
     enable = true;
+    package = pkgs-unstable.readarr;
     openFirewall = false;
     group = "media";
   };
 
   services.jellyseerr = {
     enable = true;
+    package = pkgs-unstable.jellyseerr;
     openFirewall = false;
   };
 
   services.transmission = {
     enable = true;
+    package = pkgs-unstable.transmission_4;
     openFirewall = false;
     group = "media";
     settings = {
@@ -136,6 +149,10 @@ in {
       rpc-port = 9091;
       rpc-whitelist-enabled = false;
       rpc-host-whitelist-enabled = false;
+      download-dir = "/ocean/downloads/torrents/complete";
+      incomplete-dir = "/ocean/downloads/torrents/incomplete";
+      incomplete-dir-enabled = true;
+      umask = 7; # Results in 770/660 permissions (group writable)
     };
   };
 
@@ -149,6 +166,7 @@ in {
 
   services.sabnzbd = {
     enable = true;
+    package = pkgs-unstable.sabnzbd;
     group = "media";
   };
 
