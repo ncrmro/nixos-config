@@ -58,6 +58,18 @@
                 <property name="vexpand">true</property>
                 <property name="vexpand-set">true</property>
                 <child>
+                  <object class="GtkLabel" id="ElephantHint">
+                    <style>
+                      <class name="elephant-hint"></class>
+                    </style>
+                    <property name="label">Waiting for elephant...</property>
+                    <property name="hexpand">true</property>
+                    <property name="vexpand">true</property>
+                    <property name="visible">false</property>
+                    <property name="valign">0.5</property>
+                  </object>
+                </child>
+                <child>
                   <object class="GtkLabel" id="Placeholder">
                     <style>
                       <class name="placeholder"></class>
