@@ -5,8 +5,6 @@
   lib,
   ...
 }: {
-  imports = [inputs.omarchy-nix.homeManagerModules.default];
-
   home.username = "ncrmro";
   home.homeDirectory = "/home/ncrmro";
   home.stateVersion = "25.05";

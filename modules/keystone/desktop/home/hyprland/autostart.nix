@@ -10,6 +10,7 @@ in {
   config = mkIf cfg.enable {
     wayland.windowManager.hyprland.settings = {
       exec-once = mkDefault [
+        "hyprlock"
         "uwsm app -- hyprsunset"
         "systemctl --user start hyprpolkitagent"
         "wl-clip-persist --clipboard regular & uwsm app -- clipse -listen"

@@ -7,7 +7,7 @@
   ...
 }: {
   imports = [
-    outputs.homeManagerModules.keystone-terminal
+    outputs.homeManagerModules.keystone-desktop
     ../common/global
     ../common/features/cli
     ../common/features/desktop
@@ -19,7 +19,9 @@
     inputs.nix-index-database.homeModules.nix-index
   ];
 
-  keystone.terminal.enable = true;
+  # Keystone desktop includes terminal
+  keystone.desktop.enable = true;
+  keystone.desktop.hyprland.enable = true;
 
   wayland.windowManager.hyprland.settings = {
     windowrule = [

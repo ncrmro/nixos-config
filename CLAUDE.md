@@ -21,6 +21,7 @@ This is a NixOS configuration repository using flakes for managing system config
   - `/common/kubernetes/` - Kubernetes module definitions
 - `/home-manager/` - User-specific Home Manager configurations
 - `/modules/` - Custom NixOS and user modules
+  - `/modules/keystone/` - Development modules being prototyped here before migration to [ncrmro/keystone](https://github.com/ncrmro/keystone)
 - `/bin/` - Helper scripts for deployment and management
 - `/docs/` - Documentation for various setup procedures
 - `/kubernetes/` - Raw Kubernetes manifests (legacy)

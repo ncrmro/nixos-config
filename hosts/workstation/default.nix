@@ -70,7 +70,10 @@
 
   services.openssh.settings.PermitRootLogin = "yes";
 
-  keystone.desktop.enable = true;
+  keystone.desktop = {
+    enable = true;
+    user = "ncrmro";
+  };
 
   services.monitoring-client = {
     enable = true;
