@@ -53,12 +53,12 @@ in {
   };
 
   config = mkIf cfg.enable {
-    # Hyprland with UWSM (using unstable for latest features)
+    # Hyprland with UWSM (using official flake for latest features)
     programs.hyprland = mkIf cfg.hyprland.enable {
       enable = mkDefault true;
       withUWSM = mkDefault true;
-      package = mkDefault pkgs-unstable.hyprland;
-      portalPackage = mkDefault pkgs-unstable.xdg-desktop-portal-hyprland;
+      package = mkDefault inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+      portalPackage = mkDefault pkgs.xdg-desktop-portal-hyprland; # Use stable nixpkgs version to fix Qt version mismatch
     };
 
     # Greetd display manager with auto-login to hyprlock

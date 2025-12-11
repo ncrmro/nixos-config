@@ -26,18 +26,18 @@
   wayland.windowManager.hyprland.settings = {
     windowrule = [
       # Tag messaging apps
-      "tag +messaging, class:Signal"
-      "tag +messaging, title:.*WhatsApp.*"
-      "tag +messaging, class:discord"
-      "tag +messaging, class:telegram"
+      "tag +messaging, match:class Signal"
+      "tag +messaging, match:title .*WhatsApp.*"
+      "tag +messaging, match:class discord"
+      "tag +messaging, match:class telegram"
 
       # Apply rules to all messaging apps
-      "noscreenshare, tag:messaging"
-      "workspace special:magic, tag:messaging"
-      "tile, tag:messaging"
+      "no_screen_share on, match:tag messaging"
+      "workspace special:magic, match:tag messaging"
+      # "tile, match:tag messaging"
 
-      "workspace special:magic, title:.*YouTube Music.*"
-      "tile, title:.*YouTube Music.*"
+      "workspace special:magic, match:title .*YouTube Music.*"
+      # "tile, match:title .*YouTube Music.*"
     ];
   };
 

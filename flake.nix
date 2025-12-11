@@ -45,6 +45,9 @@
       inputs.home-manager.follows = "home-manager";
     };
 
+    # Hyprland (latest from official flake)
+    hyprland.url = "github:hyprwm/Hyprland";
+
     # Keystone
     keystone = {
       url = "github:ncrmro/keystone";

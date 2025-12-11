@@ -2,10 +2,12 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 with lib; let
   cfg = config.keystone.desktop;
+  hyprlandPkg = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
 
   # Screenshot script - supports region, windows, fullscreen, and smart modes
   keystoneScreenshot = pkgs.writeShellScriptBin "keystone-screenshot" ''
@@ -23,9 +25,9 @@ with lib; let
     PROCESSING="''${2:-slurp}"
 
     get_rectangles() {
-      local active_workspace=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused == true) | .activeWorkspace.id')
-      ${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r --arg ws "$active_workspace" '.[] | select(.activeWorkspace.id == ($ws | tonumber)) | "\(.x),\(.y) \((.width / .scale) | floor)x\((.height / .scale) | floor)"'
-      ${pkgs.hyprland}/bin/hyprctl clients -j | ${pkgs.jq}/bin/jq -r --arg ws "$active_workspace" '.[] | select(.workspace.id == ($ws | tonumber)) | "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'
+      local active_workspace=$(${hyprlandPkg}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused == true) | .activeWorkspace.id')
+      ${hyprlandPkg}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r --arg ws "$active_workspace" '.[] | select(.activeWorkspace.id == ($ws | tonumber)) | "\(.x),\(.y) \((.width / .scale) | floor)x\((.height / .scale) | floor)"'
+      ${hyprlandPkg}/bin/hyprctl clients -j | ${pkgs.jq}/bin/jq -r --arg ws "$active_workspace" '.[] | select(.workspace.id == ($ws | tonumber)) | "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'
     }
 
     case "$MODE" in
@@ -42,7 +44,7 @@ with lib; let
         kill $PID 2>/dev/null
         ;;
       fullscreen)
-        SELECTION=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused == true) | "\(.x),\(.y) \((.width / .scale) | floor)x\((.height / .scale) | floor)"')
+        SELECTION=$(${hyprlandPkg}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused == true) | "\(.x),\(.y) \((.width / .scale) | floor)x\((.height / .scale) | floor)"')
         ;;
       smart|*)
         RECTS=$(get_rectangles)
@@ -125,7 +127,7 @@ with lib; let
 
   # Audio switch script
   keystoneAudioSwitch = pkgs.writeShellScriptBin "keystone-audio-switch" ''
-    focused_monitor="$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused == true).name')"
+    focused_monitor="$(${hyprlandPkg}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused == true).name')"
 
     sinks=$(${pkgs.pulseaudio}/bin/pactl -f json list sinks | ${pkgs.jq}/bin/jq '[.[] | select((.ports | length == 0) or ([.ports[]? | .availability != "not available"] | any))]')
     sinks_count=$(echo "$sinks" | ${pkgs.jq}/bin/jq '. | length')
@@ -191,13 +193,13 @@ with lib; let
       sleep 1
     fi
 
-    CURRENT_TEMP=$(${pkgs.hyprland}/bin/hyprctl hyprsunset temperature 2>/dev/null | grep -oE '[0-9]+')
+    CURRENT_TEMP=$(${hyprlandPkg}/bin/hyprctl hyprsunset temperature 2>/dev/null | grep -oE '[0-9]+')
 
     if [[ "$CURRENT_TEMP" == "$OFF_TEMP" ]]; then
-      ${pkgs.hyprland}/bin/hyprctl hyprsunset temperature $ON_TEMP
+      ${hyprlandPkg}/bin/hyprctl hyprsunset temperature $ON_TEMP
       ${pkgs.libnotify}/bin/notify-send "  Nightlight screen temperature"
     else
-      ${pkgs.hyprland}/bin/hyprctl hyprsunset temperature $OFF_TEMP
+      ${hyprlandPkg}/bin/hyprctl hyprsunset temperature $OFF_TEMP
       ${pkgs.libnotify}/bin/notify-send "   Daylight screen temperature"
     fi
   '';

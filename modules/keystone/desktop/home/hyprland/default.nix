@@ -2,10 +2,12 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 with lib; let
   cfg = config.keystone.desktop.hyprland;
+  hyprlandPkg = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
 in {
   imports = [
     ./appearance.nix
@@ -51,6 +53,9 @@ in {
   config = mkIf cfg.enable {
     wayland.windowManager.hyprland = {
       enable = true;
+      package = hyprlandPkg;
+      # Disabled since programs.hyprland.withUWSM is enabled on NixOS
+      systemd.enable = false;
 
       settings = {
         # Default applications

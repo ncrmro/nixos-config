@@ -20,9 +20,8 @@ in {
         };
       };
 
-      gestures = mkDefault {
-        workspace_swipe = false;
-      };
+      # Note: workspace_swipe was removed in Hyprland 0.51+
+      # Use new gesture syntax if needed: gesture = fingers, direction, action
     };
   };
 }
