@@ -117,6 +117,7 @@ with lib; let
 
     # Reload components
     ${pkgs.procps}/bin/pkill -SIGUSR2 waybar 2>/dev/null || true
+    ${pkgs.procps}/bin/pkill -SIGUSR2 ghostty 2>/dev/null || true
     ${pkgs.systemd}/bin/systemctl --user restart mako.service 2>/dev/null || true
     ${pkgs.libnotify}/bin/notify-send "Theme Changed" "Switched to $THEME_NAME theme" -t 3000
   '';
