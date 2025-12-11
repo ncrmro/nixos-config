@@ -4,15 +4,21 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
+  # Add Flatpak exports to XDG_DATA_DIRS for application launcher
+  home.sessionVariables = {
+    XDG_DATA_DIRS = "$XDG_DATA_DIRS:/var/lib/flatpak/exports/share";
+  };
+
   # Hypridle configuration - ignore D-Bus inhibit locks from Chrome/Claude
   services.hypridle.settings.general.ignore_dbus_inhibit = true;
 
   programs.chromium.enable = true;
   programs.chromium.extensions = [
-    {id = "nngceckbapebfimnlniiiahkandclblb";} # bitwarden
-    {id = "nkbihfbeogaeaoehlefnkodbefgpgknn";} # metamask
-    {id = "einnioafmpimabjcddiinlhmijaionap";} # wander wallet
+    { id = "nngceckbapebfimnlniiiahkandclblb"; } # bitwarden
+    { id = "nkbihfbeogaeaoehlefnkodbefgpgknn"; } # metamask
+    { id = "einnioafmpimabjcddiinlhmijaionap"; } # wander wallet
   ];
   programs.vscode = {
     enable = true;
