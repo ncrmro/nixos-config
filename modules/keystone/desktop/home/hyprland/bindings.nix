@@ -14,15 +14,14 @@ in {
       bind = mkDefault [
         # Application launchers
         "$mod, Return, exec, ghostty"
-        "$mod, D, exec, wofi --show drun"
-        "$mod, Q, killactive,"
-        "$mod, M, exit,"
+        "$mod, Space, exec, walker"
+        "$mod, B, exec, chromium"
         "$mod, E, exec, nautilus"
-        "$mod, V, togglefloating,"
-        "$mod, P, pseudo,"
 
-        # Kill active window
-        "$mod, Backspace, killactive,"
+        # Window management
+        "$mod, W, killactive,"
+        "$mod, V, togglefloating,"
+        "$mod, M, exit,"
 
         # Move focus with vim keys
         "$mod, H, movefocus, l"
