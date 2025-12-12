@@ -4,9 +4,11 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.keystone.desktop;
-in {
+in
+{
   config = mkIf cfg.enable {
     programs.waybar = {
       enable = mkDefault true;
@@ -18,8 +20,14 @@ in {
           height = 26;
           reload_style_on_change = true;
 
-          modules-left = ["custom/keystone" "hyprland/workspaces"];
-          modules-center = ["clock"];
+          modules-left = [
+            "custom/keystone"
+            "hyprland/workspaces"
+          ];
+          modules-center = [
+            "clock"
+            "custom/screenrecording-indicator"
+          ];
           modules-right = [
             "group/tray-expander"
             "bluetooth"
@@ -47,11 +55,11 @@ in {
               active = "";
             };
             persistent-workspaces = {
-              "1" = [];
-              "2" = [];
-              "3" = [];
-              "4" = [];
-              "5" = [];
+              "1" = [ ];
+              "2" = [ ];
+              "3" = [ ];
+              "4" = [ ];
+              "5" = [ ];
             };
           };
 
@@ -63,7 +71,8 @@ in {
 
           cpu = {
             interval = 5;
-            format = "";
+            format = "󰍛";
+            on-click = "ghostty -e btop";
           };
 
           clock = {
@@ -72,17 +81,31 @@ in {
             tooltip = false;
           };
 
+          "custom/screenrecording-indicator" = {
+            exec = "pgrep -x 'wf-recorder|wl-screenrec|gpu-screen-recorder' > /dev/null && echo '󰻃' || echo ''";
+            interval = 2;
+            on-click = "keystone-screenrecord";
+            tooltip-format = "Screen recording active";
+          };
+
           network = {
-            format-icons = ["" "" "" "" ""];
+            format-icons = [
+              "󰤯"
+              "󰤟"
+              "󰤢"
+              "󰤥"
+              "󰤨"
+            ];
             format = "{icon}";
             format-wifi = "{icon}";
-            format-ethernet = "";
-            format-disconnected = "";
-            tooltip-format-wifi = "{essid} ({frequency} GHz)\n{bandwidthDownBytes}  {bandwidthUpBytes}";
-            tooltip-format-ethernet = "{bandwidthDownBytes}  {bandwidthUpBytes}";
+            format-ethernet = "󰀂";
+            format-disconnected = "󰤮";
+            tooltip-format-wifi = "{essid} ({frequency} GHz)\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}";
+            tooltip-format-ethernet = "⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}";
             tooltip-format-disconnected = "Disconnected";
             interval = 3;
             spacing = 1;
+            on-click = "nm-connection-editor";
           };
 
           battery = {
@@ -91,13 +114,36 @@ in {
             format-charging = "{icon}";
             format-plugged = "";
             format-icons = {
-              charging = ["" "" "" "" "" "" "" "" "" ""];
-              default = ["" "" "" "" "" "" "" "" "" ""];
+              charging = [
+                "󰢜"
+                "󰂆"
+                "󰂇"
+                "󰂈"
+                "󰢝"
+                "󰂉"
+                "󰢞"
+                "󰂊"
+                "󰂋"
+                "󰂅"
+              ];
+              default = [
+                "󰁺"
+                "󰁻"
+                "󰁼"
+                "󰁽"
+                "󰁾"
+                "󰁿"
+                "󰂀"
+                "󰂁"
+                "󰂂"
+                "󰁹"
+              ];
             };
-            format-full = "";
-            tooltip-format-discharging = "{power:>1.0f}W {capacity}%";
-            tooltip-format-charging = "{power:>1.0f}W {capacity}%";
+            format-full = "󰂅";
+            tooltip-format-discharging = "{power:>1.0f}W↓ {capacity}%";
+            tooltip-format-charging = "{power:>1.0f}W↑ {capacity}%";
             interval = 5;
+            on-click = "keystone-menu system";
             states = {
               warning = 20;
               critical = 10;
@@ -106,10 +152,11 @@ in {
 
           bluetooth = {
             format = "";
-            format-disabled = "";
-            format-connected = "";
+            format-disabled = "󰂲";
+            format-connected = "󰂱";
             format-no-controller = "";
             tooltip-format = "Devices connected: {num_connections}";
+            on-click = "blueman-manager";
           };
 
           pulseaudio = {
@@ -119,7 +166,11 @@ in {
             scroll-step = 5;
             format-muted = "";
             format-icons = {
-              default = ["" "" ""];
+              default = [
+                ""
+                ""
+                ""
+              ];
             };
           };
 
@@ -129,7 +180,10 @@ in {
               transition-duration = 600;
               children-class = "tray-group-item";
             };
-            modules = ["custom/expand-icon" "tray"];
+            modules = [
+              "custom/expand-icon"
+              "tray"
+            ];
           };
 
           "custom/expand-icon" = {

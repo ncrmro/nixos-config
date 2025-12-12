@@ -32,9 +32,6 @@ This is a NixOS configuration repository using flakes for managing system config
 ### Building and Deploying
 
 ```bash
-# Format code with alejandra
-alejandra .
-
 # Check flake configuration
 nix flake check
 
@@ -131,7 +128,6 @@ After the first deployment attempt, Nix will provide the correct hash which shou
 
 ## Important Notes
 
-- Always run `alejandra .` before committing to maintain consistent formatting
 - Use `nix flake check` to validate configuration before deployment
 - Host-specific secrets are in `/secrets/` and require appropriate age keys
 - ZFS systems require `networking.hostId` to be set uniquely per host
