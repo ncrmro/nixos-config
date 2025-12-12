@@ -4,9 +4,11 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.keystone.terminal;
-in {
+in
+{
   config = mkIf cfg.enable {
     # Starship - A minimal, blazing-fast, and infinitely customizable prompt for any shell
     # Shows git status, language versions, execution time, and more in your terminal prompt
@@ -34,25 +36,41 @@ in {
         keybinds = {
           normal = {
             # Previous tab: Ctrl+PgUp
-            "bind \"Ctrl PageUp\"" = {GoToPreviousTab = {};};
+            "bind \"Ctrl PageUp\"" = {
+              GoToPreviousTab = { };
+            };
             # Next tab: Ctrl+PgDn
-            "bind \"Ctrl PageDown\"" = {GoToNextTab = {};};
+            "bind \"Ctrl PageDown\"" = {
+              GoToNextTab = { };
+            };
             # Previous tab (alternative): Ctrl+Shift+Tab
-            "bind \"Ctrl Shift Tab\"" = {GoToPreviousTab = {};};
+            "bind \"Ctrl Shift Tab\"" = {
+              GoToPreviousTab = { };
+            };
             # Next tab (alternative): Ctrl+Tab
-            "bind \"Ctrl Tab\"" = {GoToNextTab = {};};
+            "bind \"Ctrl Tab\"" = {
+              GoToNextTab = { };
+            };
             # New tab: Ctrl+T
-            "bind \"Ctrl t\"" = {NewTab = {};};
+            "bind \"Ctrl t\"" = {
+              NewTab = { };
+            };
             # Close tab: Ctrl+W
-            "bind \"Ctrl w\"" = {CloseTab = {};};
+            "bind \"Ctrl w\"" = {
+              CloseTab = { };
+            };
             # Unbind default Ctrl+G (conflict with Claude Code)
-            "unbind \"Ctrl g\"" = [];
+            "unbind \"Ctrl g\"" = [ ];
             # Lock mode: Ctrl+Shift+G
-            "bind \"Ctrl Shift g\"" = {SwitchToMode = "locked";};
+            "bind \"Ctrl Shift g\"" = {
+              SwitchToMode = "locked";
+            };
             # Unbind default Ctrl+O (conflict with Claude Code and lazygit)
-            "unbind \"Ctrl o\"" = [];
+            "unbind \"Ctrl o\"" = [ ];
             # Session mode: Ctrl+Shift+O
-            "bind \"Ctrl Shift o\"" = {SwitchToMode = "session";};
+            "bind \"Ctrl Shift o\"" = {
+              SwitchToMode = "session";
+            };
           };
         };
       };
@@ -73,7 +91,7 @@ in {
       zplug.enable = lib.mkForce false;
       oh-my-zsh = {
         enable = true;
-        plugins = ["git"];
+        plugins = [ "git" ];
         theme = "robbyrussell";
       };
     };
@@ -90,6 +108,10 @@ in {
       # Ripgrep - Fast search tool that recursively searches directories
       # https://github.com/BurntSushi/ripgrep
       ripgrep
+
+      # Yazi - Blazing fast terminal file manager written in Rust
+      # https://github.com/sxyazi/yazi
+      yazi
     ];
   };
 }
