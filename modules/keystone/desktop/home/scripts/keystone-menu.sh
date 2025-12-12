@@ -45,20 +45,12 @@ show_learn_menu() {
   esac
 }
 
-# ============== TRIGGER MENU ==============
-show_trigger_menu() {
-  case $(menu "Trigger" "  Capture\n󰔎  Toggle") in
-  *Capture*) show_capture_menu ;;
-  *Toggle*) show_toggle_menu ;;
-  *) show_main_menu ;;
-  esac
-}
-
+# ============== CAPTURE MENU ==============
 show_capture_menu() {
   case $(menu "Capture" "  Screenshot\n  Screenrecord") in
   *Screenshot*) show_screenshot_menu ;;
   *Screenrecord*) keystone-screenrecord ;;
-  *) show_trigger_menu ;;
+  *) show_main_menu ;;
   esac
 }
 
@@ -71,10 +63,11 @@ show_screenshot_menu() {
 }
 
 show_toggle_menu() {
-  case $(menu "Toggle" "󰔎  Nightlight\n󰍜  Top Bar") in
+  case $(menu "Toggle" "󰅶  Idle Inhibitor\n󰔎  Nightlight\n󰍜  Top Bar") in
+  *Idle*) keystone-idle-toggle ;;
   *Nightlight*) keystone-nightlight-toggle ;;
   *Bar*) not_implemented "Toggle waybar" ;;
-  *) show_trigger_menu ;;
+  *) show_main_menu ;;
   esac
 }
 
@@ -153,20 +146,21 @@ show_system_menu() {
   *Suspend*) systemctl suspend ;;
   *Restart*) systemctl reboot ;;
   *Shutdown*) systemctl poweroff ;;
-  *) back_to show_main_menu ;;
+  *) show_main_menu ;;
   esac
 }
 
 # ============== MAIN MENU ==============
 show_main_menu() {
-  go_to_menu "$(menu "Go" "󰀻  Apps\n󰧑  Learn\n󱓞  Trigger\n  Style\n  Setup\n󰉉  Install\n󰭌  Remove\n  Update\n  System")"
+  go_to_menu "$(menu "Go" "󰀻  Apps\n󰧑  Learn\n  Capture\n󰔎  Toggle\n  Style\n  Setup\n󰉉  Install\n󰭌  Remove\n  Update\n  System")"
 }
 
 go_to_menu() {
   case "${1,,}" in
   *apps*) walker ;;
   *learn*) show_learn_menu ;;
-  *trigger*) show_trigger_menu ;;
+  *capture*) show_capture_menu ;;
+  *toggle*) show_toggle_menu ;;
   *style*) show_style_menu ;;
   *setup*) show_setup_menu ;;
   *install*) show_install_menu ;;
@@ -180,5 +174,5 @@ if [[ -n "$1" ]]; then
   BACK_TO_EXIT=true
   go_to_menu "$1"
 else
-  show_main_menu
+  show_system_menu
 fi

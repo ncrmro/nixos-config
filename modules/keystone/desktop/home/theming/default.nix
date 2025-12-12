@@ -145,6 +145,7 @@ let
     ${pkgs.systemd}/bin/systemctl --user restart waybar.service 2>/dev/null || true
     ${pkgs.procps}/bin/pkill -SIGUSR2 ghostty 2>/dev/null || true
     ${pkgs.systemd}/bin/systemctl --user restart mako.service 2>/dev/null || true
+    ${pkgs.systemd}/bin/systemctl --user restart walker.service 2>/dev/null || true
     ${pkgs.libnotify}/bin/notify-send "Theme Changed" "Switched to $THEME_NAME theme" -t 3000
   '';
 in
@@ -159,7 +160,10 @@ in
 
   config = mkIf cfg.enable {
     # Deploy all theme files from omarchy
-    home.file = mkMerge (map mkThemeFiles availableThemes);
+    # Also deploy omarchy default mako core.ini since theme mako.ini files include it
+    home.file = mkMerge (map mkThemeFiles availableThemes) // {
+      ".local/share/omarchy/default/mako/core.ini".source = "${inputs.omarchy}/default/mako/core.ini";
+    };
 
     # Theme switching script
     home.packages = [
