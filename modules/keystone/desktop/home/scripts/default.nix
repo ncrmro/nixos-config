@@ -5,7 +5,8 @@
   inputs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.keystone.desktop;
   hyprlandPkg = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
 
@@ -204,6 +205,19 @@ with lib; let
     fi
   '';
 
+  # Walker launcher wrapper for menus
+  keystoneLaunchWalker = pkgs.writeShellScriptBin "keystone-launch-walker" (
+    builtins.readFile ./keystone-launch-walker.sh
+  );
+
+  # Main menu script
+  keystoneMenu = pkgs.writeShellScriptBin "keystone-menu" (builtins.readFile ./keystone-menu.sh);
+
+  # Keybindings viewer script
+  keystoneMenuKeybindings = pkgs.writeShellScriptBin "keystone-menu-keybindings" (
+    builtins.readFile ./keystone-menu-keybindings.sh
+  );
+
   # Battery monitor script
   keystoneBatteryMonitor = pkgs.writeShellScriptBin "keystone-battery-monitor" ''
     BATTERY_THRESHOLD=10
@@ -228,7 +242,8 @@ with lib; let
       fi
     fi
   '';
-in {
+in
+{
   config = mkIf cfg.enable {
     home.packages = [
       keystoneScreenshot
@@ -236,6 +251,9 @@ in {
       keystoneAudioSwitch
       keystoneNightlightToggle
       keystoneBatteryMonitor
+      keystoneLaunchWalker
+      keystoneMenu
+      keystoneMenuKeybindings
       # Dependencies that should be available
       pkgs.grim
       pkgs.slurp
@@ -244,6 +262,7 @@ in {
       pkgs.wf-recorder
       pkgs.wl-screenrec
       pkgs.jq
+      pkgs.libxkbcommon # for xkbcli in keybindings menu
     ];
   };
 }

@@ -4,9 +4,11 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.keystone.desktop.hyprland;
-in {
+in
+{
   config = mkIf cfg.enable {
     wayland.windowManager.hyprland.settings = {
       "$mod" = mkDefault "SUPER";
@@ -18,6 +20,10 @@ in {
         "$mod, B, exec, chromium"
         "$mod, E, exec, nautilus"
 
+        # Menu system
+        "$mod, Escape, exec, keystone-menu"
+        "$mod, K, exec, keystone-menu-keybindings"
+
         # Window management
         "$mod, W, killactive,"
         "$mod, V, togglefloating,"
@@ -26,7 +32,6 @@ in {
         # Move focus with vim keys
         "$mod, H, movefocus, l"
         "$mod, L, movefocus, r"
-        "$mod, K, movefocus, u"
         "$mod, J, movefocus, d"
 
         # Move focus with arrow keys

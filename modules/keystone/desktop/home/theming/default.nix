@@ -5,18 +5,18 @@
   inputs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.keystone.desktop;
   themeCfg = config.keystone.desktop.theme;
 
-  # List of theme files to copy from omarchy (excluding editor configs we don't use)
+  # List of theme files to copy from omarchy (excluding ghostty.conf - we generate our own)
   themeFilesToCopy = [
     "hyprland.conf"
     "hyprlock.conf"
     "waybar.css"
     "mako.ini"
     "wofi.css"
-    "ghostty.conf"
     "btop.theme"
     "swayosd.css"
     "walker.css"
@@ -24,6 +24,24 @@ with lib; let
     "icons.theme"
     "preview.png"
   ];
+
+  # Map keystone theme names to correct ghostty theme names
+  ghosttyThemeMap = {
+    "tokyo-night" = "tokyonight";
+    "kanagawa" = "Kanagawa Wave";
+    "catppuccin" = "catppuccin-mocha";
+    "catppuccin-latte" = "catppuccin-latte";
+    "everforest" = "Everforest Dark - Hard";
+    "gruvbox" = "GruvboxDark";
+    "nord" = "nord";
+    "rose-pine" = "rose-pine";
+    "flexoki-light" = "flexoki-light";
+    "ristretto" = "Monokai Pro Ristretto";
+    "ethereal" = "Builtin Dark";
+    "hackerman" = "Builtin Dark";
+    "matte-black" = "Builtin Dark";
+    "osaka-jade" = "Builtin Dark";
+  };
 
   # Get list of themes from omarchy
   omarchyThemesPath = "${inputs.omarchy}/themes";
@@ -47,27 +65,32 @@ with lib; let
   ];
 
   # Function to create theme files for a single theme
-  mkThemeFiles = themeName: let
-    sourceThemePath = "${omarchyThemesPath}/${themeName}";
-    destThemePath = "${config.xdg.configHome}/keystone/themes/${themeName}";
-  in
+  mkThemeFiles =
+    themeName:
+    let
+      sourceThemePath = "${omarchyThemesPath}/${themeName}";
+      destThemePath = "${config.xdg.configHome}/keystone/themes/${themeName}";
+      ghosttyTheme = ghosttyThemeMap.${themeName} or "Builtin Dark";
+    in
     # Copy individual theme files
     listToAttrs (
-      map (fileName:
-        nameValuePair
-        "${destThemePath}/${fileName}"
-        {source = "${sourceThemePath}/${fileName}";})
-      (filter (fileName:
-        pathExists "${sourceThemePath}/${fileName}")
-      themeFilesToCopy)
+      map (
+        fileName:
+        nameValuePair "${destThemePath}/${fileName}" { source = "${sourceThemePath}/${fileName}"; }
+      ) (filter (fileName: pathExists "${sourceThemePath}/${fileName}") themeFilesToCopy)
     )
+    # Generate ghostty.conf with correct theme name
+    // {
+      "${destThemePath}/ghostty.conf".text = "theme = ${ghosttyTheme}\n";
+    }
     # Copy backgrounds directory if it exists
     // (
-      if pathExists "${sourceThemePath}/backgrounds"
-      then {
-        "${destThemePath}/backgrounds".source = "${sourceThemePath}/backgrounds";
-      }
-      else {}
+      if pathExists "${sourceThemePath}/backgrounds" then
+        {
+          "${destThemePath}/backgrounds".source = "${sourceThemePath}/backgrounds";
+        }
+      else
+        { }
     );
 
   # Theme switch script
@@ -115,13 +138,17 @@ with lib; let
 
     echo "Switched to theme: $THEME_NAME"
 
+    # Restart hyprpaper to pick up new background
+    ${pkgs.systemd}/bin/systemctl --user restart hyprpaper.service 2>/dev/null || true
+
     # Reload components
-    ${pkgs.procps}/bin/pkill -SIGUSR2 waybar 2>/dev/null || true
+    ${pkgs.systemd}/bin/systemctl --user restart waybar.service 2>/dev/null || true
     ${pkgs.procps}/bin/pkill -SIGUSR2 ghostty 2>/dev/null || true
     ${pkgs.systemd}/bin/systemctl --user restart mako.service 2>/dev/null || true
     ${pkgs.libnotify}/bin/notify-send "Theme Changed" "Switched to $THEME_NAME theme" -t 3000
   '';
-in {
+in
+{
   options.keystone.desktop.theme = {
     name = mkOption {
       type = types.str;
@@ -140,7 +167,7 @@ in {
     ];
 
     # Create activation script to setup symlinks
-    home.activation.keystoneThemeSetup = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    home.activation.keystoneThemeSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       KEYSTONE_DIR="${config.xdg.configHome}/keystone"
       CURRENT_DIR="$KEYSTONE_DIR/current"
       THEME_DIR="$KEYSTONE_DIR/themes/${themeCfg.name}"
