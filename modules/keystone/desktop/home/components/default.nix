@@ -4,15 +4,18 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.keystone.desktop;
-in {
+in
+{
   imports = [
     ./btop.nix
     ./clipboard.nix
     ./ghostty.nix
     ./launcher.nix
     ./mako.nix
+    ./screenshot.nix
     ./swayosd.nix
     ./waybar.nix
   ];
