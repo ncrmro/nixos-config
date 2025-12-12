@@ -123,8 +123,6 @@ in
     ];
 
     # Hyprland layer rule to remove animation artifacts during screenshot selection
-    wayland.windowManager.hyprland.settings.layerrule = [
-      "noanim, selection"
-    ];
+    wayland.windowManager.hyprland.settings.layerrule = [ "no_anim on, match:namespace slurp" ];
   };
 }
