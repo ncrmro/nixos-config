@@ -65,6 +65,26 @@ let
     "royal-green" = "royal_green";
   };
 
+  # Map keystone theme names to zellij built-in theme names
+  zellijThemeMap = {
+    "tokyo-night" = "tokyo-night-dark";
+    "kanagawa" = "kanagawa";
+    "catppuccin" = "catppuccin-mocha";
+    "catppuccin-latte" = "catppuccin-latte";
+    "everforest" = "everforest-dark";
+    "gruvbox" = "gruvbox-dark";
+    "nord" = "nord";
+    "rose-pine" = "rose-pine";
+    "flexoki-light" = "solarized-light";
+    "ristretto" = "molokai-dark";
+    "ethereal" = "nightfox";
+    "hackerman" = "nightfox";
+    "matte-black" = "nightfox";
+    "osaka-jade" = "nightfox";
+    # Custom themes use their own zellij.kdl
+    "royal-green" = "royal-green";
+  };
+
   # Path to local custom themes
   customThemesPath = ./themes;
 
@@ -105,6 +125,7 @@ let
       destThemePath = "${config.xdg.configHome}/keystone/themes/${themeName}";
       ghosttyTheme = ghosttyThemeMap.${themeName} or "Builtin Dark";
       helixTheme = helixThemeMap.${themeName} or "base16_default_dark";
+      zellijTheme = zellijThemeMap.${themeName} or "tokyo-night-dark";
     in
     # Copy individual theme files
     listToAttrs (
@@ -121,6 +142,10 @@ let
     // {
       "${destThemePath}/helix.conf".text = "theme = \"${helixTheme}\"\n";
     }
+    # Generate zellij.conf with correct theme name (references built-in zellij themes)
+    // {
+      "${destThemePath}/zellij.conf".text = "theme \"${zellijTheme}\"\n";
+    }
     # Copy backgrounds directory if it exists
     // (
       if pathExists "${sourceThemePath}/backgrounds" then
@@ -131,10 +156,11 @@ let
         { }
     );
 
-  # Files to copy for custom themes (includes ghostty.conf since custom themes provide their own)
+  # Files to copy for custom themes (includes ghostty.conf and zellij.kdl since custom themes provide their own)
   customThemeFilesToCopy = themeFilesToCopy ++ [
     "ghostty.conf"
     "helix.toml"
+    "zellij.kdl"
   ];
 
   # Function to create theme files for a custom local theme
@@ -144,6 +170,7 @@ let
       sourceThemePath = "${customThemesPath}/${themeName}";
       destThemePath = "${config.xdg.configHome}/keystone/themes/${themeName}";
       helixTheme = helixThemeMap.${themeName} or "base16_default_dark";
+      zellijTheme = zellijThemeMap.${themeName} or "tokyo-night-dark";
     in
     # Copy individual theme files from local custom themes directory
     listToAttrs (
@@ -156,11 +183,25 @@ let
     // {
       "${destThemePath}/helix.conf".text = "theme = \"${helixTheme}\"\n";
     }
+    # Generate zellij.conf with correct theme name
+    // {
+      "${destThemePath}/zellij.conf".text = "theme \"${zellijTheme}\"\n";
+    }
     # Copy helix.toml to helix themes directory for custom themes
     // (
       if pathExists "${sourceThemePath}/helix.toml" then
         {
           "${config.xdg.configHome}/helix/themes/${helixTheme}.toml".source = "${sourceThemePath}/helix.toml";
+        }
+      else
+        { }
+    )
+    # Copy zellij.kdl to zellij themes directory for custom themes
+    // (
+      if pathExists "${sourceThemePath}/zellij.kdl" then
+        {
+          "${config.xdg.configHome}/zellij/themes/${zellijTheme}.kdl".source =
+            "${sourceThemePath}/zellij.kdl";
         }
       else
         { }
@@ -248,6 +289,17 @@ let
       ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface icon-theme "$(<"$THEME_PATH/icons.theme")"
     fi
 
+    # Update zellij theme (zellij watches config file for changes)
+    ZELLIJ_CONFIG="${config.xdg.configHome}/zellij/config.kdl"
+    if [[ -f "$ZELLIJ_CONFIG" ]] && [[ -f "$THEME_PATH/zellij.conf" ]]; then
+      ZELLIJ_THEME=$(cat "$THEME_PATH/zellij.conf" | grep -oP 'theme "\K[^"]+' || echo "tokyo-night-dark")
+      if grep -q '^theme ' "$ZELLIJ_CONFIG"; then
+        ${pkgs.gnused}/bin/sed -i "s/^theme .*/theme \"$ZELLIJ_THEME\"/" "$ZELLIJ_CONFIG"
+      else
+        echo "theme \"$ZELLIJ_THEME\"" >> "$ZELLIJ_CONFIG"
+      fi
+    fi
+
     ${pkgs.libnotify}/bin/notify-send "Theme Changed" "Switched to $THEME_NAME theme" -t 3000
   '';
   # Light themes (have light.mode file in omarchy)
@@ -302,11 +354,12 @@ in
       };
     };
 
-    # Create activation script to setup symlinks
+    # Create activation script to setup symlinks and mutable configs
     home.activation.keystoneThemeSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       KEYSTONE_DIR="${config.xdg.configHome}/keystone"
       CURRENT_DIR="$KEYSTONE_DIR/current"
       THEME_DIR="$KEYSTONE_DIR/themes/${themeCfg.name}"
+      ZELLIJ_CONFIG="${config.xdg.configHome}/zellij/config.kdl"
 
       # Create directories
       mkdir -p "$CURRENT_DIR"
@@ -331,6 +384,27 @@ in
       if [[ -f "$THEME_DIR/mako.ini" ]]; then
         ln -sfn "$CURRENT_DIR/theme/mako.ini" "${config.xdg.configHome}/mako/config"
         echo "Keystone: Linked mako config"
+      fi
+
+      # Setup mutable zellij config for dynamic theme switching
+      # Zellij doesn't watch symlinks, so we need a real file
+      if [[ -L "$ZELLIJ_CONFIG" ]]; then
+        # Copy the symlinked config to a real file
+        cp -L "$ZELLIJ_CONFIG" "$ZELLIJ_CONFIG.tmp"
+        rm "$ZELLIJ_CONFIG"
+        mv "$ZELLIJ_CONFIG.tmp" "$ZELLIJ_CONFIG"
+        echo "Keystone: Converted zellij config to mutable file"
+      fi
+
+      # Update zellij theme if config exists
+      if [[ -f "$ZELLIJ_CONFIG" ]] && [[ -f "$THEME_DIR/zellij.conf" ]]; then
+        ZELLIJ_THEME=$(cat "$THEME_DIR/zellij.conf" | grep -oP 'theme "\K[^"]+' || echo "tokyo-night-dark")
+        if grep -q '^theme ' "$ZELLIJ_CONFIG"; then
+          ${pkgs.gnused}/bin/sed -i "s/^theme .*/theme \"$ZELLIJ_THEME\"/" "$ZELLIJ_CONFIG"
+        else
+          echo "theme \"$ZELLIJ_THEME\"" >> "$ZELLIJ_CONFIG"
+        fi
+        echo "Keystone: Set zellij theme to $ZELLIJ_THEME"
       fi
     '';
   };
