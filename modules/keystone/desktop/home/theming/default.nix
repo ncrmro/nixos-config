@@ -22,6 +22,7 @@ let
     "walker.css"
     "chromium.theme"
     "icons.theme"
+    "light.mode"
     "preview.png"
   ];
 
@@ -152,8 +153,29 @@ let
       chromium --no-startup-window --set-theme-color="$(<"$THEME_PATH/chromium.theme")" 2>/dev/null || true
     fi
 
+    # Set GTK/GNOME color scheme based on light.mode file
+    if [[ -f "$THEME_PATH/light.mode" ]]; then
+      ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme "prefer-light"
+      ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface gtk-theme "Adwaita"
+    else
+      ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
+      ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
+    fi
+
+    # Set icon theme if available
+    if [[ -f "$THEME_PATH/icons.theme" ]]; then
+      ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface icon-theme "$(<"$THEME_PATH/icons.theme")"
+    fi
+
     ${pkgs.libnotify}/bin/notify-send "Theme Changed" "Switched to $THEME_NAME theme" -t 3000
   '';
+  # Light themes (have light.mode file in omarchy)
+  lightThemes = [
+    "flexoki-light"
+    "catppuccin-latte"
+    "rose-pine"
+  ];
+  isLightTheme = builtins.elem themeCfg.name lightThemes;
 in
 {
   options.keystone.desktop.theme = {
@@ -175,6 +197,23 @@ in
     home.packages = [
       keystoneThemeSwitch
     ];
+
+    # GTK theme configuration
+    gtk = {
+      enable = true;
+      theme = {
+        name = if isLightTheme then "Adwaita" else "Adwaita-dark";
+        package = pkgs.gnome-themes-extra;
+      };
+    };
+
+    # Set GNOME/GTK color scheme via dconf
+    dconf.settings = {
+      "org/gnome/desktop/interface" = {
+        color-scheme = if isLightTheme then "prefer-light" else "prefer-dark";
+        gtk-theme = if isLightTheme then "Adwaita" else "Adwaita-dark";
+      };
+    };
 
     # Create activation script to setup symlinks
     home.activation.keystoneThemeSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
