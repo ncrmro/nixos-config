@@ -81,10 +81,40 @@ show_toggle_menu() {
 # ============== STYLE MENU ==============
 show_style_menu() {
   case $(menu "Style" "󰸌  Theme\n  Background") in
-  *Theme*) not_implemented "Theme picker" ;;
+  *Theme*) show_theme_menu ;;
   *Background*) not_implemented "Background switcher" ;;
   *) show_main_menu ;;
   esac
+}
+
+show_theme_menu() {
+  # Get available themes from keystone themes directory
+  THEMES_DIR="$HOME/.config/keystone/themes"
+  if [[ ! -d "$THEMES_DIR" ]]; then
+    notify-send "No themes found" "Themes directory not found at $THEMES_DIR" -t 3000
+    show_style_menu
+    return
+  fi
+
+  # Build theme list
+  theme_list=""
+  for theme in "$THEMES_DIR"/*/; do
+    theme_name=$(basename "$theme")
+    theme_list="${theme_list}󰸌  ${theme_name}\n"
+  done
+
+  # Remove trailing newline
+  theme_list="${theme_list%\\n}"
+
+  selected=$(echo -e "$theme_list" | keystone-launch-walker --dmenu --width 350 --minheight 1 --maxheight 630 -p "Theme…" 2>/dev/null)
+
+  if [[ -n "$selected" ]]; then
+    # Extract theme name (remove icon prefix)
+    theme_name=$(echo "$selected" | sed 's/^󰸌  //')
+    keystone-theme-switch "$theme_name"
+  else
+    show_style_menu
+  fi
 }
 
 # ============== SETUP MENU ==============
