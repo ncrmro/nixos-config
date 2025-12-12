@@ -34,7 +34,7 @@ in
         # Move focus with vim keys
         "$mod, H, movefocus, l"
         "$mod, L, movefocus, r"
-        "$mod, J, movefocus, d"
+        "$mod, J, togglesplit,"
 
         # Move focus with arrow keys
         "$mod, left, movefocus, l"
