@@ -1,9 +1,15 @@
-{...}: {
+{ ... }:
+{
   services.adguardhome = {
     enable = true;
     mutableSettings = true;
     openFirewall = true;
     allowDHCP = true;
+    settings = {
+      http = {
+        address = "127.0.0.1:3030";
+      };
+    };
   };
 
   # Open firewall ports for DNS and DHCP
