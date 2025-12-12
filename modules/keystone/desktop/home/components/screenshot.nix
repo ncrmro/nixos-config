@@ -14,17 +14,17 @@ let
   # The default version of satty is 0.18.1 and uses --action-on-enter (singular)
   # Version 0.19.0+ uses --actions-on-enter (plural) which our script requires
   satty-latest = pkgs.satty.overrideAttrs (oldAttrs: rec {
-    version = "0.19.0";
+    version = "0.20.0";
     src = pkgs.fetchFromGitHub {
       owner = "gabm";
       repo = "Satty";
-      rev = "v0.19.0";
-      hash = "sha256-AKzTDBKqZuZfEgPJqv8I5IuCeDkD2+fBY44aAPFaYvI=";
+      rev = "v0.20.0";
+      hash = "sha256-4RVah6yo4cJyE6qUbDJbcmFpi7xsKNpHJFrzSs1yJcg=";
     };
     cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
       inherit src;
       name = "${oldAttrs.pname}-${version}";
-      hash = "sha256-hvJOjWD5TRXlDr5KfpFlzAi44Xd6VuaFexXziXgDLCk=";
+      hash = "sha256-RPj6ZVtDWPMt4jrmU750b7zLVHwqk+SWr2OskDAQFYI=";
     };
   });
 
@@ -121,6 +121,14 @@ in
       pkgs.hyprpicker
       pkgs.jq
     ];
+
+    # Satty configuration - Ctrl+C copies to clipboard, saves file, and exits
+    xdg.configFile."satty/config.toml".text = ''
+      [general]
+      early-exit = true
+      save-after-copy = true
+      copy-command = "${pkgs.wl-clipboard}/bin/wl-copy"
+    '';
 
     # Hyprland layer rule to remove animation artifacts during screenshot selection
     wayland.windowManager.hyprland.settings.layerrule = [ "no_anim on, match:namespace slurp" ];

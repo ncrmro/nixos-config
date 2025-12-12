@@ -81,11 +81,14 @@ in
             tooltip = false;
           };
 
+          # Screen recording indicator - updates via signal instead of polling
+          # signal = 8 means waybar listens for RTMIN+8 (sent by keystone-screenrecord)
+          # See: modules/keystone/desktop/home/scripts/default.nix
           "custom/screenrecording-indicator" = {
-            exec = "pgrep -x 'wf-recorder|wl-screenrec|gpu-screen-recorder' > /dev/null && echo '󰻃' || echo ''";
-            interval = 2;
+            exec = "pgrep -f '^gpu-screen-recorder' >/dev/null && echo '{\"text\": \"󰻂\", \"tooltip\": \"Stop recording\", \"class\": \"active\"}' || echo '{\"text\": \"\"}'";
+            return-type = "json";
+            signal = 8;
             on-click = "keystone-screenrecord";
-            tooltip-format = "Screen recording active";
           };
 
           network = {

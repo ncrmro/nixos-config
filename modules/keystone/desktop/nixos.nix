@@ -5,12 +5,14 @@
   inputs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.keystone.desktop;
   pkgs-unstable = import inputs.nixpkgs-unstable {
     system = pkgs.system;
   };
-in {
+in
+{
   options.keystone.desktop = {
     enable = mkEnableOption "Keystone Desktop - Core desktop packages and utilities";
 
@@ -68,6 +70,12 @@ in {
         command = mkDefault "uwsm start -S -F Hyprland";
         user = cfg.user;
       };
+    };
+
+    # Configure PAM to register greetd session as wayland type
+    # This enables loginctl lock-session to work properly
+    security.pam.services.greetd.rules.session.systemd.settings = mkIf cfg.greetd.enable {
+      type = "wayland";
     };
 
     # Pipewire audio stack

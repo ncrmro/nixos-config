@@ -42,13 +42,37 @@ let
     "hackerman" = "Builtin Dark";
     "matte-black" = "Matte Black";
     "osaka-jade" = "Builtin Dark";
+    # Custom themes use their own ghostty.conf, this is just a fallback
+    "royal-green" = "Builtin Dark";
   };
+
+  # Map keystone theme names to helix theme names
+  helixThemeMap = {
+    "tokyo-night" = "tokyonight";
+    "kanagawa" = "kanagawa";
+    "catppuccin" = "catppuccin_mocha";
+    "catppuccin-latte" = "catppuccin_latte";
+    "everforest" = "everforest_dark";
+    "gruvbox" = "gruvbox";
+    "nord" = "nord";
+    "rose-pine" = "rose_pine";
+    "flexoki-light" = "fleet_dark";
+    "ristretto" = "monokai_pro_ristretto";
+    "ethereal" = "base16_default_dark";
+    "hackerman" = "base16_default_dark";
+    "matte-black" = "base16_default_dark";
+    "osaka-jade" = "kinda_nvim";
+    "royal-green" = "royal_green";
+  };
+
+  # Path to local custom themes
+  customThemesPath = ./themes;
 
   # Get list of themes from omarchy
   omarchyThemesPath = "${inputs.omarchy}/themes";
 
   # Theme directories available in omarchy
-  availableThemes = [
+  omarchyThemes = [
     "tokyo-night"
     "kanagawa"
     "catppuccin"
@@ -65,13 +89,22 @@ let
     "rose-pine"
   ];
 
-  # Function to create theme files for a single theme
-  mkThemeFiles =
+  # Custom local themes
+  customThemes = [
+    "royal-green"
+  ];
+
+  # All available themes
+  availableThemes = omarchyThemes ++ customThemes;
+
+  # Function to create theme files for an omarchy theme
+  mkOmarchyThemeFiles =
     themeName:
     let
       sourceThemePath = "${omarchyThemesPath}/${themeName}";
       destThemePath = "${config.xdg.configHome}/keystone/themes/${themeName}";
       ghosttyTheme = ghosttyThemeMap.${themeName} or "Builtin Dark";
+      helixTheme = helixThemeMap.${themeName} or "base16_default_dark";
     in
     # Copy individual theme files
     listToAttrs (
@@ -84,11 +117,59 @@ let
     // {
       "${destThemePath}/ghostty.conf".text = "theme = ${ghosttyTheme}\n";
     }
+    # Generate helix.conf with correct theme name
+    // {
+      "${destThemePath}/helix.conf".text = "theme = \"${helixTheme}\"\n";
+    }
     # Copy backgrounds directory if it exists
     // (
       if pathExists "${sourceThemePath}/backgrounds" then
         {
           "${destThemePath}/backgrounds".source = "${sourceThemePath}/backgrounds";
+        }
+      else
+        { }
+    );
+
+  # Files to copy for custom themes (includes ghostty.conf since custom themes provide their own)
+  customThemeFilesToCopy = themeFilesToCopy ++ [
+    "ghostty.conf"
+    "helix.toml"
+  ];
+
+  # Function to create theme files for a custom local theme
+  mkCustomThemeFiles =
+    themeName:
+    let
+      sourceThemePath = "${customThemesPath}/${themeName}";
+      destThemePath = "${config.xdg.configHome}/keystone/themes/${themeName}";
+      helixTheme = helixThemeMap.${themeName} or "base16_default_dark";
+    in
+    # Copy individual theme files from local custom themes directory
+    listToAttrs (
+      map (
+        fileName:
+        nameValuePair "${destThemePath}/${fileName}" { source = "${sourceThemePath}/${fileName}"; }
+      ) (filter (fileName: pathExists "${sourceThemePath}/${fileName}") customThemeFilesToCopy)
+    )
+    # Generate helix.conf with correct theme name
+    // {
+      "${destThemePath}/helix.conf".text = "theme = \"${helixTheme}\"\n";
+    }
+    # Copy helix.toml to helix themes directory for custom themes
+    // (
+      if pathExists "${sourceThemePath}/helix.toml" then
+        {
+          "${config.xdg.configHome}/helix/themes/${helixTheme}.toml".source = "${sourceThemePath}/helix.toml";
+        }
+      else
+        { }
+    )
+    # Use osaka-jade backgrounds from omarchy for royal-green
+    // (
+      if themeName == "royal-green" then
+        {
+          "${destThemePath}/backgrounds".source = "${omarchyThemesPath}/osaka-jade/backgrounds";
         }
       else
         { }
@@ -187,11 +268,17 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Deploy all theme files from omarchy
+    # Deploy all theme files from omarchy and custom themes
     # Also deploy omarchy default mako core.ini since theme mako.ini files include it
-    home.file = mkMerge (map mkThemeFiles availableThemes) // {
-      ".local/share/omarchy/default/mako/core.ini".source = "${inputs.omarchy}/default/mako/core.ini";
-    };
+    home.file = mkMerge (
+      (map mkOmarchyThemeFiles omarchyThemes)
+      ++ (map mkCustomThemeFiles customThemes)
+      ++ [
+        {
+          ".local/share/omarchy/default/mako/core.ini".source = "${inputs.omarchy}/default/mako/core.ini";
+        }
+      ]
+    );
 
     # Theme switching script
     home.packages = [

@@ -4,9 +4,11 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.keystone.desktop.hyprland;
-in {
+in
+{
   config = mkIf cfg.enable {
     services.hypridle = {
       enable = mkDefault true;
@@ -21,7 +23,7 @@ in {
           # Lock screen at 5 minutes
           {
             timeout = 300;
-            on-timeout = "loginctl lock-session";
+            on-timeout = "pidof hyprlock || hyprlock";
           }
           # DPMS off at 5.5 minutes
           {
