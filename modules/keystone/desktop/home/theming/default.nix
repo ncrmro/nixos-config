@@ -27,19 +27,19 @@ let
 
   # Map keystone theme names to correct ghostty theme names
   ghosttyThemeMap = {
-    "tokyo-night" = "tokyonight";
+    "tokyo-night" = "TokyoNight Night";
     "kanagawa" = "Kanagawa Wave";
-    "catppuccin" = "catppuccin-mocha";
-    "catppuccin-latte" = "catppuccin-latte";
-    "everforest" = "Everforest Dark - Hard";
-    "gruvbox" = "GruvboxDark";
-    "nord" = "nord";
-    "rose-pine" = "rose-pine";
-    "flexoki-light" = "flexoki-light";
+    "catppuccin" = "Catppuccin Mocha";
+    "catppuccin-latte" = "Catppuccin Latte";
+    "everforest" = "Everforest Dark Hard";
+    "gruvbox" = "Gruvbox Dark";
+    "nord" = "Nord";
+    "rose-pine" = "Rose Pine";
+    "flexoki-light" = "Flexoki Light";
     "ristretto" = "Monokai Pro Ristretto";
     "ethereal" = "Builtin Dark";
     "hackerman" = "Builtin Dark";
-    "matte-black" = "Builtin Dark";
+    "matte-black" = "Matte Black";
     "osaka-jade" = "Builtin Dark";
   };
 
