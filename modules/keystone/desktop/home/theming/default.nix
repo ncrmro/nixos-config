@@ -146,6 +146,12 @@ let
     ${pkgs.procps}/bin/pkill -SIGUSR2 ghostty 2>/dev/null || true
     ${pkgs.systemd}/bin/systemctl --user restart mako.service 2>/dev/null || true
     ${pkgs.systemd}/bin/systemctl --user restart walker.service 2>/dev/null || true
+
+    # Set Chromium theme color
+    if [[ -f "$THEME_PATH/chromium.theme" ]] && command -v chromium &>/dev/null; then
+      chromium --no-startup-window --set-theme-color="$(<"$THEME_PATH/chromium.theme")" 2>/dev/null || true
+    fi
+
     ${pkgs.libnotify}/bin/notify-send "Theme Changed" "Switched to $THEME_NAME theme" -t 3000
   '';
 in
@@ -192,6 +198,13 @@ in
           ln -sfn "$THEME_DIR/backgrounds/$FIRST_BG" "$CURRENT_DIR/background"
           echo "Keystone: Set default background from ${themeCfg.name} theme"
         fi
+      fi
+
+      # Create mako config directory and symlink
+      mkdir -p "${config.xdg.configHome}/mako"
+      if [[ -f "$THEME_DIR/mako.ini" ]]; then
+        ln -sfn "$CURRENT_DIR/theme/mako.ini" "${config.xdg.configHome}/mako/config"
+        echo "Keystone: Linked mako config"
       fi
     '';
   };
