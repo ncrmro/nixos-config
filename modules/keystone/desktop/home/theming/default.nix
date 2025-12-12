@@ -355,6 +355,7 @@ in
     };
 
     # Create activation script to setup symlinks and mutable configs
+    # Run after writeBoundary so files are deployed, but handle conflicts gracefully
     home.activation.keystoneThemeSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       KEYSTONE_DIR="${config.xdg.configHome}/keystone"
       CURRENT_DIR="$KEYSTONE_DIR/current"
@@ -388,11 +389,15 @@ in
 
       # Setup mutable zellij config for dynamic theme switching
       # Zellij doesn't watch symlinks, so we need a real file
-      if [[ -L "$ZELLIJ_CONFIG" ]]; then
-        # Copy the symlinked config to a real file
-        cp -L "$ZELLIJ_CONFIG" "$ZELLIJ_CONFIG.tmp"
-        rm "$ZELLIJ_CONFIG"
-        mv "$ZELLIJ_CONFIG.tmp" "$ZELLIJ_CONFIG"
+      # Remove any backup files that might interfere
+      rm -f "$ZELLIJ_CONFIG.backup" "$ZELLIJ_CONFIG.tmp"
+
+      if [[ -L "$ZELLIJ_CONFIG" ]] || [[ ! -w "$ZELLIJ_CONFIG" ]]; then
+        # Copy the config to a real mutable file
+        cp -L "$ZELLIJ_CONFIG" "$ZELLIJ_CONFIG.tmp" 2>/dev/null || true
+        rm -f "$ZELLIJ_CONFIG"
+        mv "$ZELLIJ_CONFIG.tmp" "$ZELLIJ_CONFIG" 2>/dev/null || true
+        chmod 644 "$ZELLIJ_CONFIG" 2>/dev/null || true
         echo "Keystone: Converted zellij config to mutable file"
       fi
 

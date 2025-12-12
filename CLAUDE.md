@@ -66,9 +66,14 @@ nix build .#nixosConfigurations.test-vm.config.system.build.vm
 
 ### Home Manager
 
+Home Manager is integrated into NixOS and activated automatically during `nixos-rebuild switch`. **Never run `home-manager switch` directly** - it will cause conflicts with the NixOS-managed home-manager service.
+
 ```bash
-# Switch Home Manager configuration
-home-manager switch --flake .#ncrmro@<hostname>
+# CORRECT: Home Manager is applied as part of NixOS rebuild
+sudo nixos-rebuild switch --flake .#<hostname>
+
+# WRONG: Do not use home-manager directly
+# home-manager switch --flake .#ncrmro@<hostname>  # Don't do this!
 ```
 
 ## Configuration Patterns
