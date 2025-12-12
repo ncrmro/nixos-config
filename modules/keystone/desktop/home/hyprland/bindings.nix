@@ -26,8 +26,10 @@ in
 
         # Window management
         "$mod, W, killactive,"
-        "$mod, V, togglefloating,"
+        "CTRL ALT, DELETE, exec, hyprctl dispatch closewindow address:*"
+        "$mod SHIFT, V, togglefloating,"
         "$mod, M, exit,"
+        "$mod, P, pseudo,"
 
         # Move focus with vim keys
         "$mod, H, movefocus, l"
@@ -39,6 +41,12 @@ in
         "$mod, right, movefocus, r"
         "$mod, up, movefocus, u"
         "$mod, down, movefocus, d"
+
+        # Swap windows with arrow keys
+        "$mod SHIFT, left, swapwindow, l"
+        "$mod SHIFT, right, swapwindow, r"
+        "$mod SHIFT, up, swapwindow, u"
+        "$mod SHIFT, down, swapwindow, d"
 
         # Workspace navigation
         "$mod, 1, workspace, 1"
@@ -64,11 +72,22 @@ in
         "$mod SHIFT, 9, movetoworkspace, 9"
         "$mod SHIFT, 0, movetoworkspace, 10"
 
-        # Scroll through workspaces
+        # TAB between workspaces
+        "$mod, TAB, workspace, e+1"
+        "$mod SHIFT, TAB, workspace, e-1"
+        "$mod CTRL, TAB, workspace, previous"
+
+        # Scroll through workspaces with comma/period
         "$mod, comma, workspace, -1"
         "$mod, period, workspace, +1"
         "$mod, mouse_down, workspace, e+1"
         "$mod, mouse_up, workspace, e-1"
+
+        # Cycle through windows (ALT+TAB)
+        "ALT, TAB, cyclenext,"
+        "ALT SHIFT, TAB, cyclenext, prev"
+        "ALT, TAB, bringactivetotop,"
+        "ALT SHIFT, TAB, bringactivetotop,"
 
         # Special workspace (scratchpad)
         "$mod, S, togglespecialworkspace, magic"
@@ -76,12 +95,46 @@ in
 
         # Fullscreen
         "$mod, F, fullscreen,"
+        "SHIFT, F11, fullscreen, 0"
+        "ALT, F11, fullscreen, 1"
 
         # Toggle split direction
         "$mod, T, togglesplit,"
 
+        # Resize windows
+        "$mod, minus, resizeactive, -100 0"
+        "$mod, equal, resizeactive, 100 0"
+        "$mod SHIFT, minus, resizeactive, 0 -100"
+        "$mod SHIFT, equal, resizeactive, 0 100"
+
+        # Universal copy/paste/cut
+        "$mod, C, sendshortcut, CTRL, Insert,"
+        "$mod, V, sendshortcut, SHIFT, Insert,"
+        "$mod, X, sendshortcut, CTRL, X,"
+
         # Clipboard manager
-        "CTRL $mod, V, exec, ghostty --class clipse -e clipse"
+        "$mod CTRL, V, exec, ghostty --class clipse -e clipse"
+
+        # Emoji picker
+        "$mod CTRL, E, exec, walker -m symbols"
+
+        # Utilities
+        "$mod SHIFT, Space, exec, killall -SIGUSR1 waybar"
+        "$mod, Backspace, exec, hyprctl dispatch setprop \"address:$(hyprctl activewindow -j | jq -r '.address')\" opaque toggle"
+
+        # Notifications (mako)
+        "$mod SHIFT, period, exec, makoctl dismiss"
+        "$mod CTRL, period, exec, makoctl dismiss --all"
+        "$mod ALT, period, exec, makoctl mode -t do-not-disturb"
+
+        # Screenshots
+        ", Print, exec, keystone-screenshot"
+        "SHIFT, Print, exec, keystone-screenshot smart clipboard"
+        "$mod, Print, exec, hyprpicker -a"
+
+        # Toggle idle/nightlight
+        "$mod CTRL, I, exec, keystone-idle-toggle"
+        "$mod CTRL, N, exec, keystone-nightlight-toggle"
       ];
 
       # Mouse bindings
@@ -106,6 +159,7 @@ in
         ", XF86AudioPause, exec, playerctl play-pause"
         ", XF86AudioPlay, exec, playerctl play-pause"
         ", XF86AudioPrev, exec, playerctl previous"
+        ", XF86PowerOff, exec, keystone-menu system"
       ];
     };
   };
