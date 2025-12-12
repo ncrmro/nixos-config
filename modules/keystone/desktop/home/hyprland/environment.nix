@@ -2,21 +2,25 @@
   config,
   lib,
   pkgs,
-  osConfig ? {},
+  osConfig ? { },
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.keystone.desktop.hyprland;
+  terminalCfg = config.keystone.terminal;
   hasNvidiaDrivers =
-    if osConfig ? services.xserver.videoDrivers
-    then builtins.elem "nvidia" osConfig.services.xserver.videoDrivers
-    else false;
+    if osConfig ? services.xserver.videoDrivers then
+      builtins.elem "nvidia" osConfig.services.xserver.videoDrivers
+    else
+      false;
   nvidiaEnv = [
     "NVD_BACKEND,direct"
     "LIBVA_DRIVER_NAME,nvidia"
     "__GLX_VENDOR_LIBRARY_NAME,nvidia"
   ];
-in {
+in
+{
   config = mkIf cfg.enable {
     wayland.windowManager.hyprland.settings = {
       env = mkDefault (
@@ -50,7 +54,7 @@ in {
 
           # Use XCompose file
           "XCOMPOSEFILE,~/.XCompose"
-          "EDITOR,nvim"
+          "EDITOR,${terminalCfg.editor}"
 
           # GTK theme
           "GTK_THEME,Adwaita:dark"
