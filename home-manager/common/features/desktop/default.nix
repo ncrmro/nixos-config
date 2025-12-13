@@ -14,6 +14,13 @@
   # Hypridle configuration - ignore D-Bus inhibit locks from Chrome/Claude
   services.hypridle.settings.general.ignore_dbus_inhibit = true;
 
+  # xdg-desktop-portal-hyprland config - auto-allow restore tokens for screen sharing
+  xdg.configFile."hypr/xdph.conf".text = ''
+    screencopy {
+      allow_token_by_default = true
+    }
+  '';
+
   programs.chromium.enable = true;
   programs.chromium.extensions = [
     { id = "nngceckbapebfimnlniiiahkandclblb"; } # bitwarden
