@@ -367,10 +367,10 @@ in
       # Create directories
       mkdir -p "$CURRENT_DIR"
 
-      # Create theme symlink if not exists or pointing to wrong theme
-      if [[ ! -L "$CURRENT_DIR/theme" ]] || [[ "$(readlink "$CURRENT_DIR/theme")" != "$THEME_DIR" ]]; then
+      # Create theme symlink only if not exists (preserve user's runtime selection)
+      if [[ ! -L "$CURRENT_DIR/theme" ]]; then
         ln -sfn "$THEME_DIR" "$CURRENT_DIR/theme"
-        echo "Keystone: Set theme to ${themeCfg.name}"
+        echo "Keystone: Set initial theme to ${themeCfg.name}"
       fi
 
       # Create default background symlink if not exists and theme has backgrounds
