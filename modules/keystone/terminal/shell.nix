@@ -33,6 +33,7 @@ in
       settings = {
         theme = "current";
         startup_tips = false;
+        pane_frames = false;
         keybinds = {
           normal = {
             # Previous tab: Ctrl+PgUp
