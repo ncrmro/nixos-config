@@ -289,14 +289,14 @@ let
       ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface icon-theme "$(<"$THEME_PATH/icons.theme")"
     fi
 
-    # Update zellij theme (zellij watches config file for changes)
-    ZELLIJ_CONFIG="${config.xdg.configHome}/zellij/config.kdl"
-    if [[ -f "$ZELLIJ_CONFIG" ]] && [[ -f "$THEME_PATH/zellij.conf" ]]; then
-      ZELLIJ_THEME=$(cat "$THEME_PATH/zellij.conf" | grep -oP 'theme "\K[^"]+' || echo "tokyo-night-dark")
-      if grep -q '^theme ' "$ZELLIJ_CONFIG"; then
-        ${pkgs.gnused}/bin/sed -i "s/^theme .*/theme \"$ZELLIJ_THEME\"/" "$ZELLIJ_CONFIG"
-      else
-        echo "theme \"$ZELLIJ_THEME\"" >> "$ZELLIJ_CONFIG"
+    # Update zellij theme symlink and trigger reload
+    if [[ -f "$THEME_PATH/zellij.kdl" ]]; then
+      mkdir -p "${config.xdg.configHome}/zellij/themes"
+      ln -sfn "$THEME_PATH/zellij.kdl" "${config.xdg.configHome}/zellij/themes/current.kdl"
+
+      # Touch config to trigger zellij reload (zellij watches config file)
+      if [[ -f "${config.xdg.configHome}/zellij/config.kdl" ]]; then
+        touch "${config.xdg.configHome}/zellij/config.kdl"
       fi
     fi
 
@@ -360,7 +360,6 @@ in
       KEYSTONE_DIR="${config.xdg.configHome}/keystone"
       CURRENT_DIR="$KEYSTONE_DIR/current"
       THEME_DIR="$KEYSTONE_DIR/themes/${themeCfg.name}"
-      ZELLIJ_CONFIG="${config.xdg.configHome}/zellij/config.kdl"
 
       # Create directories
       mkdir -p "$CURRENT_DIR"
@@ -387,29 +386,11 @@ in
         echo "Keystone: Linked mako config"
       fi
 
-      # Setup mutable zellij config for dynamic theme switching
-      # Zellij doesn't watch symlinks, so we need a real file
-      # Remove any backup files that might interfere
-      rm -f "$ZELLIJ_CONFIG.backup" "$ZELLIJ_CONFIG.tmp"
-
-      if [[ -L "$ZELLIJ_CONFIG" ]] || [[ ! -w "$ZELLIJ_CONFIG" ]]; then
-        # Copy the config to a real mutable file
-        cp -L "$ZELLIJ_CONFIG" "$ZELLIJ_CONFIG.tmp" 2>/dev/null || true
-        rm -f "$ZELLIJ_CONFIG"
-        mv "$ZELLIJ_CONFIG.tmp" "$ZELLIJ_CONFIG" 2>/dev/null || true
-        chmod 644 "$ZELLIJ_CONFIG" 2>/dev/null || true
-        echo "Keystone: Converted zellij config to mutable file"
-      fi
-
-      # Update zellij theme if config exists
-      if [[ -f "$ZELLIJ_CONFIG" ]] && [[ -f "$THEME_DIR/zellij.conf" ]]; then
-        ZELLIJ_THEME=$(cat "$THEME_DIR/zellij.conf" | grep -oP 'theme "\K[^"]+' || echo "tokyo-night-dark")
-        if grep -q '^theme ' "$ZELLIJ_CONFIG"; then
-          ${pkgs.gnused}/bin/sed -i "s/^theme .*/theme \"$ZELLIJ_THEME\"/" "$ZELLIJ_CONFIG"
-        else
-          echo "theme \"$ZELLIJ_THEME\"" >> "$ZELLIJ_CONFIG"
-        fi
-        echo "Keystone: Set zellij theme to $ZELLIJ_THEME"
+      # Create zellij theme symlink
+      mkdir -p "${config.xdg.configHome}/zellij/themes"
+      if [[ -f "$THEME_DIR/zellij.kdl" ]]; then
+        ln -sfn "$CURRENT_DIR/theme/zellij.kdl" "${config.xdg.configHome}/zellij/themes/current.kdl"
+        echo "Keystone: Linked zellij theme"
       fi
     '';
   };

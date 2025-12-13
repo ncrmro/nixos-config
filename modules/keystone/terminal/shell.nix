@@ -31,7 +31,7 @@ in
       enable = true;
       enableZshIntegration = false;
       settings = {
-        theme = "tokyo-night-dark";
+        theme = "current";
         startup_tips = false;
         keybinds = {
           normal = {
