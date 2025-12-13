@@ -5,10 +5,12 @@
   inputs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.keystone.desktop.hyprland;
   hyprlandPkg = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
-in {
+in
+{
   imports = [
     ./appearance.nix
     ./autostart.nix
@@ -27,7 +29,7 @@ in {
 
     monitors = mkOption {
       type = types.listOf types.str;
-      default = [",preferred,auto,1"];
+      default = [ ",preferred,auto,1" ];
       description = "Monitor configuration strings for Hyprland";
     };
 
@@ -62,6 +64,11 @@ in {
       package = hyprlandPkg;
       # Disabled since programs.hyprland.withUWSM is enabled on NixOS
       systemd.enable = false;
+
+      # Source theme file for runtime theme switching
+      extraConfig = ''
+        source = ~/.config/keystone/current/theme/hyprland.conf
+      '';
 
       settings = {
         # Default applications

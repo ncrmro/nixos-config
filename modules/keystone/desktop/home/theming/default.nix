@@ -300,6 +300,9 @@ let
       fi
     fi
 
+    # Reload hyprland to pick up theme changes
+    ${pkgs.hyprland}/bin/hyprctl reload 2>/dev/null || true
+
     ${pkgs.libnotify}/bin/notify-send "Theme Changed" "Switched to $THEME_NAME theme" -t 3000
   '';
   # Light themes (have light.mode file in omarchy)
