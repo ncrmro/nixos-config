@@ -2,10 +2,20 @@
 set -euo pipefail
 
 HOST="ocean"
-HOST_IP="ocean.mercury"
+TAILSCALE_HOST="ocean.mercury"
+LOCAL_IP="192.168.1.10"
 REMOTE_K3S_PATH="/etc/rancher/k3s/k3s.yaml"
 LOCAL_CONFIG_DIR="$(dirname "$0")/../.kube"
 LOCAL_CONFIG_PATH="${LOCAL_CONFIG_DIR}/ocean.yml"
+
+# Try Tailscale first, fall back to local IP
+if ssh -o ConnectTimeout=3 -o BatchMode=yes "root@${TAILSCALE_HOST}" true 2>/dev/null; then
+  HOST_IP="$TAILSCALE_HOST"
+  echo "Using Tailscale: $HOST_IP"
+else
+  HOST_IP="$LOCAL_IP"
+  echo "Tailscale unavailable, using local IP: $HOST_IP"
+fi
 
 echo "Updating $HOST at $HOST_IP..."
 
