@@ -161,6 +161,7 @@ let
     "ghostty.conf"
     "helix.toml"
     "zellij.kdl"
+    "lazygit.yml"
   ];
 
   # Function to create theme files for a custom local theme
@@ -289,15 +290,16 @@ let
       ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface icon-theme "$(<"$THEME_PATH/icons.theme")"
     fi
 
-    # Update zellij theme symlink and trigger reload
+    # Update zellij theme symlink
     if [[ -f "$THEME_PATH/zellij.kdl" ]]; then
       mkdir -p "${config.xdg.configHome}/zellij/themes"
       ln -sfn "$THEME_PATH/zellij.kdl" "${config.xdg.configHome}/zellij/themes/current.kdl"
+    fi
 
-      # Touch config to trigger zellij reload (zellij watches config file)
-      if [[ -f "${config.xdg.configHome}/zellij/config.kdl" ]]; then
-        touch "${config.xdg.configHome}/zellij/config.kdl"
-      fi
+    # Update lazygit theme symlink
+    if [[ -f "$THEME_PATH/lazygit.yml" ]]; then
+      mkdir -p "${config.xdg.configHome}/lazygit"
+      ln -sfn "$THEME_PATH/lazygit.yml" "${config.xdg.configHome}/lazygit/config.yml"
     fi
 
     # Reload hyprland to pick up theme changes
@@ -394,6 +396,13 @@ in
       if [[ -f "$THEME_DIR/zellij.kdl" ]]; then
         ln -sfn "$CURRENT_DIR/theme/zellij.kdl" "${config.xdg.configHome}/zellij/themes/current.kdl"
         echo "Keystone: Linked zellij theme"
+      fi
+
+      # Create lazygit theme symlink
+      mkdir -p "${config.xdg.configHome}/lazygit"
+      if [[ -f "$THEME_DIR/lazygit.yml" ]]; then
+        ln -sfn "$CURRENT_DIR/theme/lazygit.yml" "${config.xdg.configHome}/lazygit/config.yml"
+        echo "Keystone: Linked lazygit theme"
       fi
     '';
   };
