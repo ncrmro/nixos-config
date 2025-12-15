@@ -1,11 +1,22 @@
-{config, ...}: let
+{ config, ... }:
+let
   k8sIngressHttp = "127.0.0.1:8080";
   # Allow/deny config for Tailscale-only services
   tailscaleOnly = ''
     allow 100.64.0.0/10;
+    allow fd7a:115c:a1e0::/48;
     deny all;
   '';
-in {
+  # Allow Tailscale and local network
+  tailscaleAndLocal = ''
+    allow 100.64.0.0/10;
+    allow fd7a:115c:a1e0::/48;
+    allow 192.168.1.0/24;
+    allow 2600:1702:6250:4c80::/64;
+    deny all;
+  '';
+in
+{
   age.secrets.cloudflare-api-token = {
     file = ../../secrets/cloudflare-api-token.age;
     owner = "acme";
@@ -19,11 +30,14 @@ in {
 
   security.acme.certs."wildcard-ncrmro-com" = {
     domain = "*.ncrmro.com";
-    extraDomainNames = ["*.home.ncrmro.com" "ncrmro.com"];
+    extraDomainNames = [
+      "*.home.ncrmro.com"
+      "ncrmro.com"
+    ];
     dnsProvider = "cloudflare";
     environmentFile = config.age.secrets.cloudflare-api-token.path;
     group = "nginx";
-    extraLegoFlags = ["--dns.resolvers=1.1.1.1:53"];
+    extraLegoFlags = [ "--dns.resolvers=1.1.1.1:53" ];
   };
 
   services.nginx = {
@@ -34,7 +48,10 @@ in {
     recommendedGzipSettings = true;
   };
 
-  networking.firewall.allowedTCPPorts = [80 443];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
 
   # Jellyfin - PUBLIC (no access restriction)
   services.nginx.virtualHosts."jellyfin.ncrmro.com" = {
@@ -166,13 +183,13 @@ in {
     };
   };
 
-  # AdGuard Home - Tailscale only
+  # AdGuard Home - Tailscale and local network
   services.nginx.virtualHosts."adguard.home.ncrmro.com" = {
     forceSSL = true;
     useACMEHost = "wildcard-ncrmro-com";
-    extraConfig = tailscaleOnly;
+    extraConfig = tailscaleAndLocal;
     locations."/" = {
-      proxyPass = "http://127.0.0.1:3030";
+      proxyPass = "http://127.0.0.1:3000";
       proxyWebsockets = true;
     };
   };

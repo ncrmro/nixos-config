@@ -3,7 +3,8 @@
   outputs,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     inputs.disko.nixosModules.disko
     inputs.home-manager.nixosModules.default
@@ -17,7 +18,7 @@
     ../common/optional/tailscale.node.nix
     ../common/optional/secureboot.nix
     ../common/optional/agenix.nix
-    ../common/optional/adguard-home.nix
+    ./adguard-home.nix
     ../common/optional/servarr.nix
     ../common/optional/home-assistant.nix
     ../common/optional/octoprint.nix
@@ -39,7 +40,7 @@
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
-  home-manager.extraSpecialArgs = {inherit inputs outputs;};
+  home-manager.extraSpecialArgs = { inherit inputs outputs; };
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ocean.nix;
 
   environment.variables = {
@@ -49,7 +50,10 @@
   # Configure Tailscale node with Kubernetes tags
   services.tailscale.node = {
     enable = true;
-    tags = ["tag:k8s-cluster" "tag:k8s-master"];
+    tags = [
+      "tag:k8s-cluster"
+      "tag:k8s-master"
+    ];
   };
 
   # Configure SMB backup shares
@@ -80,7 +84,10 @@
     interface = "enp4s0";
   };
 
-  networking.nameservers = ["1.1.1.1" "8.8.8.8"];
+  networking.nameservers = [
+    "1.1.1.1"
+    "8.8.8.8"
+  ];
 
   boot.kernel.sysctl."fs.inotify.max_user_watches" = 524288;
   boot.kernel.sysctl."fs.inotify.max_user_instances" = 512;

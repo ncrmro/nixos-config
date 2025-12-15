@@ -5,18 +5,14 @@
     mutableSettings = true;
     openFirewall = true;
     allowDHCP = true;
-    settings = {
-      http = {
-        address = "127.0.0.1:3030";
-      };
-    };
+    #settings = { http = { address = "0.0.0.0:3030"; }; };
   };
 
   # Open firewall ports for DNS and DHCP
   networking.firewall = {
     allowedTCPPorts = [
       53 # DNS
-      # 3000  # AdGuard Home web interface - listening on Tailscale interface only
+      3000 # AdGuard Home web interface - listening on Tailscale interface only
     ];
     allowedUDPPorts = [
       53 # DNS

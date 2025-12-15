@@ -1,15 +1,22 @@
-{ ... }:
-let
-  # Mercury's Tailscale IP addresses
-  tailscaleIPv4 = "100.64.0.38";
-  tailscaleIPv6 = "fd7a:115c:a1e0::26";
-in
 {
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+{
+  # Secret for AdGuard admin password hash
+  age.secrets.adguard-password-hash = {
+    file = ../../secrets/adguard-password-hash.age;
+    owner = "root";
+    mode = "0400";
+  };
+
   services.adguardhome = {
     enable = true;
     mutableSettings = false;
     openFirewall = false;
-    allowDHCP = false;
+    allowDHCP = true;
 
     settings = {
       http = {
@@ -21,24 +28,37 @@ in
         session_ttl = "720h";
       };
 
-      users = [ ];
+      # Users are injected at runtime via systemd preStart
+      users = [
+        # Leaving this here, to document that this is what agenix merge sets
+        #   {
+        #   name = "ncrmro";
+        #   password =
+        #     "$2y$10$....";
+        # }
+
+      ];
+
       auth_attempts = 5;
       block_auth_min = 15;
       theme = "auto";
 
       dns = {
         bind_hosts = [
-          tailscaleIPv4
-          tailscaleIPv6
+          "0.0.0.0"
+          "::"
         ];
         port = 53;
         anonymize_client_ip = false;
-        ratelimit = 20;
+        ratelimit = 200;
         ratelimit_subnet_len_ipv4 = 24;
         ratelimit_subnet_len_ipv6 = 56;
         refuse_any = true;
 
         upstream_dns = [
+          "https://family.cloudflare-dns.com/dns-query"
+          "https://dns.google/dns-query"
+          "https://dns11.quad9.net/dns-query"
           "https://security.cloudflare-dns.com/dns-query"
           "h3://unfiltered.adguard-dns.com/dns-query"
           "h3://doh.ffmuc.net/dns-query"
@@ -51,8 +71,11 @@ in
           "2620:fe::fe:10"
         ];
 
-        fallback_dns = [ ];
-        upstream_mode = "parallel";
+        fallback_dns = [
+          "1.1.1.1"
+          "8.8.8.8"
+        ];
+        upstream_mode = "load_balance";
         fastest_timeout = "1s";
 
         blocked_hosts = [
@@ -130,19 +153,20 @@ in
         }
       ];
 
-      user_rules = [
-        "@@||www.google-analytics.com^$client='ncrmro-workstation'"
-        "@@||analytics.google.com^$client='ncrmro-workstation'"
-      ];
-
       dhcp = {
-        enabled = false;
+        enabled = true;
+        interface_name = "enp4s0";
         local_domain_name = "lan";
         dhcpv4 = {
+          gateway_ip = "192.168.1.254";
+          subnet_mask = "255.255.255.0";
+          range_start = "192.168.1.100";
+          range_end = "192.168.1.200";
           lease_duration = 86400;
           icmp_timeout_msec = 1000;
         };
         dhcpv6 = {
+          range_start = "2001::1";
           lease_duration = 86400;
           ra_slaac_only = false;
           ra_allow_slaac = false;
@@ -151,7 +175,7 @@ in
 
       filtering = {
         blocked_services = {
-          schedule.time_zone = "UTC";
+          schedule.time_zone = "Local";
           ids = [ ];
         };
         safe_search = {
@@ -167,7 +191,20 @@ in
         blocking_mode = "default";
         parental_block_host = "family-block.dns.adguard.com";
         safebrowsing_block_host = "standard-block.dns.adguard.com";
-        rewrites = [ ];
+        rewrites = [
+          {
+            domain = "ingress.home.ncrmro.com";
+            answer = "192.168.1.10";
+          }
+          {
+            domain = "jellyfin.ncrmro.com";
+            answer = "ingress.home.ncrmro.com";
+          }
+          {
+            domain = "adguard.home.ncrmro.com";
+            answer = "ingress.home.ncrmro.com";
+          }
+        ];
         safebrowsing_cache_size = 1048576;
         safesearch_cache_size = 1048576;
         parental_cache_size = 1048576;
@@ -188,84 +225,7 @@ in
           dhcp = true;
           hosts = true;
         };
-        persistent = [
-          {
-            name = "mercury";
-            ids = [ "100.64.0.38" ];
-            uid = "019ac752-2868-7074-9670-f24bb72807aa";
-            use_global_settings = true;
-            filtering_enabled = false;
-            parental_enabled = false;
-            safebrowsing_enabled = false;
-            use_global_blocked_services = true;
-            ignore_querylog = false;
-            ignore_statistics = false;
-          }
-          {
-            name = "ncrmro-laptop";
-            ids = [ "100.64.0.1" ];
-            uid = "019ac750-afdc-7690-8465-c400531abba7";
-            use_global_settings = true;
-            filtering_enabled = false;
-            parental_enabled = false;
-            safebrowsing_enabled = false;
-            use_global_blocked_services = true;
-            ignore_querylog = false;
-            ignore_statistics = false;
-          }
-          {
-            name = "ncrmro-laptop-14";
-            ids = [ "100.64.0.40" ];
-            uid = "019ac751-cb7f-7784-b599-f24fae17e669";
-            use_global_settings = true;
-            filtering_enabled = false;
-            parental_enabled = false;
-            safebrowsing_enabled = false;
-            use_global_blocked_services = true;
-            ignore_querylog = false;
-            ignore_statistics = false;
-          }
-          {
-            name = "ncrmro-phone";
-            ids = [ "100.64.0.2" ];
-            uid = "019ac751-2fa2-7171-9f82-c57e59b8f5b4";
-            use_global_settings = true;
-            filtering_enabled = false;
-            parental_enabled = false;
-            safebrowsing_enabled = false;
-            use_global_blocked_services = true;
-            ignore_querylog = false;
-            ignore_statistics = false;
-          }
-          {
-            name = "ncrmro-workstation";
-            ids = [ "100.64.0.3" ];
-            tags = [
-              "device_pc"
-              "os_linux"
-            ];
-            uid = "019ac750-eeaf-769b-a3cf-32d96ce48b7f";
-            use_global_settings = true;
-            filtering_enabled = false;
-            parental_enabled = false;
-            safebrowsing_enabled = false;
-            use_global_blocked_services = true;
-            ignore_querylog = false;
-            ignore_statistics = false;
-          }
-          {
-            name = "ocean";
-            ids = [ "100.64.0.6" ];
-            uid = "019ac751-7a76-7545-beff-50790e570234";
-            use_global_settings = true;
-            filtering_enabled = false;
-            parental_enabled = false;
-            safebrowsing_enabled = false;
-            use_global_blocked_services = true;
-            ignore_querylog = false;
-            ignore_statistics = false;
-          }
-        ];
+        persistent = [ ];
       };
 
       log = {
@@ -282,9 +242,37 @@ in
     };
   };
 
-  # Open firewall only on Tailscale interface
-  networking.firewall.interfaces.tailscale0 = {
+  # Open firewall for DNS and DHCP on all interfaces (ocean is the main DNS/DHCP server)
+  networking.firewall = {
     allowedTCPPorts = [ 53 ];
-    allowedUDPPorts = [ 53 ];
+    allowedUDPPorts = [
+      53
+      67
+      68
+    ];
   };
+
+  # Inject the password hash from agenix secret at runtime using ExecStartPre running as root
+  systemd.services.adguardhome.serviceConfig.ExecStartPre = lib.mkAfter [
+    (
+      "+"
+      + (pkgs.writeShellScript "inject-adguard-password" ''
+        echo "Running injection script as user: $(whoami) (id: $(id -u))"
+        ls -l /run/agenix/adguard-password-hash
+
+        configPath="/var/lib/AdGuardHome/AdGuardHome.yaml"
+
+        # Wait for config file to be written by the NixOS module's preStart script
+        # This script runs after the main preStart because of lib.mkAfter
+
+        if [ -f "$configPath" ]; then
+          # Read password hash from secret and inject into config
+          PASSWORD_HASH=$(cat ${config.age.secrets.adguard-password-hash.path})
+          
+          # Use yq to update the users array with the password hash
+          ${pkgs.yq-go}/bin/yq -i '.users = [{"name": "ncrmro", "password": "'"$PASSWORD_HASH"'"}]' "$configPath"
+        fi
+      '')
+    )
+  ];
 }
