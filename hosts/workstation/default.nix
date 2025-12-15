@@ -5,7 +5,8 @@
   lib,
   pkgs,
   ...
-} @ args: {
+}@args:
+{
   imports = [
     inputs.disko.nixosModules.disko
     inputs.home-manager.nixosModules.default
@@ -40,7 +41,7 @@
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
-  home-manager.extraSpecialArgs = {inherit inputs outputs;};
+  home-manager.extraSpecialArgs = { inherit inputs outputs; };
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-workstation.nix;
 
   environment.systemPackages = with pkgs; [
@@ -90,10 +91,48 @@
 
   # Disable HDA Intel audio (GPU HDMI + onboard) - keep only USB audio devices
   # This may help with Hyprland crashes caused by snd_hda_intel spurious responses
-  boot.blacklistedKernelModules = ["snd_hda_intel"];
+  boot.blacklistedKernelModules = [ "snd_hda_intel" ];
 
+  # Static networking on enp5s0 (router: 192.168.1.254 / 2600:1702:6250:4c80::1, DHCP server at 192.168.1.10)
+  networking.useDHCP = false;
   networking.hostId = "cb1216ed"; # generate with: head -c 8 /etc/machine-id
   networking.hostName = "ncrmro-workstation";
+
+  networking.interfaces.enp5s0 = {
+    # Keep the existing static IPv4 address
+    ipv4.addresses = [
+      {
+        address = "192.168.1.69";
+        prefixLength = 24;
+      }
+    ];
+    # Static IPv6 within router-advertised prefix 2600:1702:6250:4c80::/64
+    # Alternative: Remove this block to use SLAAC (auto-configured from router advertisements)
+    ipv6.addresses = [
+      {
+        address = "2600:1702:6250:4c80::69";
+        prefixLength = 64;
+      }
+    ];
+  };
+
+  networking.defaultGateway = {
+    address = "192.168.1.254";
+    interface = "enp5s0";
+  };
+
+  networking.defaultGateway6 = {
+    address = "2600:1702:6250:4c80::1";
+    interface = "enp5s0";
+  };
+
+  networking.nameservers = [
+    # Local DNS on ocean (DHCP/DNS host)
+    "192.168.1.10"
+    "2600:1702:6250:4c80:da5e:d3ff:fe8e:3126"
+    # Uncommit if local server goes down
+    # "1.1.1.1"
+  ];
 
   system.stateVersion = "25.11";
 }
