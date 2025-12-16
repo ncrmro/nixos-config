@@ -1,8 +1,5 @@
+{ pkgs, lib, ... }:
 {
-  pkgs,
-  lib,
-  ...
-}: {
   # Enable common container config files in /etc/containers
   virtualisation.containers.enable = true;
   virtualisation = {
@@ -12,7 +9,10 @@
         enable = true;
         setSocketVariable = true;
         daemon.settings = {
-          dns = ["1.1.1.1" "8.8.8.8"];
+          dns = [
+            "1.1.1.1"
+            "8.8.8.8"
+          ];
           #registry-mirrors = [ "https://mirror.gcr.io" ];
           experimental = true;
           features = {
@@ -34,4 +34,7 @@
   # Needed for default bridge network to automatically work
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
   boot.kernel.sysctl."net.ipv6.ip_forward" = 1;
+  # Was this causing issues with ipv6 by these being disabled
+  #boot.kernel.sysctl."net.ipv6.conf.all.accept_ra" = 2;
+  #boot.kernel.sysctl."net.ipv6.conf.default.accept_ra" = 2;
 }
