@@ -4,9 +4,11 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.keystone.desktop.hyprland;
-in {
+in
+{
   config = mkIf cfg.enable {
     programs.hyprlock = {
       enable = mkDefault true;
@@ -46,7 +48,7 @@ in {
 
           placeholder_color = "$placeholder_color";
           placeholder_text = "  Enter Password";
-          check_color = "rgba(131, 192, 146, 1.0)";
+          check_color = "$check_color";
           fail_text = "Wrong ($ATTEMPTS)";
 
           rounding = 0;
