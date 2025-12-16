@@ -52,7 +52,6 @@ in
               "8" = "8";
               "9" = "9";
               "10" = "0";
-              active = "";
             };
             persistent-workspaces = {
               "1" = [ ];
@@ -222,15 +221,29 @@ in
           margin-right: 8px;
         }
 
+        /* Base workspace button styling - DO NOT use "all: initial" as it breaks CSS cascade */
         #workspaces button {
-          all: initial;
+          font-family: 'JetBrainsMono Nerd Font';
+          font-size: 12px;
+          font-weight: normal;
+          background-color: transparent;
+          color: @foreground;
           padding: 0 6px;
           margin: 0 1.5px;
           min-width: 9px;
+          border: none;
+          border-radius: 0;
         }
 
+        /* Empty workspaces - less visible */
         #workspaces button.empty {
           opacity: 0.5;
+        }
+
+        /* Active workspace - MUST come last for CSS cascade priority */
+        #workspaces button.active, #workspaces button.active label {
+          color: #B8A26C;
+          font-weight: bold;
         }
 
         #cpu,
