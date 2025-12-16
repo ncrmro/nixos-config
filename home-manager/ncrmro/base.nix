@@ -47,6 +47,7 @@
       # "tile, match:title .*YouTube Music.*"
     ];
   };
+  programs.fastfetch.enable = true;
 
   programs.git.extraConfig = {
     credential.helper = "store";
