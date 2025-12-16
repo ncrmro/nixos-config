@@ -1,14 +1,11 @@
 {
   inputs,
-  outputs,
-  lib,
-  config,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
-    ../common/features/macos-dev.nix
-    ../common/optional/mosh.nix
+    inputs.keystone.homeManagerModules.tui
   ];
 
   home = {
@@ -17,7 +14,13 @@
     stateVersion = "25.05";
   };
 
-  # macOS-specific configurations can be added here
-  # For example:
-  # programs.alacritty.settings.font.size = lib.mkForce 14.0;
+  # Enable the Keystone TUI module
+  keystone.terminal.enable = true;
+
+  home.packages = with pkgs; [
+    kubectl
+    k9s
+  ];
+
+  programs.home-manager.enable = true;
 }
