@@ -3,10 +3,15 @@
   pkgs,
   inputs,
   ...
-}: let
-  zesh = pkgs.callPackage ../../../../packages/zesh {};
-in {
-  imports = [./playwright.nix ./ssh.nix];
+}:
+let
+  zesh = pkgs.callPackage ../../../../packages/zesh { };
+in
+{
+  imports = [
+    ./playwright.nix
+    ./ssh.nix
+  ];
   # UV - Fast Python package installer and resolver written in Rust
   # https://github.com/astral-sh/uv
   programs.uv.enable = true;
@@ -106,6 +111,10 @@ in {
     # Chart Testing - Tool for testing Helm charts
     # https://github.com/helm/chart-testing
     chart-testing
+
+    # Alejandra - The Uncompromising Nix Code Formatter
+    # https://github.com/kamadorueda/alejandra
+    alejandra
 
     asdf-vm
 
@@ -209,7 +218,11 @@ in {
   programs.direnv = {
     enable = true;
     enableZshIntegration = true;
-    config = {global = {load_dotenv = true;};};
+    config = {
+      global = {
+        load_dotenv = true;
+      };
+    };
   };
 
   # Additional zsh aliases (not in keystone terminal)
