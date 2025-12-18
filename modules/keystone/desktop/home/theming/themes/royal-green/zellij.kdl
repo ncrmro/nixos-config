@@ -2,123 +2,38 @@
 // Based on kinda_nvim color palette
 // https://github.com/ncrmro/nixos-config
 
+// This theme has been updated to the new Zellij 0.40+ theme format.
+// The previous format with explicit UI element styling (e.g., text_unselected, ribbon_selected)
+// was deprecated and caused issues like the "black bar" due to Zellij falling back to defaults.
+// The new format uses a simplified palette mapping directly to terminal ANSI colors and UI accents.
+
+// Additionally, the theme name within this file was changed from "royal-green" to "current"
+// to match the `programs.zellij.settings.theme = "current";` configuration in `shell.nix`.
+// This ensures Zellij correctly loads this theme when referenced.
+
 themes {
-    royal-green {
-        text_unselected {
-            base 182 191 188
-            background 0 18 12
-            emphasis_0 18 178 125
-            emphasis_1 103 151 194
-            emphasis_2 156 89 178
-            emphasis_3 50 135 143
-        }
-        text_selected {
-            base 182 191 188
-            background 0 46 31
-            emphasis_0 18 178 125
-            emphasis_1 103 151 194
-            emphasis_2 156 89 178
-            emphasis_3 50 135 143
-        }
-        ribbon_selected {
-            base 0 18 12
-            background 18 178 125
-            emphasis_0 194 114 128
-            emphasis_1 184 162 108
-            emphasis_2 156 89 178
-            emphasis_3 103 151 194
-        }
-        ribbon_unselected {
-            base 0 18 12
-            background 76 89 85
-            emphasis_0 194 114 128
-            emphasis_1 182 191 188
-            emphasis_2 103 151 194
-            emphasis_3 156 89 178
-        }
-        table_title {
-            base 18 178 125
-            background 0
-            emphasis_0 184 162 108
-            emphasis_1 50 135 143
-            emphasis_2 18 178 125
-            emphasis_3 156 89 178
-        }
-        table_cell_selected {
-            base 182 191 188
-            background 0 54 36
-            emphasis_0 18 178 125
-            emphasis_1 103 151 194
-            emphasis_2 156 89 178
-            emphasis_3 50 135 143
-        }
-        table_cell_unselected {
-            base 182 191 188
-            background 0 18 12
-            emphasis_0 18 178 125
-            emphasis_1 103 151 194
-            emphasis_2 156 89 178
-            emphasis_3 50 135 143
-        }
-        list_selected {
-            base 182 191 188
-            background 0 54 36
-            emphasis_0 18 178 125
-            emphasis_1 103 151 194
-            emphasis_2 156 89 178
-            emphasis_3 50 135 143
-        }
-        list_unselected {
-            base 182 191 188
-            background 0 18 12
-            emphasis_0 18 178 125
-            emphasis_1 103 151 194
-            emphasis_2 156 89 178
-            emphasis_3 50 135 143
-        }
-        frame_selected {
-            base 184 162 108
-            background 0
-            emphasis_0 18 178 125
-            emphasis_1 50 135 143
-            emphasis_2 156 89 178
-            emphasis_3 0
-        }
-        frame_highlight {
-            base 184 162 108
-            background 0
-            emphasis_0 156 89 178
-            emphasis_1 184 162 108
-            emphasis_2 184 162 108
-            emphasis_3 184 162 108
-        }
-        exit_code_success {
-            base 18 178 125
-            background 0
-            emphasis_0 50 135 143
-            emphasis_1 0 18 12
-            emphasis_2 156 89 178
-            emphasis_3 103 151 194
-        }
-        exit_code_error {
-            base 194 114 128
-            background 0
-            emphasis_0 184 162 108
-            emphasis_1 0
-            emphasis_2 0
-            emphasis_3 0
-        }
-        multiplayer_user_colors {
-            player_1 156 89 178
-            player_2 103 151 194
-            player_3 18 178 125
-            player_4 184 162 108
-            player_5 50 135 143
-            player_6 148 94 166
-            player_7 194 114 128
-            player_8 15 153 107
-            player_9 82 107 130
-            player_10 108 148 184
-        }
+    current {
+        // Foreground text color
+        fg "#B8A26C"
+        // Background color for terminal panes and default UI elements
+        bg "#00120C"
+        // ANSI Black color (often used for specific UI backgrounds or dark accents)
+        black "#00120C"
+        // ANSI Red color
+        red "#C27280"
+        // ANSI Green color (used for accents like active tabs, highlights)
+        green "#B8A26C"
+        // ANSI Yellow color
+        yellow "#B8A26C"
+        // ANSI Blue color
+        blue "#6797C2"
+        // ANSI Magenta color
+        magenta "#9C59B2"
+        // ANSI Cyan color
+        cyan "#32878F"
+        // ANSI White color
+        white "#B8A26C"
+        // Orange color (often used for specific UI highlights) - reusing yellow in this theme
+        orange "#B8A26C"
     }
 }
