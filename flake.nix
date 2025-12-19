@@ -48,7 +48,7 @@
 
     # Keystone
     keystone = {
-      url = "path:./.submodules/keystone";
+      url = "git+file:./.submodules/keystone?submodules=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

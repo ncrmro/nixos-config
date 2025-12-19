@@ -1193,17 +1193,19 @@
         "omarchy": "omarchy"
       },
       "locked": {
-        "lastModified": 1765853824,
-        "narHash": "sha256-MMJCBJhu8zr8PP8gcKfnekE5s30FFDqeTUnXLpLbPbk=",
-        "owner": "ncrmro",
-        "repo": "keystone",
-        "rev": "cbd683a6195ec3f9ff0cec21bd0feedc02ed7232",
-        "type": "github"
+        "lastModified": 1766118185,
+        "narHash": "sha256-uTwPEM4sfy1OLFLSiMFjnul6DmDku5PjoB7TVAQn2Po=",
+        "ref": "refs/heads/main",
+        "rev": "c9b563332d79bd9eb7d11ec17ccb2006882a6c4e",
+        "revCount": 118,
+        "submodules": true,
+        "type": "git",
+        "url": "file:./.submodules/keystone"
       },
       "original": {
-        "owner": "ncrmro",
-        "repo": "keystone",
-        "type": "github"
+        "submodules": true,
+        "type": "git",
+        "url": "file:./.submodules/keystone"
       }
     },
     "kinda-nvim-hx": {

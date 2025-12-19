@@ -1,10 +1,11 @@
 {
   lib,
-  outputs,
+  inputs,
   ...
-}: {
+}:
+{
   imports = [
-    outputs.homeManagerModules.keystone-terminal
+    inputs.keystone.homeModules.keystoneTerminal
   ];
 
   # Enable terminal configuration (zsh, starship, zoxide, zellij)

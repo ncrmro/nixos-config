@@ -6,14 +6,15 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
     ../common/global
-    ../common/users/ncrmro
-    ../common/optional/hyprland-desktop.nix
-    ../common/optional/thunar.nix
+    ../../modules/users/ncrmro.nix
+    # ../common/optional/hyprland-desktop.nix  # TODO: Missing file
+    # ../common/optional/thunar.nix  # TODO: Missing file
     ../common/optional/virt-manager.nix
 
     # <home-manager/nixos>
@@ -23,7 +24,10 @@
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.

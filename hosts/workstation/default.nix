@@ -26,7 +26,7 @@
     ../common/optional/docker-rootless.nix
     ../common/optional/virt-manager.nix
     ../common/optional/shairport-sync.nix
-    outputs.nixosModules.keystone-desktop
+    inputs.keystone.nixosModules.keystoneDesktop
     outputs.nixosModules.bambu-studio
     ./windows11-vm.nix
     ../../modules/nixos/steam.nix

@@ -1,13 +1,14 @@
 {
   lib,
   pkgs,
-  self,
+  inputs,
   ...
-}: {
+}:
+{
   # Common macOS development toolkit
   # Shared by all macOS home-manager configurations
   imports = [
-    self.homeManagerModules.keystone-terminal
+    inputs.keystone.homeModules.keystoneTerminal
     ./cli
     ./cli/git.nix
     ./cli/ssh.nix
@@ -25,7 +26,10 @@
   nix = {
     package = pkgs.nix;
     settings = {
-      experimental-features = ["nix-command" "flakes"];
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
     };
   };
 }

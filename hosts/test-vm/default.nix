@@ -5,13 +5,14 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
     ./hardware-configuration.nix
     ../common/global
     ../../modules/users/ncrmro.nix
-    outputs.nixosModules.keystone-desktop
+    inputs.keystone.nixosModules.keystoneDesktop
   ];
 
   # Make users deterministic for test VM

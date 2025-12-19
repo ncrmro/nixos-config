@@ -8,7 +8,7 @@
 }:
 {
   imports = [
-    outputs.homeManagerModules.keystone-desktop
+    inputs.keystone.homeModules.keystoneDesktop
     ../common/global
     ../common/features/cli
     ../common/features/desktop
@@ -24,6 +24,9 @@
     nixfmt-rfc-style
     google-chrome
     zig
+    gh
+    gh-dash
+    devcontainer
   ];
 
   # Keystone desktop includes terminal
