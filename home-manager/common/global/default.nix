@@ -4,7 +4,8 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   home.username = "ncrmro";
   home.homeDirectory = "/home/ncrmro";
   home.stateVersion = "25.05";
@@ -12,7 +13,9 @@
   programs.home-manager.enable = true;
 
   # Enable Wayland support for Electron/Chromium applications
-  home.sessionVariables = {NIXOS_OZONE_WL = "1";};
+  home.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
+  };
 
   programs.ssh = {
     enable = true;
@@ -26,22 +29,22 @@
     enable = true;
     userName = "Nicholas Romero";
     userEmail = "ncrmro@gmail.com";
-    extraConfig = {
-      credential.helper = "store";
-      push.autoSetupRemote = true;
-      gpg.format = "ssh";
-      commit.gpgsign = true;
-      user.signingkey = "~/.ssh/id_ed25519";
-      lfs.enable = true;
-      alias = {
-        b = "branch";
-        p = "pull";
-        co = "checkout";
-        c = "commit";
-        ci = "commit -a";
-        a = "add";
-        st = "status -sb";
-      };
-    };
+    # extraConfig = {
+    #   credential.helper = "store";
+    #   push.autoSetupRemote = true;
+    #   gpg.format = "ssh";
+    #   commit.gpgsign = true;
+    #   user.signingkey = "~/.ssh/id_ed25519";
+    #   lfs.enable = true;
+    #   alias = {
+    #     b = "branch";
+    #     p = "pull";
+    #     co = "checkout";
+    #     c = "commit";
+    #     ci = "commit -a";
+    #     a = "add";
+    #     st = "status -sb";
+    #   };
+    # };
   };
 }

@@ -215,15 +215,16 @@ in
   # Automatically loads .envrc files when entering directories
   # Supports dotenv (.env) files for environment variable management
   # https://direnv.net/
-  programs.direnv = {
-    enable = true;
-    enableZshIntegration = true;
-    config = {
-      global = {
-        load_dotenv = true;
-      };
-    };
-  };
+  # Managed by Keystone
+  # programs.direnv = {
+  #   enable = true;
+  #   enableZshIntegration = true;
+  #   config = {
+  #     global = {
+  #       load_dotenv = true;
+  #     };
+  #   };
+  # };
 
   # Additional zsh aliases (not in keystone terminal)
   programs.zsh.shellAliases = {
