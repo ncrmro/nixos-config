@@ -5,7 +5,7 @@
 }:
 {
   imports = [
-    inputs.keystone.homeManagerModules.tui
+    inputs.keystone.homeModules.keystoneTerminal
   ];
 
   home = {
