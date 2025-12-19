@@ -48,7 +48,7 @@
 
     # Keystone
     keystone = {
-      url = "path:./.submodules/keystone";
+      url = "github:ncrmro/keystone";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
