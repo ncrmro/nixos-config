@@ -10,6 +10,8 @@ jobs:
     steps:
       # Check out the repository code to access flake.nix and related files
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       # Install Nix package manager with flakes support for building NixOS configurations
       - uses: cachix/install-nix-action@v31
