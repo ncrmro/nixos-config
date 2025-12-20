@@ -1193,11 +1193,11 @@
         "omarchy": "omarchy"
       },
       "locked": {
-        "lastModified": 1766118185,
-        "narHash": "sha256-uTwPEM4sfy1OLFLSiMFjnul6DmDku5PjoB7TVAQn2Po=",
+        "lastModified": 1766194758,
+        "narHash": "sha256-+Wjo8pyc6oKGbgiYaL9WMaa6f4/NcZEpFNQG1YVO784=",
         "ref": "refs/heads/main",
-        "rev": "c9b563332d79bd9eb7d11ec17ccb2006882a6c4e",
-        "revCount": 118,
+        "rev": "36cc36265393ffa9241a249a6e91886dda64d583",
+        "revCount": 119,
         "submodules": true,
         "type": "git",
         "url": "file:./.submodules/keystone"
