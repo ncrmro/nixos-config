@@ -46,9 +46,10 @@
     # Hyprland (latest from official flake)
     hyprland.url = "github:hyprwm/Hyprland";
 
-    # Keystone
+    # Keystone - self-sovereign infrastructure platform
+    # For local dev without commits, use: ./bin/dev-keystone <hostname>
     keystone = {
-      url = "git+file:./.submodules/keystone?submodules=1";
+      url = "github:ncrmro/keystone";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
