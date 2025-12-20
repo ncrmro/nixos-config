@@ -9,7 +9,7 @@
   imports = [
     inputs.disko.nixosModules.disko
     inputs.home-manager.nixosModules.default
-    inputs.keystone.nixosModules.keystoneDesktop
+    inputs.keystone.nixosModules.desktop
     ./disk-config.nix
     ./hardware-configuration.nix
     ../common/global

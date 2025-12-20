@@ -5,10 +5,9 @@
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   imports = [
-    inputs.keystone.homeModules.keystoneDesktop
+    inputs.keystone.homeModules.desktop
   ];
 
   # Enable desktop
@@ -17,8 +16,8 @@
 
   # Override monitor config for VM (single virtual display)
   wayland.windowManager.hyprland.settings = {
-    monitor = [ "Virtual-1, 1920x1080@60, 0x0, 1" ];
-    workspace = [ "1, monitor:Virtual-1" ];
+    monitor = ["Virtual-1, 1920x1080@60, 0x0, 1"];
+    workspace = ["1, monitor:Virtual-1"];
     cursor = {
       no_hardware_cursors = true;
     };

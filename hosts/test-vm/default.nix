@@ -11,7 +11,7 @@
     ./hardware-configuration.nix
     ../common/global
     ../../modules/users/ncrmro.nix
-    inputs.keystone.nixosModules.keystoneDesktop
+    inputs.keystone.nixosModules.desktop
   ];
 
   # Make users deterministic for test VM

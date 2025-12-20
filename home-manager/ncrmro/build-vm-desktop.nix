@@ -5,13 +5,12 @@
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   # Minimal home-manager config for VM desktop testing
   # Based on base.nix but simplified for faster iteration
 
   imports = [
-    inputs.keystone.homeModules.keystoneDesktop
+    inputs.keystone.homeModules.desktop
     ../common/global
     ../common/features/cli
     ../common/features/desktop
@@ -23,7 +22,7 @@
 
   # Simple monitor config for VM (single virtual display)
   wayland.windowManager.hyprland.settings = {
-    monitor = [ ",preferred,auto,1" ];
+    monitor = [",preferred,auto,1"];
   };
 
   # Git config for testing

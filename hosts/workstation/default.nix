@@ -5,8 +5,7 @@
   lib,
   pkgs,
   ...
-}@args:
-{
+} @ args: {
   imports = [
     inputs.disko.nixosModules.disko
     inputs.home-manager.nixosModules.default
@@ -26,7 +25,7 @@
     ../common/optional/docker-rootless.nix
     ../common/optional/virt-manager.nix
     ../common/optional/shairport-sync.nix
-    inputs.keystone.nixosModules.keystoneDesktop
+    inputs.keystone.nixosModules.desktop
     outputs.nixosModules.bambu-studio
     ./windows11-vm.nix
     ../../modules/nixos/steam.nix
@@ -41,7 +40,7 @@
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
-  home-manager.extraSpecialArgs = { inherit inputs outputs; };
+  home-manager.extraSpecialArgs = {inherit inputs outputs;};
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-workstation.nix;
 
   environment.systemPackages = with pkgs; [
@@ -91,7 +90,7 @@
 
   # Disable HDA Intel audio (GPU HDMI + onboard) - keep only USB audio devices
   # This may help with Hyprland crashes caused by snd_hda_intel spurious responses
-  boot.blacklistedKernelModules = [ "snd_hda_intel" ];
+  boot.blacklistedKernelModules = ["snd_hda_intel"];
 
   # Static networking on enp5s0 (router: 192.168.1.254 / 2600:1702:6250:4c80::1, DHCP server at 192.168.1.10)
   networking.useDHCP = false;

@@ -4,8 +4,7 @@
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   home.username = "ncrmro";
   home.homeDirectory = "/home/ncrmro";
   home.stateVersion = "25.05";
@@ -23,6 +22,15 @@
     #   Host *
     #     IdentityAgent ~/.1password/agent.sock
     # '';
+  };
+
+  # Keystone terminal configuration
+  keystone.terminal = {
+    enable = true;
+    git = {
+      userName = "Nicholas Romero";
+      userEmail = "ncrmro@gmail.com";
+    };
   };
 
   programs.git = {

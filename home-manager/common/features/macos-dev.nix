@@ -3,12 +3,11 @@
   pkgs,
   inputs,
   ...
-}:
-{
+}: {
   # Common macOS development toolkit
   # Shared by all macOS home-manager configurations
   imports = [
-    inputs.keystone.homeModules.keystoneTerminal
+    inputs.keystone.homeModules.terminal
     ./cli
     ./cli/git.nix
     ./cli/ssh.nix
@@ -16,9 +15,6 @@
     ../optional/mcp/kubernetes.nix
     ../optional/mcp/playwright.nix
   ];
-
-  # Enable terminal configuration (zsh, starship, zoxide, zellij)
-  keystone.terminal.enable = true;
 
   programs.home-manager.enable = true;
 

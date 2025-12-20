@@ -5,8 +5,7 @@
   lib,
   pkgs,
   ...
-}:
-{
+}: {
   # Fast VM for testing Keystone desktop configuration
   # Uses nixos-rebuild build-vm for rapid iteration without encryption/secure boot
   #
@@ -22,7 +21,7 @@
     (modulesPath + "/profiles/qemu-guest.nix")
     ../common/global
     ../../modules/users/ncrmro.nix
-    inputs.keystone.nixosModules.keystoneDesktop
+    inputs.keystone.nixosModules.desktop
   ];
 
   # System identity

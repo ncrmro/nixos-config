@@ -5,10 +5,9 @@
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   imports = [
-    inputs.keystone.homeModules.keystoneDesktop
+    inputs.keystone.homeModules.desktop
     ../common/global
     ../common/features/cli
     ../common/features/desktop
@@ -27,6 +26,7 @@
     gh
     gh-dash
     devcontainer
+    obsidian
   ];
 
   # Keystone desktop includes terminal

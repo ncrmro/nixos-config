@@ -30,7 +30,7 @@
     ../common/optional/iphone-tether.nix
     ./zfs.remote-replication.nix
     ../../modules/nixos/steam.nix
-    inputs.keystone.nixosModules.keystoneDesktop
+    inputs.keystone.nixosModules.desktop
   ];
 
   programs.zsh.enable = true;
