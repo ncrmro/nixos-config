@@ -5,8 +5,7 @@
   lib,
   pkgs,
   ...
-}@args:
-{
+} @ args: {
   imports = [
     inputs.lanzaboote.nixosModules.lanzaboote
     # inputs.omarchy-nix.nixosModules.default
@@ -41,8 +40,9 @@
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
-  home-manager.extraSpecialArgs = { inherit inputs outputs; };
-  home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-laptop.nix;
+  home-manager.extraSpecialArgs = {inherit inputs outputs;};
+  home-manager.users.ncrmro =
+    import ../../home-manager/ncrmro/ncrmro-laptop.nix;
 
   keystone.desktop = {
     enable = true;
@@ -70,7 +70,7 @@
     pkgs.sbctl
     pkgs.nfs-utils
     pkgs.nvtopPackages.amd
-    inputs.alejandra.defaultPackage."x86_64-linux"
+    # inputs.alejandra.defaultPackage."x86_64-linux"
   ];
 
   programs.nix-ld.enable = true;
@@ -88,14 +88,10 @@
     pkiBundle = "/var/lib/sbctl";
   };
   systemd.services.fprintd = {
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = ["multi-user.target"];
     serviceConfig.Type = "simple";
   };
   services.fprintd.enable = true;
-
-  # omarchy = {scale = 1;};
-  # https://github.com/NixOS/nixpkgs/issues/231191#issuecomment-1664053176
-  environment.etc."resolv.conf".mode = "direct-symlink";
 
   # networking.firewall.enable = true;
   # networking.firewall.logRefusedConnections = true;
@@ -114,9 +110,7 @@
   };
 
   # Configure Tailscale node (no tags for client machine)
-  services.tailscale.node = {
-    enable = true;
-  };
+  services.tailscale.node = {enable = true;};
 
   networking.hostName = "ncrmro-laptop";
   networking.hostId = "cac44b47";

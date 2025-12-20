@@ -5,8 +5,7 @@
   lib,
   pkgs,
   ...
-}:
-{
+}: {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
     ./hardware-configuration.nix
@@ -25,7 +24,10 @@
   users.users.root.initialPassword = "test";
 
   # Enable keystone desktop
-  keystone.desktop.enable = true;
+  keystone.desktop = {
+    enable = true;
+    user = "ncrmro";
+  };
 
   # Auto-login to Hyprland
   services.greetd.settings.initial_session = {
