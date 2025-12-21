@@ -10,7 +10,7 @@
     inputs.lanzaboote.nixosModules.lanzaboote
     # inputs.omarchy-nix.nixosModules.default
     inputs.home-manager.nixosModules.default
-    outputs.nixosModules.omarchy-config
+    # outputs.nixosModules.omarchy-config
     ./disk-config.nix
     ../common/optional/zfs.luks.root.nix
     ./hardware-configuration.nix
@@ -30,6 +30,7 @@
     ../common/optional/iphone-tether.nix
     ./zfs.remote-replication.nix
     ../../modules/nixos/steam.nix
+    inputs.keystone.nixosModules.desktop
   ];
 
   programs.zsh.enable = true;
@@ -43,10 +44,15 @@
   home-manager.users.ncrmro =
     import ../../home-manager/ncrmro/ncrmro-laptop.nix;
 
-  services.greetd = {
+  keystone.desktop = {
     enable = true;
-    settings.default_session.user = "ncrmro";
+    user = "ncrmro";
   };
+
+  # services.greetd = {
+  #   enable = true;
+  #   settings.default_session.user = "ncrmro";
+  # };
 
   services.hardware.bolt.enable = true;
   services.fwupd.enable = true;
@@ -54,7 +60,7 @@
   services.zfs.autoScrub.enable = true;
   services.zfs.autoSnapshot.enable = true;
   services.gnome.gnome-keyring.enable = true;
-  security.pam.services.greetd.enableGnomeKeyring = true;
+  # security.pam.services.greetd.enableGnomeKeyring = true;
 
   # Allow unfree packages like VSCode
   nixpkgs.config.allowUnfree = true;
@@ -64,7 +70,7 @@
     pkgs.sbctl
     pkgs.nfs-utils
     pkgs.nvtopPackages.amd
-    inputs.alejandra.defaultPackage."x86_64-linux"
+    # inputs.alejandra.defaultPackage."x86_64-linux"
   ];
 
   programs.nix-ld.enable = true;
@@ -86,10 +92,6 @@
     serviceConfig.Type = "simple";
   };
   services.fprintd.enable = true;
-
-  omarchy = {scale = 1;};
-  # https://github.com/NixOS/nixpkgs/issues/231191#issuecomment-1664053176
-  environment.etc."resolv.conf".mode = "direct-symlink";
 
   # networking.firewall.enable = true;
   # networking.firewall.logRefusedConnections = true;

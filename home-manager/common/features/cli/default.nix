@@ -66,7 +66,8 @@ in
 
     # htop - Interactive process viewer
     # https://htop.dev/
-    htop
+    # Provided by Keystone
+    # htop
 
     # Corepack - Package manager manager for Node.js
     # https://nodejs.org/api/corepack.html
@@ -127,19 +128,23 @@ in
 
     # Eza - Modern replacement for ls with colors and git integration
     # https://github.com/eza-community/eza
-    eza
+    # Provided by Keystone
+    # eza
 
     # Tree - Recursive directory listing program
     # https://gitlab.com/OldManProgrammer/unix-tree
-    tree
+    # Provided by Keystone
+    # tree
 
     # jq - Command-line JSON processor
     # https://jqlang.github.io/jq/
-    jq
+    # Provided by Keystone
+    # jq
 
     # yq - Command-line YAML/XML/TOML processor (jq wrapper)
     # https://github.com/mikefarah/yq
-    yq
+    # Provided by Keystone
+    # yq
 
     # SOPS - Simple and flexible tool for managing secrets
     # https://github.com/getsops/sops
@@ -215,15 +220,16 @@ in
   # Automatically loads .envrc files when entering directories
   # Supports dotenv (.env) files for environment variable management
   # https://direnv.net/
-  programs.direnv = {
-    enable = true;
-    enableZshIntegration = true;
-    config = {
-      global = {
-        load_dotenv = true;
-      };
-    };
-  };
+  # Managed by Keystone
+  # programs.direnv = {
+  #   enable = true;
+  #   enableZshIntegration = true;
+  #   config = {
+  #     global = {
+  #       load_dotenv = true;
+  #     };
+  #   };
+  # };
 
   # Additional zsh aliases (not in keystone terminal)
   programs.zsh.shellAliases = {
@@ -232,6 +238,7 @@ in
     k = "kubectl";
     # Session management
     zs = "zesh connect";
+    ztab = "zellij action rename-tab";
     # AI Tools
     opencode = "/home/ncrmro/.opencode/bin/opencode";
   };

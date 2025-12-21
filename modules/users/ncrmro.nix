@@ -14,6 +14,9 @@ in {
         "sound"
         "docker"
         "podman"
+        # dialout grants access to serial ports (/dev/ttyUSB*, /dev/ttyACM*)
+        # required for ESP32, Arduino, and other microcontroller development
+        "dialout"
       ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyrDBVcGK+pUZOTUA7MLoD5vYK/kaPF6TNNyoDmwNl2 ncrmro@ncrmro-laptop-fw7k"
