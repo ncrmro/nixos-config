@@ -21,11 +21,29 @@ This is a NixOS configuration repository using flakes for managing system config
   - `/common/kubernetes/` - Kubernetes module definitions
 - `/home-manager/` - User-specific Home Manager configurations
 - `/modules/` - Custom NixOS and user modules
-  - `/modules/keystone/` - Development modules being prototyped here before migration to [ncrmro/keystone](https://github.com/ncrmro/keystone)
+  - `.submodules/keystone/` - The upstream Keystone repository containing core infrastructure modules
 - `/bin/` - Helper scripts for deployment and management
 - `/docs/` - Documentation for various setup procedures
 - `/kubernetes/` - Raw Kubernetes manifests (legacy)
 - `/secrets/` - Encrypted secrets managed by agenix
+
+### Keystone Submodule
+
+Located at `.submodules/keystone`, this is a Git submodule tracking the [ncrmro/keystone](https://github.com/ncrmro/keystone) repository. Keystone provides the core infrastructure-as-code building blocks used by this repository.
+
+**Key capabilities:**
+- **Self-Sovereign Infrastructure**: Configurations for bare-metal and cloud environments.
+- **Server Roles**: Gateway, VPN endpoint, DNS, storage, and backup servers.
+- **Client Roles**: Workstations (always-on dev machines) and Interactive Clients (laptops/portables).
+- **Security**: TPM integration, Full Disk Encryption (LUKS), Secure Boot, and Zero-Knowledge architecture.
+- **NixOS Modules**: Reusable modules for servers, clients, disko configurations, secure boot, and more.
+
+**Development Workflow:**
+When developing features intended for upstream Keystone:
+1. Make changes in `.submodules/keystone`.
+2. Test using the local override mechanism (e.g., `nixos-rebuild switch ... --override-input keystone "path:.submodules/keystone"`).
+3. Commit and push changes from the submodule directory.
+4. Update the flake input lock in the main repository.
 
 ## Common Commands
 
