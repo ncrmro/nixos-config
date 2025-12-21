@@ -238,6 +238,7 @@ in
     k = "kubectl";
     # Session management
     zs = "zesh connect";
+    ztab = "zellij action rename-tab";
     # AI Tools
     opencode = "/home/ncrmro/.opencode/bin/opencode";
   };
