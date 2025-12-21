@@ -1,14 +1,12 @@
 {
   lib,
-  outputs,
+  inputs,
   ...
-}: {
+}:
+{
   imports = [
-    outputs.homeManagerModules.keystone-terminal
+    inputs.keystone.homeModules.terminal
   ];
-
-  # Enable terminal configuration (zsh, starship, zoxide, zellij)
-  keystone.terminal.enable = true;
 
   home = {
     username = lib.mkDefault "ncrmro";

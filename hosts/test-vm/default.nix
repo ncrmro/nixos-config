@@ -5,13 +5,14 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
     ./hardware-configuration.nix
     ../common/global
     ../../modules/users/ncrmro.nix
-    outputs.nixosModules.keystone-desktop
+    inputs.keystone.nixosModules.desktop
   ];
 
   # Make users deterministic for test VM
@@ -24,7 +25,10 @@
   users.users.root.initialPassword = "test";
 
   # Enable keystone desktop
-  keystone.desktop.enable = true;
+  keystone.desktop = {
+    enable = true;
+    user = "ncrmro";
+  };
 
   # Auto-login to Hyprland
   services.greetd.settings.initial_session = {

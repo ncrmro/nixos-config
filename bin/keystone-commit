@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""
+Commit and push keystone submodule changes, then update flake lock and commit.
+
+Usage:
+    ./bin/keystone-commit "feat: add new feature"
+    ./bin/keystone-commit "fix: resolve bug"
+"""
+
+import subprocess
+import sys
+import os
+import re
+
+SEMANTIC_PATTERN = re.compile(
+    r'^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .+$'
+)
+
+def run(cmd, cwd=None, check=True, capture=True):
+    """Run a command and return stdout."""
+    result = subprocess.run(
+        cmd,
+        cwd=cwd,
+        check=check,
+        capture_output=capture,
+        text=True
+    )
+    return result.stdout.strip() if capture else None
+
+def run_interactive(cmd, cwd=None):
+    """Run a command with inherited stdio."""
+    subprocess.run(cmd, cwd=cwd, check=True)
+
+def has_changes(repo_path):
+    """Check if repo has uncommitted changes."""
+    result = subprocess.run(
+        ["git", "diff", "--quiet"],
+        cwd=repo_path,
+        capture_output=True
+    )
+    if result.returncode != 0:
+        return True
+    result = subprocess.run(
+        ["git", "diff", "--cached", "--quiet"],
+        cwd=repo_path,
+        capture_output=True
+    )
+    return result.returncode != 0
+
+def needs_push(repo_path):
+    """Check if local is ahead of remote."""
+    local = run(["git", "rev-parse", "HEAD"], cwd=repo_path)
+    try:
+        remote = run(["git", "rev-parse", "@{upstream}"], cwd=repo_path)
+    except subprocess.CalledProcessError:
+        return True
+    return local != remote
+
+def submodule_changed(repo_path, submodule_path):
+    """Check if submodule ref has changed."""
+    result = subprocess.run(
+        ["git", "diff", "--quiet", submodule_path],
+        cwd=repo_path,
+        capture_output=True
+    )
+    return result.returncode != 0
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: keystone-commit <semantic commit message>", file=sys.stderr)
+        print("Example: keystone-commit 'fix: resolve theme colors'", file=sys.stderr)
+        sys.exit(1)
+
+    commit_msg = sys.argv[1]
+
+    if not SEMANTIC_PATTERN.match(commit_msg):
+        print(f"Error: Commit message must be semantic", file=sys.stderr)
+        print(f"Format: <type>(<scope>)?: <description>", file=sys.stderr)
+        print(f"Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert", file=sys.stderr)
+        print(f"Got: {commit_msg}", file=sys.stderr)
+        sys.exit(1)
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_root = os.path.dirname(script_dir)
+    keystone_path = os.path.join(repo_root, ".submodules", "keystone")
+
+    # Step 1: Commit keystone changes if any
+    if has_changes(keystone_path):
+        print("Committing keystone changes...")
+        run(["git", "add", "-A"], cwd=keystone_path)
+        run(["git", "commit", "-m", commit_msg], cwd=keystone_path)
+    else:
+        print("No changes in keystone submodule to commit")
+
+    # Step 2: Push keystone if needed
+    if needs_push(keystone_path):
+        print("Pushing keystone to remote...")
+        run_interactive(["git", "push"], cwd=keystone_path)
+    else:
+        print("Keystone already up to date with remote")
+
+    # Step 3: Update flake.lock
+    print("Updating flake.lock for keystone input...")
+    run_interactive(["nix", "flake", "update", "keystone"], cwd=repo_root)
+
+    # Step 4: Commit submodule ref and flake.lock in root repo
+    submodule_rel_path = ".submodules/keystone"
+    flake_lock_path = "flake.lock"
+
+    has_submodule_change = submodule_changed(repo_root, submodule_rel_path)
+    has_flake_change = submodule_changed(repo_root, flake_lock_path)
+
+    if has_submodule_change or has_flake_change:
+        print("Committing submodule ref and flake.lock in root repo...")
+        if has_submodule_change:
+            run(["git", "add", submodule_rel_path], cwd=repo_root)
+        if has_flake_change:
+            run(["git", "add", flake_lock_path], cwd=repo_root)
+
+        root_commit_msg = f"chore(keystone): relock flake input - {commit_msg}"
+        run(["git", "commit", "-m", root_commit_msg], cwd=repo_root)
+        print(f"Created commit: {root_commit_msg}")
+    else:
+        print("No changes to commit in root repo")
+
+    print("Done.")
+
+if __name__ == "__main__":
+    main()

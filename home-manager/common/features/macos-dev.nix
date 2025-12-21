@@ -1,13 +1,14 @@
 {
   lib,
   pkgs,
-  self,
+  inputs,
   ...
-}: {
+}:
+{
   # Common macOS development toolkit
   # Shared by all macOS home-manager configurations
   imports = [
-    self.homeManagerModules.keystone-terminal
+    inputs.keystone.homeModules.terminal
     ./cli
     ./cli/git.nix
     ./cli/ssh.nix
@@ -16,16 +17,16 @@
     ../optional/mcp/playwright.nix
   ];
 
-  # Enable terminal configuration (zsh, starship, zoxide, zellij)
-  keystone.terminal.enable = true;
-
   programs.home-manager.enable = true;
 
   # Enable experimental Nix features on macOS
   nix = {
     package = pkgs.nix;
     settings = {
-      experimental-features = ["nix-command" "flakes"];
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
     };
   };
 }

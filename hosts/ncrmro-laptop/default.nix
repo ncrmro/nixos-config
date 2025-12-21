@@ -5,12 +5,13 @@
   lib,
   pkgs,
   ...
-} @ args: {
+}@args:
+{
   imports = [
     inputs.lanzaboote.nixosModules.lanzaboote
     # inputs.omarchy-nix.nixosModules.default
     inputs.home-manager.nixosModules.default
-    outputs.nixosModules.omarchy-config
+    # outputs.nixosModules.omarchy-config
     ./disk-config.nix
     ../common/optional/zfs.luks.root.nix
     ./hardware-configuration.nix
@@ -30,6 +31,7 @@
     ../common/optional/iphone-tether.nix
     ./zfs.remote-replication.nix
     ../../modules/nixos/steam.nix
+    inputs.keystone.nixosModules.desktop
   ];
 
   programs.zsh.enable = true;
@@ -39,14 +41,18 @@
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
-  home-manager.extraSpecialArgs = {inherit inputs outputs;};
-  home-manager.users.ncrmro =
-    import ../../home-manager/ncrmro/ncrmro-laptop.nix;
+  home-manager.extraSpecialArgs = { inherit inputs outputs; };
+  home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-laptop.nix;
 
-  services.greetd = {
+  keystone.desktop = {
     enable = true;
-    settings.default_session.user = "ncrmro";
+    user = "ncrmro";
   };
+
+  # services.greetd = {
+  #   enable = true;
+  #   settings.default_session.user = "ncrmro";
+  # };
 
   services.hardware.bolt.enable = true;
   services.fwupd.enable = true;
@@ -54,7 +60,7 @@
   services.zfs.autoScrub.enable = true;
   services.zfs.autoSnapshot.enable = true;
   services.gnome.gnome-keyring.enable = true;
-  security.pam.services.greetd.enableGnomeKeyring = true;
+  # security.pam.services.greetd.enableGnomeKeyring = true;
 
   # Allow unfree packages like VSCode
   nixpkgs.config.allowUnfree = true;
@@ -64,7 +70,7 @@
     pkgs.sbctl
     pkgs.nfs-utils
     pkgs.nvtopPackages.amd
-    inputs.alejandra.defaultPackage."x86_64-linux"
+    # inputs.alejandra.defaultPackage."x86_64-linux"
   ];
 
   programs.nix-ld.enable = true;
@@ -82,14 +88,10 @@
     pkiBundle = "/var/lib/sbctl";
   };
   systemd.services.fprintd = {
-    wantedBy = ["multi-user.target"];
+    wantedBy = [ "multi-user.target" ];
     serviceConfig.Type = "simple";
   };
   services.fprintd.enable = true;
-
-  omarchy = {scale = 1;};
-  # https://github.com/NixOS/nixpkgs/issues/231191#issuecomment-1664053176
-  environment.etc."resolv.conf".mode = "direct-symlink";
 
   # networking.firewall.enable = true;
   # networking.firewall.logRefusedConnections = true;
@@ -108,7 +110,9 @@
   };
 
   # Configure Tailscale node (no tags for client machine)
-  services.tailscale.node = {enable = true;};
+  services.tailscale.node = {
+    enable = true;
+  };
 
   networking.hostName = "ncrmro-laptop";
   networking.hostId = "cac44b47";

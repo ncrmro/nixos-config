@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Rebuild NixOS with local keystone changes without requiring commits
+# Usage: ./bin/keystone-dev <hostname>
+#        ./bin/keystone-dev # uses current hostname
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+KEYSTONE_PATH="$REPO_ROOT/.submodules/keystone"
+
+HOSTNAME="${1:-$(hostname)}"
+
+echo "Rebuilding with local keystone from: $KEYSTONE_PATH"
+echo "Target hostname: $HOSTNAME"
+
+sudo nixos-rebuild switch --flake "$REPO_ROOT#$HOSTNAME" \
+  --override-input keystone "path:$KEYSTONE_PATH"

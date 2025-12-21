@@ -46,7 +46,8 @@
     # Hyprland (latest from official flake)
     hyprland.url = "github:hyprwm/Hyprland";
 
-    # Keystone
+    # Keystone - self-sovereign infrastructure platform
+    # For local dev without commits, use: ./bin/dev-keystone <hostname>
     keystone = {
       url = "github:ncrmro/keystone";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -181,13 +182,13 @@
         };
 
         # Additional systems
-        testbox = nixpkgs.lib.nixosSystem {
-          modules = [ ./hosts/testbox ];
-          specialArgs = {
-            inherit inputs self;
-            outputs = self;
-          };
-        };
+        # testbox = nixpkgs.lib.nixosSystem {
+        #   modules = [ ./hosts/testbox ];
+        #   specialArgs = {
+        #     inherit inputs self;
+        #     outputs = self;
+        #   };
+        # };
 
         ncrmro-laptop = nixpkgs.lib.nixosSystem {
           modules = [ ./hosts/ncrmro-laptop ];

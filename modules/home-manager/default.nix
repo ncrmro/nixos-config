@@ -1,4 +1,3 @@
 {
-  keystone-terminal = import ../keystone/terminal/default.nix;
-  keystone-desktop = import ../keystone/desktop/home/default.nix;
+  # Keystone modules are now provided by the keystone flake input
 }

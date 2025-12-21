@@ -5,7 +5,7 @@
 }:
 {
   imports = [
-    inputs.keystone.homeManagerModules.tui
+    inputs.keystone.homeModules.terminal
   ];
 
   home = {
@@ -13,9 +13,6 @@
     homeDirectory = "/Users/nicholas";
     stateVersion = "25.05";
   };
-
-  # Enable the Keystone TUI module
-  keystone.terminal.enable = true;
 
   home.packages = with pkgs; [
     kubectl
