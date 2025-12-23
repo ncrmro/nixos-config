@@ -21,7 +21,6 @@
     ./adguard-home.nix
     ../common/optional/servarr.nix
     ../common/optional/home-assistant.nix
-    ../common/optional/octoprint.nix
     ./k3s.nix
     ./k3s-storage-classes.nix
     ./nfs.nix
