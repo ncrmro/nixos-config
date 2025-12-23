@@ -50,7 +50,7 @@
     # For local dev without commits, use: ./bin/dev-keystone <hostname>
     keystone = {
       url = "github:ncrmro/keystone";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
     # Omarchy themes (original arch version)
