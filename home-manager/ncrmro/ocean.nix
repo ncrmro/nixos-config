@@ -25,4 +25,10 @@
   };
 
   programs.home-manager.enable = true;
+
+  programs.zsh = {
+    shellAliases = {
+      update = "sudo nixos-rebuild switch --flake ~/nixos-config#ocean";
+    };
+  };
 }
