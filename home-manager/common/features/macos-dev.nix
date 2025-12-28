@@ -14,7 +14,6 @@
     ./cli/ssh.nix
     ../optional/mcp/github-mcp.nix
     ../optional/mcp/kubernetes.nix
-    ../optional/mcp/playwright.nix
   ];
 
   programs.home-manager.enable = true;

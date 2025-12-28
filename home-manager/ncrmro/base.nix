@@ -16,7 +16,6 @@
     ../common/optional/mcp/github-mcp.nix
     ../common/optional/mcp/kubernetes.nix
     ../common/optional/mcp/mcp-language-server.nix
-    ../common/optional/mcp/playwright.nix
     inputs.nix-index-database.homeModules.nix-index
   ];
 
@@ -28,6 +27,7 @@
     gh-dash
     devcontainer
     obsidian
+    signal-desktop
   ];
 
   # Keystone desktop includes terminal
