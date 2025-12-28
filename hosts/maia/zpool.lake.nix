@@ -13,7 +13,8 @@
   config,
   utils,
   ...
-}: {
+}:
+{
   boot.initrd.systemd.emergencyAccess = lib.mkDefault false;
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -32,59 +33,65 @@
     # Disable NixOS's systemd service that imports the pool
     # systemd.services.zfs-import-rpool.enable = false;
 
-    systemd.services.import-lake-bare = let
-      # Compute the systemd units for the devices in the pool
-      devices = map (p: utils.escapeSystemdPath p + ".device") [
-        config.disko.devices.disk.disk2.device
-        config.disko.devices.disk.disk3.device
-      ];
-    in {
-      after = ["modprobe@zfs.service"] ++ devices;
-      requires = ["modprobe@zfs.service"];
+    systemd.services.import-lake-bare =
+      let
+        # Compute the systemd units for the devices in the pool
+        devices = map (p: utils.escapeSystemdPath p + ".device") [
+          config.disko.devices.disk.disk2.device
+          config.disko.devices.disk.disk3.device
+        ];
+      in
+      {
+        after = [ "modprobe@zfs.service" ] ++ devices;
+        requires = [ "modprobe@zfs.service" ];
 
-      # Devices are added to 'wants' instead of 'requires' so that a
-      # degraded import may be attempted if one of them times out.
-      # 'cryptsetup-pre.target' is wanted because it isn't pulled in
-      # normally and we want this service to finish before
-      # 'systemd-cryptsetup@.service' instances begin running.
-      wants = ["cryptsetup-pre.target"] ++ devices;
-      before = ["cryptsetup-pre.target"];
+        # Devices are added to 'wants' instead of 'requires' so that a
+        # degraded import may be attempted if one of them times out.
+        # 'cryptsetup-pre.target' is wanted because it isn't pulled in
+        # normally and we want this service to finish before
+        # 'systemd-cryptsetup@.service' instances begin running.
+        wants = [ "cryptsetup-pre.target" ] ++ devices;
+        before = [ "cryptsetup-pre.target" ];
 
-      unitConfig.DefaultDependencies = false;
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        # TimeoutStartSec = "120s";
+        unitConfig.DefaultDependencies = false;
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          # TimeoutStartSec = "120s";
+        };
+        path = [ config.boot.zfs.package ];
+        enableStrictShellChecks = true;
+        script =
+          let
+            # Check that the FSes we're about to mount actually come from
+            # our encryptionroot. If not, they may be fraudulent.
+            shouldCheckFS = fs: fs.fsType == "zfs" && utils.fsNeededForBoot fs;
+            checkFS = fs: ''
+              encroot="$(zfs get -H -o value encryptionroot ${fs.device})"
+              if [ "$encroot" != lake/crypt ]; then
+                echo ${fs.device} has invalid encryptionroot "$encroot" >&2
+                exit 1
+              else
+                echo ${fs.device} has valid encryptionroot "$encroot" >&2
+              fi
+            '';
+          in
+          ''
+            function cleanup() {
+              exit_code=$?
+              if [ "$exit_code" != 0 ]; then
+                zpool export lake
+              fi
+            }
+            trap cleanup EXIT
+            zpool import -N -d /dev/disk/by-id lake
+
+            # Check that the file systems we will mount have the right encryptionroot.
+            ${lib.concatStringsSep "\n" (
+              lib.map checkFS (lib.filter shouldCheckFS config.system.build.fileSystems)
+            )}
+          '';
       };
-      path = [config.boot.zfs.package];
-      enableStrictShellChecks = true;
-      script = let
-        # Check that the FSes we're about to mount actually come from
-        # our encryptionroot. If not, they may be fraudulent.
-        shouldCheckFS = fs: fs.fsType == "zfs" && utils.fsNeededForBoot fs;
-        checkFS = fs: ''
-          encroot="$(zfs get -H -o value encryptionroot ${fs.device})"
-          if [ "$encroot" != lake/crypt ]; then
-            echo ${fs.device} has invalid encryptionroot "$encroot" >&2
-            exit 1
-          else
-            echo ${fs.device} has valid encryptionroot "$encroot" >&2
-          fi
-        '';
-      in ''
-        function cleanup() {
-          exit_code=$?
-          if [ "$exit_code" != 0 ]; then
-            zpool export lake
-          fi
-        }
-        trap cleanup EXIT
-        zpool import -N -d /dev/disk/by-id lake
-
-        # Check that the file systems we will mount have the right encryptionroot.
-        ${lib.concatStringsSep "\n" (lib.map checkFS (lib.filter shouldCheckFS config.system.build.fileSystems))}
-      '';
-    };
 
     luks.devices.lake-credstore = {
       device = "/dev/zvol/lake/credstore";
@@ -113,8 +120,14 @@
     '';
     # Add some conflicts to ensure the credstore closes before leaving initrd.
     systemd.targets.initrd-switch-root = {
-      conflicts = ["etc-credstore.mount" "systemd-cryptsetup@credstore.service"];
-      after = ["etc-credstore.mount" "systemd-cryptsetup@credstore.service"];
+      conflicts = [
+        "etc-credstore.mount"
+        "systemd-cryptsetup@credstore.service"
+      ];
+      after = [
+        "etc-credstore.mount"
+        "systemd-cryptsetup@credstore.service"
+      ];
     };
 
     # After the pool is imported and the credstore is mounted, finally
@@ -126,10 +139,13 @@
     # 'WantsMountsFor' instead and allow providing the key through any
     # of the numerous other systemd credential provision mechanisms.
     systemd.services.lake-load-key = {
-      requiredBy = ["initrd.target"];
-      before = ["sysroot.mount" "initrd.target"];
-      requires = ["import-lake-bare.service"];
-      after = ["import-lake-bare.service"];
+      requiredBy = [ "initrd.target" ];
+      before = [
+        "sysroot.mount"
+        "initrd.target"
+      ];
+      requires = [ "import-lake-bare.service" ];
+      after = [ "import-lake-bare.service" ];
       unitConfig.RequiresMountsFor = "/etc/credstore";
       unitConfig.DefaultDependencies = false;
       serviceConfig = {

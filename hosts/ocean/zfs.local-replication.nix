@@ -4,7 +4,8 @@
   lib,
   inputs,
   ...
-}: {
+}:
+{
   # Import the common ZFS remote replication module
   imports = [
     ../common/optional/zfs.remote-replication.nix

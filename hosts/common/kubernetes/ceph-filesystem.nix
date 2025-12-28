@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   services.k3s.manifests = {
     "ceph-filesystem".content = {
       apiVersion = "ceph.rook.io/v1";
@@ -27,8 +28,8 @@
         metadataServer = {
           activeCount = 1;
           activeStandby = true;
-          placement = {};
-          resources = {};
+          placement = { };
+          resources = { };
         };
       };
     };

@@ -1,5 +1,6 @@
 # disko-config.nix
-{lib, ...}: {
+{ lib, ... }:
+{
   disko.devices = {
     disk = {
       # OS Disk - referenced by serial number

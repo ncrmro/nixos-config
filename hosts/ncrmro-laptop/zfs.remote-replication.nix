@@ -4,7 +4,8 @@
   lib,
   inputs,
   ...
-}: {
+}:
+{
   # Import the common ZFS remote replication module
   imports = [
     ../common/optional/zfs.remote-replication.nix
@@ -29,10 +30,11 @@
   # Configure syncoid for automatic snapshot replication to maia.mercury
   systemd.services.syncoid-to-maia = {
     description = "Sync ZFS snapshots to maia.mercury backup server";
-    wants = ["network-online.target"];
-    after = ["network-online.target"];
+    wants = [ "network-online.target" ];
+    after = [ "network-online.target" ];
     startAt = "hourly"; # Run hourly
-    path = with pkgs;
+    path =
+      with pkgs;
       [
         config.boot.zfs.package
         openssh

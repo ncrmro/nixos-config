@@ -1,4 +1,5 @@
-{pkgs, ...}: let
+{ pkgs, ... }:
+let
   # Define the OVMF package with required features
   ovmfPkg = pkgs.OVMF.override {
     secureBoot = true;
@@ -8,7 +9,8 @@
 
   # QEMU package for accessing EDK2 firmware files
   qemuPkg = pkgs.qemu_kvm;
-in {
+in
+{
   virtualisation.libvirtd = {
     enable = true;
     qemu = {
@@ -19,7 +21,7 @@ in {
     };
   };
   programs.virt-manager.enable = true;
-  users.users.ncrmro.extraGroups = ["libvirtd"];
+  users.users.ncrmro.extraGroups = [ "libvirtd" ];
 
   # Prevent NetworkManager from managing libvirt bridges
   # This allows libvirt to fully manage NAT networking for VMs

@@ -2,7 +2,8 @@
   config,
   lib,
   ...
-}: {
+}:
+{
   config = {
     services.k3s.manifests = {
       "ocean-nvme-storage-class".content = {
@@ -27,7 +28,7 @@
             matchLabelExpressions = [
               {
                 key = "kubernetes.io/hostname";
-                values = ["ocean"];
+                values = [ "ocean" ];
               }
             ];
           }
@@ -81,7 +82,7 @@
             matchLabelExpressions = [
               {
                 key = "kubernetes.io/hostname";
-                values = ["ocean"];
+                values = [ "ocean" ];
               }
             ];
           }

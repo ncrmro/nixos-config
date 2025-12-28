@@ -5,7 +5,8 @@
   config,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     ../common/features/macos-dev.nix
     ../common/optional/mosh.nix

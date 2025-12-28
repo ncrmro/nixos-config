@@ -3,10 +3,12 @@
   lib,
   inputs,
   ...
-}: let
+}:
+let
   cfg = config.programs.bambu-studio;
-in {
-  imports = [inputs.nix-flatpak.nixosModules.nix-flatpak];
+in
+{
+  imports = [ inputs.nix-flatpak.nixosModules.nix-flatpak ];
 
   options.programs.bambu-studio = {
     enable = lib.mkEnableOption "Bambu Studio 3D printing software";

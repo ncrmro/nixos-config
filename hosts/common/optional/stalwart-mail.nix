@@ -3,9 +3,11 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   cfg = config.services.stalwart-mail;
-in {
+in
+{
   services.stalwart-mail = {
     enable = true;
     package = pkgs.stalwart-mail;
@@ -23,29 +25,29 @@ in {
           # SMTP for mail delivery (port 25)
           smtp = {
             protocol = "smtp";
-            bind = ["[::]:25"];
+            bind = [ "[::]:25" ];
           };
           # SMTP Submission with TLS (port 465)
           submissions = {
             protocol = "smtp";
-            bind = ["[::]:465"];
+            bind = [ "[::]:465" ];
             tls.implicit = true;
           };
           # SMTP Submission (port 587)
           submission = {
             protocol = "smtp";
-            bind = ["[::]:587"];
+            bind = [ "[::]:587" ];
           };
           # IMAPS (port 993)
           imaps = {
             protocol = "imap";
-            bind = ["[::]:993"];
+            bind = [ "[::]:993" ];
             tls.implicit = true;
           };
           # JMAP/Management interface (localhost only)
           jmap = {
             protocol = "http";
-            bind = ["127.0.0.1:8080"];
+            bind = [ "127.0.0.1:8080" ];
           };
         };
       };
@@ -84,7 +86,10 @@ in {
         };
         auth = {
           directory = "'internal'";
-          mechanisms = ["PLAIN" "LOGIN"];
+          mechanisms = [
+            "PLAIN"
+            "LOGIN"
+          ];
         };
       };
 

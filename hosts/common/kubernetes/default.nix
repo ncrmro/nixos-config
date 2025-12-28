@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   imports = [
     ./cert-manager.nix
     #./ceph-cluster.nix

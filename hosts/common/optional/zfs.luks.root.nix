@@ -3,7 +3,8 @@
   config,
   utils,
   ...
-}: {
+}:
+{
   services.zfs.autoScrub.enable = true;
   boot.initrd.systemd.emergencyAccess = lib.mkDefault false;
   # Use the systemd-boot EFI boot loader.
@@ -16,57 +17,63 @@
     # Disable NixOS's systemd service that imports the pool
     systemd.services.zfs-import-rpool.enable = false;
 
-    systemd.services.import-rpool-bare = let
-      # Compute the systemd units for the devices in the pool
-      devices = map (p: utils.escapeSystemdPath p + ".device") [
-        config.disko.devices.disk.disk1.device
-      ];
-    in {
-      after = ["modprobe@zfs.service"] ++ devices;
-      requires = ["modprobe@zfs.service"];
+    systemd.services.import-rpool-bare =
+      let
+        # Compute the systemd units for the devices in the pool
+        devices = map (p: utils.escapeSystemdPath p + ".device") [
+          config.disko.devices.disk.disk1.device
+        ];
+      in
+      {
+        after = [ "modprobe@zfs.service" ] ++ devices;
+        requires = [ "modprobe@zfs.service" ];
 
-      # Devices are added to 'wants' instead of 'requires' so that a
-      # degraded import may be attempted if one of them times out.
-      # 'cryptsetup-pre.target' is wanted because it isn't pulled in
-      # normally and we want this service to finish before
-      # 'systemd-cryptsetup@.service' instances begin running.
-      wants = ["cryptsetup-pre.target"] ++ devices;
-      before = ["cryptsetup-pre.target"];
+        # Devices are added to 'wants' instead of 'requires' so that a
+        # degraded import may be attempted if one of them times out.
+        # 'cryptsetup-pre.target' is wanted because it isn't pulled in
+        # normally and we want this service to finish before
+        # 'systemd-cryptsetup@.service' instances begin running.
+        wants = [ "cryptsetup-pre.target" ] ++ devices;
+        before = [ "cryptsetup-pre.target" ];
 
-      unitConfig.DefaultDependencies = false;
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
+        unitConfig.DefaultDependencies = false;
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+        path = [ config.boot.zfs.package ];
+        enableStrictShellChecks = true;
+        script =
+          let
+            # Check that the FSes we're about to mount actually come from
+            # our encryptionroot. If not, they may be fraudulent.
+            shouldCheckFS = fs: fs.fsType == "zfs" && utils.fsNeededForBoot fs;
+            checkFS = fs: ''
+              encroot="$(zfs get -H -o value encryptionroot ${fs.device})"
+              if [ "$encroot" != rpool/crypt ]; then
+                echo ${fs.device} has invalid encryptionroot "$encroot" >&2
+                exit 1
+              else
+                echo ${fs.device} has valid encryptionroot "$encroot" >&2
+              fi
+            '';
+          in
+          ''
+            function cleanup() {
+              exit_code=$?
+              if [ "$exit_code" != 0 ]; then
+                zpool export rpool
+              fi
+            }
+            trap cleanup EXIT
+            zpool import -N -d /dev/disk/by-id rpool
+
+            # Check that the file systems we will mount have the right encryptionroot.
+            ${lib.concatStringsSep "\n" (
+              lib.map checkFS (lib.filter shouldCheckFS config.system.build.fileSystems)
+            )}
+          '';
       };
-      path = [config.boot.zfs.package];
-      enableStrictShellChecks = true;
-      script = let
-        # Check that the FSes we're about to mount actually come from
-        # our encryptionroot. If not, they may be fraudulent.
-        shouldCheckFS = fs: fs.fsType == "zfs" && utils.fsNeededForBoot fs;
-        checkFS = fs: ''
-          encroot="$(zfs get -H -o value encryptionroot ${fs.device})"
-          if [ "$encroot" != rpool/crypt ]; then
-            echo ${fs.device} has invalid encryptionroot "$encroot" >&2
-            exit 1
-          else
-            echo ${fs.device} has valid encryptionroot "$encroot" >&2
-          fi
-        '';
-      in ''
-        function cleanup() {
-          exit_code=$?
-          if [ "$exit_code" != 0 ]; then
-            zpool export rpool
-          fi
-        }
-        trap cleanup EXIT
-        zpool import -N -d /dev/disk/by-id rpool
-
-        # Check that the file systems we will mount have the right encryptionroot.
-        ${lib.concatStringsSep "\n" (lib.map checkFS (lib.filter shouldCheckFS config.system.build.fileSystems))}
-      '';
-    };
 
     luks.devices.credstore = {
       device = "/dev/zvol/rpool/credstore";
@@ -76,7 +83,10 @@
       # the TPM2 enters a state where the LUKS volume can no longer be
       # decrypted. That way if we accidentally boot an untrustworthy
       # OS somehow, they can't decrypt the LUKS volume.
-      crypttabExtraOpts = ["tpm2-measure-pcr=yes" "tpm2-device=auto"];
+      crypttabExtraOpts = [
+        "tpm2-measure-pcr=yes"
+        "tpm2-device=auto"
+      ];
     };
     # Adding an fstab is the easiest way to add file systems whose
     # purpose is solely in the initrd and aren't a part of '/sysroot'.
@@ -91,8 +101,14 @@
     '';
     # Add some conflicts to ensure the credstore closes before leaving initrd.
     systemd.targets.initrd-switch-root = {
-      conflicts = ["etc-credstore.mount" "systemd-cryptsetup@credstore.service"];
-      after = ["etc-credstore.mount" "systemd-cryptsetup@credstore.service"];
+      conflicts = [
+        "etc-credstore.mount"
+        "systemd-cryptsetup@credstore.service"
+      ];
+      after = [
+        "etc-credstore.mount"
+        "systemd-cryptsetup@credstore.service"
+      ];
     };
 
     # After the pool is imported and the credstore is mounted, finally
@@ -104,10 +120,13 @@
     # 'WantsMountsFor' instead and allow providing the key through any
     # of the numerous other systemd credential provision mechanisms.
     systemd.services.rpool-load-key = {
-      requiredBy = ["initrd.target"];
-      before = ["sysroot.mount" "initrd.target"];
-      requires = ["import-rpool-bare.service"];
-      after = ["import-rpool-bare.service"];
+      requiredBy = [ "initrd.target" ];
+      before = [
+        "sysroot.mount"
+        "initrd.target"
+      ];
+      requires = [ "import-rpool-bare.service" ];
+      after = [ "import-rpool-bare.service" ];
       unitConfig.RequiresMountsFor = "/etc/credstore";
       unitConfig.DefaultDependencies = false;
       serviceConfig = {
@@ -122,7 +141,7 @@
     # There's a race condition where udev is being shutdown as we transition
     # out of initrd, but the cryptsetup detach verb needs to do one last udev
     # update, so that has to happen before udev shuts down.
-    systemd.services.systemd-udevd.before = ["systemd-cryptsetup@credstore.service"];
+    systemd.services.systemd-udevd.before = [ "systemd-cryptsetup@credstore.service" ];
   };
 
   # All my datasets use 'mountpoint=$path', but you have to be careful
@@ -135,9 +154,9 @@
   # '/var' datasets.
   #
   # All of that is incorrect if you just use 'mountpoint=legacy'
-  fileSystems = lib.genAttrs ["/" "/nix" "/var"] (fs: {
+  fileSystems = lib.genAttrs [ "/" "/nix" "/var" ] (fs: {
     device = "rpool/crypt/system${lib.optionalString (fs != "/") fs}";
     fsType = "zfs";
-    options = ["zfsutil"];
+    options = [ "zfsutil" ];
   });
 }

@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   services.k3s.manifests = {
     home-assistant-namespace = {
       enable = true;
@@ -55,7 +56,7 @@
         spec = {
           tls = [
             {
-              hosts = ["home.ncrmro.com"];
+              hosts = [ "home.ncrmro.com" ];
             }
           ];
           rules = [

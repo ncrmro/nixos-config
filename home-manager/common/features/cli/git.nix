@@ -2,7 +2,8 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   programs.git = {
     enable = true;
     userName = "Nicholas Romero";

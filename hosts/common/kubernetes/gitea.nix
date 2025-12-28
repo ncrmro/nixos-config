@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   services.k3s.autoDeployCharts = {
     # Gitea Helm Chart: https://gitea.com/gitea/helm-chart
     gitea = {
@@ -42,7 +43,7 @@
           enabled = true;
           storageClass = "ceph-filesystem";
           size = "10Gi";
-          accessModes = ["ReadWriteMany"];
+          accessModes = [ "ReadWriteMany" ];
         };
 
         # Database configuration - using external PostgreSQL
@@ -61,7 +62,7 @@
             enabled = true;
             storageClass = "zfs-nvme";
             size = "2Gi";
-            accessModes = ["ReadWriteOnce"];
+            accessModes = [ "ReadWriteOnce" ];
           };
           resources = {
             limits = {
@@ -93,7 +94,7 @@
           tls = [
             {
               # Using default ingress-nginx wildcard cert (*.ncrmro.com)
-              hosts = ["git.ncrmro.com"];
+              hosts = [ "git.ncrmro.com" ];
             }
           ];
         };

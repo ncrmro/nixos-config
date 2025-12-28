@@ -16,7 +16,7 @@ buildGoModule rec {
 
   vendorHash = "sha256-WcYKtM8r9xALx68VvgRabMPq8XnubhTj6NAdtmaPa+g=";
 
-  subPackages = ["."];
+  subPackages = [ "." ];
 
   ldflags = [
     "-s"
@@ -27,7 +27,7 @@ buildGoModule rec {
     description = "An MCP server that runs and exposes a language server to LLMs";
     homepage = "https://github.com/isaacphi/mcp-language-server";
     license = licenses.bsd3;
-    maintainers = [];
+    maintainers = [ ];
     mainProgram = "mcp-language-server";
   };
 }

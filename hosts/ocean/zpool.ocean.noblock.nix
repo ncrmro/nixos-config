@@ -3,7 +3,8 @@
   config,
   utils,
   ...
-}: {
+}:
+{
   imports = [
     ../../modules/users/media.nix
   ];
@@ -21,13 +22,13 @@
     description = "Import ZFS pool 'ocean' after boot";
 
     # Run after the system is fully booted
-    wantedBy = ["multi-user.target"];
-    after = ["multi-user.target"];
+    wantedBy = [ "multi-user.target" ];
+    after = [ "multi-user.target" ];
 
     # Don't prevent boot from completing if this service fails
     # No ConditionPathExists - service will run even if specific disks aren't present
     # This allows for disk swapping scenarios where pools may be temporarily unavailable
-    unitConfig = {};
+    unitConfig = { };
 
     serviceConfig = {
       Type = "oneshot";
@@ -36,7 +37,7 @@
       Restart = "no";
     };
 
-    path = [config.boot.zfs.package];
+    path = [ config.boot.zfs.package ];
     script = ''
       # Only attempt import if the pool isn't already imported
       if ! zpool list ocean > /dev/null 2>&1; then

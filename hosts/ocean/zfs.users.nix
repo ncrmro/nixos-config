@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   # Enable ZFS backup and NAS
   # zfs create -p ocean/backups/maia
   # zfs allow maia-sync ocean/backups/maia
@@ -20,7 +21,7 @@
     ];
   };
 
-  users.groups.zfs-sync = {};
+  users.groups.zfs-sync = { };
 
   users.users.laptop-sync = {
     isSystemUser = true;

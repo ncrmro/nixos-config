@@ -4,7 +4,8 @@
   lib,
   inputs,
   ...
-}: {
+}:
+{
   # Base configuration for ZFS remote replication
   # This module provides common settings for sanoid/syncoid-based ZFS replication
   # Each host should extend this with their specific dataset configurations

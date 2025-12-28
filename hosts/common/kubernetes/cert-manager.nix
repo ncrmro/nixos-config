@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   services.k3s.autoDeployCharts = {
     cert-manager = {
       name = "cert-manager";

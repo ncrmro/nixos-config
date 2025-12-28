@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   # iPhone USB tethering support
   environment.systemPackages = [
     pkgs.libimobiledevice

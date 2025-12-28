@@ -4,7 +4,8 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   # Example Home Manager configuration with full GNOME Keyring integration
   # This configuration enables comprehensive credential management
 
@@ -82,7 +83,7 @@
   programs.chromium = {
     enable = true;
     extensions = [
-      {id = "nngceckbapebfimnlniiiahkandclblb";} # Bitwarden
+      { id = "nngceckbapebfimnlniiiahkandclblb"; } # Bitwarden
     ];
   };
 

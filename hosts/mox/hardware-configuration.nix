@@ -8,14 +8,25 @@
   modulesPath,
   utils,
   ...
-}: {
+}:
+{
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
-  boot.initrd.availableKernelModules = ["xhci_pci" "ehci_pci" "ahci" "usbhid" "usb_storage" "sd_mod"];
-  boot.initrd.kernelModules = [];
-  boot.kernelModules = ["kvm-intel" "wl"];
+  boot.initrd.availableKernelModules = [
+    "xhci_pci"
+    "ehci_pci"
+    "ahci"
+    "usbhid"
+    "usb_storage"
+    "sd_mod"
+  ];
+  boot.initrd.kernelModules = [ ];
+  boot.kernelModules = [
+    "kvm-intel"
+    "wl"
+  ];
   #boot.extraModulePackages = [ config.boot.kernelPackages.broadcom_sta ];
   networking.hostId = "7a8e1638";
 
@@ -27,34 +38,36 @@
     # Disable NixOS's systemd service that imports the pool
     systemd.services.zfs-import-rpool.enable = false;
 
-    systemd.services.import-rpool-bare = let
-      # Compute the systemd units for the devices in the pool
-      devices = map (p: utils.escapeSystemdPath p + ".device") [
-        "/dev/disk/by-id/ata-M4-CT128M4SSD2_000000001224090D40C2"
-      ];
-    in {
-      after = ["modprobe@zfs.service"] ++ devices;
-      requires = ["modprobe@zfs.service"];
+    systemd.services.import-rpool-bare =
+      let
+        # Compute the systemd units for the devices in the pool
+        devices = map (p: utils.escapeSystemdPath p + ".device") [
+          "/dev/disk/by-id/ata-M4-CT128M4SSD2_000000001224090D40C2"
+        ];
+      in
+      {
+        after = [ "modprobe@zfs.service" ] ++ devices;
+        requires = [ "modprobe@zfs.service" ];
 
-      # Devices are added to 'wants' instead of 'requires' so that a
-      # degraded import may be attempted if one of them times out.
-      # 'cryptsetup-pre.target' is wanted because it isn't pulled in
-      # normally and we want this service to finish before
-      # 'systemd-cryptsetup@.service' instances begin running.
-      wants = ["cryptsetup-pre.target"] ++ devices;
-      before = ["cryptsetup-pre.target"];
+        # Devices are added to 'wants' instead of 'requires' so that a
+        # degraded import may be attempted if one of them times out.
+        # 'cryptsetup-pre.target' is wanted because it isn't pulled in
+        # normally and we want this service to finish before
+        # 'systemd-cryptsetup@.service' instances begin running.
+        wants = [ "cryptsetup-pre.target" ] ++ devices;
+        before = [ "cryptsetup-pre.target" ];
 
-      unitConfig.DefaultDependencies = false;
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
+        unitConfig.DefaultDependencies = false;
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+        path = [ config.boot.zfs.package ];
+        enableStrictShellChecks = true;
+        script = ''
+          zpool import -N -d /dev/disk/by-id rpool
+        '';
       };
-      path = [config.boot.zfs.package];
-      enableStrictShellChecks = true;
-      script = ''
-        zpool import -N -d /dev/disk/by-id rpool
-      '';
-    };
 
     luks.devices.credstore = {
       device = "/dev/zvol/rpool/credstore";
@@ -79,8 +92,14 @@
     '';
     # Add some conflicts to ensure the credstore closes before leaving initrd.
     systemd.targets.initrd-switch-root = {
-      conflicts = ["etc-credstore.mount" "systemd-cryptsetup@credstore.service"];
-      after = ["etc-credstore.mount" "systemd-cryptsetup@credstore.service"];
+      conflicts = [
+        "etc-credstore.mount"
+        "systemd-cryptsetup@credstore.service"
+      ];
+      after = [
+        "etc-credstore.mount"
+        "systemd-cryptsetup@credstore.service"
+      ];
     };
 
     # After the pool is imported and the credstore is mounted, finally
@@ -92,10 +111,13 @@
     # 'WantsMountsFor' instead and allow providing the key through any
     # of the numerous other systemd credential provision mechanisms.
     systemd.services.rpool-load-key = {
-      requiredBy = ["initrd.target"];
-      before = ["sysroot.mount" "initrd.target"];
-      requires = ["import-rpool-bare.service"];
-      after = ["import-rpool-bare.service"];
+      requiredBy = [ "initrd.target" ];
+      before = [
+        "sysroot.mount"
+        "initrd.target"
+      ];
+      requires = [ "import-rpool-bare.service" ];
+      after = [ "import-rpool-bare.service" ];
       unitConfig.RequiresMountsFor = "/etc/credstore";
       unitConfig.DefaultDependencies = false;
       serviceConfig = {
@@ -119,9 +141,12 @@
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/E6E0-2CE8";
     fsType = "vfat";
-    options = ["fmask=0077" "dmask=0077"];
+    options = [
+      "fmask=0077"
+      "dmask=0077"
+    ];
   };
-  swapDevices = [];
+  swapDevices = [ ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's

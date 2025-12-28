@@ -4,7 +4,8 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   imports = [
     ./base.nix
     ../common/features/virt-manager.nix

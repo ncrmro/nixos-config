@@ -1,4 +1,5 @@
-{lib, ...}: {
+{ lib, ... }:
+{
   imports = [
     ./hardware-configuration.nix
     ./k3s.nix
@@ -9,10 +10,15 @@
   networking.hostName = "catalyst-primary";
   networking.domain = "";
   networking.hosts = {
-    "127.0.0.1" = ["primary.catalyst.ncrmro.com" "cr.primary.catalyst.ncrmro.com"];
+    "127.0.0.1" = [
+      "primary.catalyst.ncrmro.com"
+      "cr.primary.catalyst.ncrmro.com"
+    ];
   };
   services.openssh.enable = true;
-  users.users.root.openssh.authorizedKeys.keys = [''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyrDBVcGK+pUZOTUA7MLoD5vYK/kaPF6TNNyoDmwNl2 ncrmro@ncrmro-laptop-fw7k''];
+  users.users.root.openssh.authorizedKeys.keys = [
+    ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyrDBVcGK+pUZOTUA7MLoD5vYK/kaPF6TNNyoDmwNl2 ncrmro@ncrmro-laptop-fw7k''
+  ];
   system.stateVersion = "25.05";
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";

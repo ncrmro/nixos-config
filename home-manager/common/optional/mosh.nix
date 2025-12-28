@@ -3,7 +3,8 @@
   config,
   lib,
   ...
-}: {
+}:
+{
   # Mosh - Mobile shell, remote terminal with UDP roaming support
   # https://mosh.org/
   # Provides both client and server capabilities for roaming terminal sessions

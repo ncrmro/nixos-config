@@ -3,16 +3,17 @@
   config,
   utils,
   ...
-}: {
+}:
+{
   # Enable wireguard
   networking.firewall = {
-    allowedUDPPorts = [51820];
+    allowedUDPPorts = [ 51820 ];
   };
   networking.wireguard.interfaces = {
     # "wg0" is the network interface name. You can name the interface arbitrarily.
     wg0 = {
       # Determines the IP address and subnet of the server's end of the tunnel interface.
-      ips = ["10.13.13.4/24"];
+      ips = [ "10.13.13.4/24" ];
 
       # The port that WireGuard listens to. Must be accessible by the client.
       listenPort = 51820;
@@ -39,7 +40,7 @@
         {
           endpoint = "192.168.1.10:51820";
           publicKey = "KOb09l0R69ZnHTs5RuGKBJgAN4AHGW8gfnIIErCOjWE=";
-          allowedIPs = ["10.13.13.0/24"];
+          allowedIPs = [ "10.13.13.0/24" ];
           presharedKeyFile = "/etc/wireguard/ocean.psk";
           persistentKeepalive = 25;
         }

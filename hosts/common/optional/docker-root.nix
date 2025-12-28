@@ -2,14 +2,18 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   # Enable common container config files in /etc/containers
   virtualisation.containers.enable = true;
   virtualisation = {
     docker = {
       enable = lib.mkForce true;
       daemon.settings = {
-        dns = ["1.1.1.1" "8.8.8.8"];
+        dns = [
+          "1.1.1.1"
+          "8.8.8.8"
+        ];
         #registry-mirrors = [ "https://mirror.gcr.io" ];
         experimental = true;
         features = {

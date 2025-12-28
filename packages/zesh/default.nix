@@ -20,7 +20,7 @@ rustPlatform.buildRustPackage rec {
     description = "A zellij session manager with zoxide integration";
     homepage = "https://github.com/roberte777/zesh";
     license = licenses.mit;
-    maintainers = [];
+    maintainers = [ ];
     mainProgram = "zesh";
   };
 }

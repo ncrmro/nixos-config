@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   services.k3s.manifests = {
     servarr-namespace = {
       enable = true;
@@ -53,7 +54,7 @@
         spec = {
           tls = [
             {
-              hosts = ["jellyfin.ncrmro.com"];
+              hosts = [ "jellyfin.ncrmro.com" ];
             }
           ];
           rules = [
@@ -122,7 +123,7 @@
         spec = {
           tls = [
             {
-              hosts = ["radarr.ncrmro.com"];
+              hosts = [ "radarr.ncrmro.com" ];
             }
           ];
           rules = [
@@ -191,7 +192,7 @@
         spec = {
           tls = [
             {
-              hosts = ["sonarr.ncrmro.com"];
+              hosts = [ "sonarr.ncrmro.com" ];
             }
           ];
           rules = [
@@ -260,7 +261,7 @@
         spec = {
           tls = [
             {
-              hosts = ["prowlarr.ncrmro.com"];
+              hosts = [ "prowlarr.ncrmro.com" ];
             }
           ];
           rules = [
@@ -329,7 +330,7 @@
         spec = {
           tls = [
             {
-              hosts = ["bazarr.ncrmro.com"];
+              hosts = [ "bazarr.ncrmro.com" ];
             }
           ];
           rules = [
@@ -398,7 +399,7 @@
         spec = {
           tls = [
             {
-              hosts = ["lidarr.ncrmro.com"];
+              hosts = [ "lidarr.ncrmro.com" ];
             }
           ];
           rules = [
@@ -467,7 +468,7 @@
         spec = {
           tls = [
             {
-              hosts = ["readarr.ncrmro.com"];
+              hosts = [ "readarr.ncrmro.com" ];
             }
           ];
           rules = [
@@ -536,7 +537,7 @@
         spec = {
           tls = [
             {
-              hosts = ["jellyseerr.ncrmro.com"];
+              hosts = [ "jellyseerr.ncrmro.com" ];
             }
           ];
           rules = [
@@ -605,7 +606,7 @@
         spec = {
           tls = [
             {
-              hosts = ["transmission.ncrmro.com"];
+              hosts = [ "transmission.ncrmro.com" ];
             }
           ];
           rules = [
@@ -680,7 +681,7 @@
         spec = {
           tls = [
             {
-              hosts = ["sabnzbd.ncrmro.com"];
+              hosts = [ "sabnzbd.ncrmro.com" ];
             }
           ];
           rules = [

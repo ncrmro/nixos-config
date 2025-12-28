@@ -3,11 +3,12 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   # Enhanced GNOME Keyring configuration with comprehensive integration
   # This module provides complete GNOME Keyring setup for credential management
   # across SSH, 1Password, Bitwarden, and Docker
-  
+
   options = {
     services.gnome-keyring-full = {
       enable = lib.mkEnableOption "Enhanced GNOME Keyring with full credential integration";
@@ -17,12 +18,12 @@
   config = lib.mkIf config.services.gnome-keyring-full.enable {
     # Core GNOME Keyring service
     services.gnome.gnome-keyring.enable = true;
-    
+
     # Install required packages for credential management
     environment.systemPackages = with pkgs; [
       gnome-keyring
-      libsecret  # For secret-tool command line interface
-      seahorse   # GUI keyring management
+      libsecret # For secret-tool command line interface
+      seahorse # GUI keyring management
     ];
 
     # PAM integration for automatic unlock

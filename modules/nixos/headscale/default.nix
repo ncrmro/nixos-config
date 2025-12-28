@@ -3,9 +3,11 @@
   config,
   lib,
   ...
-}: let
+}:
+let
   domain = "mercury.ncrmro.com";
-in {
+in
+{
   # Configure ACME for SSL certificates
   security.acme = {
     acceptTerms = true;
@@ -24,8 +26,12 @@ in {
   # Open firewall ports for HTTP/HTTPS, headscale, and DERP
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [80 443 8080];
-    allowedUDPPorts = [3478];
+    allowedTCPPorts = [
+      80
+      443
+      8080
+    ];
+    allowedUDPPorts = [ 3478 ];
   };
 
   services = {
@@ -42,7 +48,10 @@ in {
           nameservers = {
             # Use AdGuard Home instances for DNS with ad-blocking
             # 100.64.0.38 = mercury (primary), 100.64.0.6 = ocean (secondary)
-            global = ["100.64.0.6" "100.64.0.38"];
+            global = [
+              "100.64.0.6"
+              "100.64.0.38"
+            ];
           };
           override_local_dns = true;
           extra_records = [
@@ -175,7 +184,7 @@ in {
     };
   };
 
-  environment.systemPackages = [config.services.headscale.package];
+  environment.systemPackages = [ config.services.headscale.package ];
 
   # Copy ACL configuration to system
   environment.etc."headscale/acl.hujson".source = ./acl.hujson;

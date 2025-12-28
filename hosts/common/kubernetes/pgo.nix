@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   services.k3s.autoDeployCharts = {
     cloudnative-pg = {
       name = "cloudnative-pg";
@@ -7,7 +8,7 @@
       hash = "sha256-5Um2iHfHjWRaEITwTbrhV6nNhXeMdHbIegf8nEsTmOI=";
       targetNamespace = "kube-system";
       createNamespace = false;
-      values = {};
+      values = { };
     };
   };
 }

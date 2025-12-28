@@ -2,7 +2,8 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   # Enable Mosh (Mobile Shell)
   # Mosh is a remote terminal application that allows roaming and supports intermittent connectivity
   # https://mosh.org/

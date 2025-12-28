@@ -1,8 +1,10 @@
-{config, ...}: let
+{ config, ... }:
+let
   adguardDomain = "adguard.mercury.ncrmro.com";
   stalwartDomain = "mail.ncrmro.com";
   tailscaleIP = "100.64.0.38";
-in {
+in
+{
   # Cloudflare API token for ACME DNS-01 challenge
   age.secrets.cloudflare-api-token = {
     file = ../../secrets/cloudflare-api-token.age;
@@ -17,12 +19,12 @@ in {
     environmentFile = config.age.secrets.cloudflare-api-token.path;
     group = "nginx";
     # Use public DNS for zone lookup (local DNS goes through Headscale)
-    extraLegoFlags = ["--dns.resolvers=1.1.1.1:53"];
+    extraLegoFlags = [ "--dns.resolvers=1.1.1.1:53" ];
   };
 
   # Nginx reverse proxy with Let's Encrypt (Tailscale only)
   services.nginx.virtualHosts.${adguardDomain} = {
-    listenAddresses = [tailscaleIP];
+    listenAddresses = [ tailscaleIP ];
     forceSSL = true;
     useACMEHost = adguardDomain;
     locations."/" = {
@@ -37,12 +39,12 @@ in {
     dnsProvider = "cloudflare";
     environmentFile = config.age.secrets.cloudflare-api-token.path;
     group = "nginx";
-    extraLegoFlags = ["--dns.resolvers=1.1.1.1:53"];
+    extraLegoFlags = [ "--dns.resolvers=1.1.1.1:53" ];
   };
 
   # Stalwart mail management interface (Tailscale only)
   services.nginx.virtualHosts.${stalwartDomain} = {
-    listenAddresses = [tailscaleIP];
+    listenAddresses = [ tailscaleIP ];
     forceSSL = true;
     useACMEHost = stalwartDomain;
     locations."/" = {

@@ -9,9 +9,10 @@ let
   };
 
   # Convenience aliases for common key combinations
-  adminKeys = [users.ncrmro];
-  k3sServers = [systems.ocean];
-in {
+  adminKeys = [ users.ncrmro ];
+  k3sServers = [ systems.ocean ];
+in
+{
   # K3s server token - accessible by admin and K3s server nodes
   "k3s-server-token.age".publicKeys = adminKeys ++ k3sServers;
 }

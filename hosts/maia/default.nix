@@ -7,7 +7,8 @@
   pkgs,
   inputs,
   ...
-}: {
+}:
+{
   imports = [
     inputs.disko.nixosModules.disko
     # Include the results of the hardware scan.
@@ -43,7 +44,10 @@
   # Configure Tailscale node with Kubernetes worker tags
   services.tailscale.node = {
     enable = true;
-    tags = ["tag:k8s-cluster" "tag:k8s-worker"];
+    tags = [
+      "tag:k8s-cluster"
+      "tag:k8s-worker"
+    ];
   };
 
   # Set your time zone.

@@ -1,9 +1,10 @@
-{...}: {
+{ ... }:
+{
   imports = [
     ../../../modules/users/media.nix
   ];
 
-  boot.supportedFilesystems = ["nfs"];
+  boot.supportedFilesystems = [ "nfs" ];
   services.rpcbind.enable = true; # needed for NFS
 
   systemd.mounts = [
@@ -27,14 +28,14 @@
 
   systemd.automounts = [
     {
-      wantedBy = ["multi-user.target"];
+      wantedBy = [ "multi-user.target" ];
       automountConfig = {
         TimeoutIdleSec = "600";
       };
       where = "/ocean/guest";
     }
     {
-      wantedBy = ["multi-user.target"];
+      wantedBy = [ "multi-user.target" ];
       automountConfig = {
         TimeoutIdleSec = "600";
       };

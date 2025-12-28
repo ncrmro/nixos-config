@@ -3,7 +3,8 @@
   config,
   utils,
   ...
-}: {
+}:
+{
   disko.devices = {
     disk.disk1 = {
       type = "disk";

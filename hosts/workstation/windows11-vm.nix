@@ -3,9 +3,10 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   # Add user to the disk group to allow access to the NVMe device
-  users.users.ncrmro.extraGroups = ["disk"];
+  users.users.ncrmro.extraGroups = [ "disk" ];
 
   # Create udev rule to set proper permissions for the Windows NVMe disk
   services.udev.extraRules = ''
@@ -17,7 +18,7 @@
   # Ensure the libvirtd service has proper access
   systemd.services.libvirtd = {
     serviceConfig = {
-      SupplementaryGroups = ["disk"];
+      SupplementaryGroups = [ "disk" ];
     };
   };
 

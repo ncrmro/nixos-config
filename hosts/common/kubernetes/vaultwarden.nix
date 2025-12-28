@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   services.k3s.manifests = {
     vaultwarden-namespace = {
       enable = true;
@@ -87,7 +88,7 @@
           tls = [
             {
               # Using default ingress-nginx wildcard cert (*.ncrmro.com)
-              hosts = ["vaultwarden.ncrmro.com"];
+              hosts = [ "vaultwarden.ncrmro.com" ];
             }
           ];
         };

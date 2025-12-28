@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   imports = [
     ./hardware-configuration.nix
     ../../modules/nixos/headscale
@@ -16,7 +17,9 @@
   networking.hostName = "mercury";
   networking.domain = "";
   services.openssh.enable = true;
-  users.users.root.openssh.authorizedKeys.keys = [''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyrDBVcGK+pUZOTUA7MLoD5vYK/kaPF6TNNyoDmwNl2 ncrmro@ncrmro-laptop-fw7k''];
+  users.users.root.openssh.authorizedKeys.keys = [
+    ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyrDBVcGK+pUZOTUA7MLoD5vYK/kaPF6TNNyoDmwNl2 ncrmro@ncrmro-laptop-fw7k''
+  ];
 
   services.alloy-client = {
     enable = true;
@@ -30,7 +33,7 @@
   # Configure Tailscale node
   services.tailscale.node = {
     enable = true;
-    tags = ["tag:server"];
+    tags = [ "tag:server" ];
     loginServer = "https://mercury.ncrmro.com";
   };
 

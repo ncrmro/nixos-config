@@ -4,13 +4,15 @@
   pkgs,
   inputs,
   ...
-}: let
+}:
+let
   # Use unstable nixpkgs for Vulkan acceleration support
   pkgs-unstable = import inputs.nixpkgs-unstable {
     inherit (pkgs) system;
     config.allowUnfree = true;
   };
-in {
+in
+{
   services.ollama = {
     enable = true;
     package = pkgs-unstable.ollama-vulkan;

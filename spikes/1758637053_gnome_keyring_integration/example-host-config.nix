@@ -5,7 +5,8 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   # Example host configuration demonstrating full GNOME Keyring integration
   # This example shows how to enable comprehensive credential management
   # across SSH, Docker, 1Password, and Bitwarden
@@ -38,7 +39,7 @@
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
-  home-manager.extraSpecialArgs = {inherit inputs outputs;};
+  home-manager.extraSpecialArgs = { inherit inputs outputs; };
 
   # User configuration with keyring integration
   home-manager.users.ncrmro = import ./home.nix;

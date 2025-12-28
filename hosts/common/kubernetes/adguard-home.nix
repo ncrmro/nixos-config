@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   services.k3s.manifests = {
     adguard-namespace = {
       enable = true;
@@ -52,7 +53,7 @@
         spec = {
           tls = [
             {
-              hosts = ["adguard.home.ncrmro.com"];
+              hosts = [ "adguard.home.ncrmro.com" ];
             }
           ];
           rules = [

@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   services.k3s.autoDeployCharts = {
     # Ingress NGINX Controller Helm Chart: https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx
     # NixOS nginx is the front-end on 80/443, forwarding K8s traffic to these internal ports
@@ -63,7 +64,11 @@
             name = "letsencrypt-cloudflare";
             kind = "ClusterIssuer";
           };
-          dnsNames = ["*.ncrmro.com" "*.home.ncrmro.com" "ncrmro.com"];
+          dnsNames = [
+            "*.ncrmro.com"
+            "*.home.ncrmro.com"
+            "ncrmro.com"
+          ];
         };
       };
     };

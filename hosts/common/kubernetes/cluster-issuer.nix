@@ -1,4 +1,5 @@
-{...}: {
+{ ... }:
+{
   # ClusterIssuer for Let's Encrypt with Cloudflare DNS validation
   #
   # IMPORTANT: Before this will work, you must manually create the Cloudflare API token secret.

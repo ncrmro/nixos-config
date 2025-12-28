@@ -11,10 +11,11 @@ let
   };
 
   # Convenience aliases for common key combinations
-  adminKeys = [users.ncrmro];
-  k3sServers = [systems.ocean]; # Only server nodes
-  k3sAgents = [systems.maia]; # Only agent nodes
-in {
+  adminKeys = [ users.ncrmro ];
+  k3sServers = [ systems.ocean ]; # Only server nodes
+  k3sAgents = [ systems.maia ]; # Only agent nodes
+in
+{
   # K3s server token - accessible by admin and K3s server nodes only
   "secrets/k3s-server-token.age".publicKeys = adminKeys ++ k3sServers;
 
@@ -22,11 +23,14 @@ in {
   "secrets/k3s-agent-token.age".publicKeys = adminKeys ++ k3sAgents;
 
   # Cloudflare API token for ACME DNS-01 challenge
-  "secrets/cloudflare-api-token.age".publicKeys = adminKeys ++ [systems.mercury systems.ocean];
+  "secrets/cloudflare-api-token.age".publicKeys = adminKeys ++ [
+    systems.mercury
+    systems.ocean
+  ];
 
   # SABnzbd usenet server configuration (contains credentials)
-  "secrets/sabnzbd-servers.age".publicKeys = adminKeys ++ [systems.ocean];
+  "secrets/sabnzbd-servers.age".publicKeys = adminKeys ++ [ systems.ocean ];
 
   # Samba Time Machine password
-  "secrets/samba-timemachine-password.age".publicKeys = adminKeys ++ [systems.ocean];
+  "secrets/samba-timemachine-password.age".publicKeys = adminKeys ++ [ systems.ocean ];
 }

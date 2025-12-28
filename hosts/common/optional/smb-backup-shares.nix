@@ -3,9 +3,11 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   cfg = config.services.smb-backup-shares;
-in {
+in
+{
   options.services.smb-backup-shares = {
     enable = lib.mkEnableOption "SMB backup shares";
 
@@ -37,7 +39,11 @@ in {
 
     allowedNetworks = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = ["100.64.0.0/10" "192.168.1.0/24" "127.0.0.1"];
+      default = [
+        "100.64.0.0/10"
+        "192.168.1.0/24"
+        "127.0.0.1"
+      ];
       description = "List of networks allowed to access SMB shares";
     };
 
@@ -153,39 +159,41 @@ in {
     # Ensure ZFS datasets exist before creating directories
     systemd.services.create-backup-datasets = {
       description = "Create ZFS datasets for backup shares";
-      wantedBy = ["multi-user.target"];
-      before = ["samba-smbd.service"];
+      wantedBy = [ "multi-user.target" ];
+      before = [ "samba-smbd.service" ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
       };
-      script = let
-        poolName = builtins.head (lib.splitString "/" cfg.backupsRoot);
-      in ''
-        # Check if ZFS pool exists
-        if ! ${pkgs.zfs}/bin/zfs list ${poolName} > /dev/null 2>&1; then
-          echo "Error: ZFS pool '${poolName}' not found"
-          exit 1
-        fi
-
-        # Create backup datasets if they don't exist
-        for dataset in ${cfg.backupsRoot} ${cfg.backupsRoot}/timemachine ${cfg.backupsRoot}/windows; do
-          if ! ${pkgs.zfs}/bin/zfs list "$dataset" > /dev/null 2>&1; then
-            echo "Creating ZFS dataset: $dataset"
-            ${pkgs.zfs}/bin/zfs create -p "$dataset"
+      script =
+        let
+          poolName = builtins.head (lib.splitString "/" cfg.backupsRoot);
+        in
+        ''
+          # Check if ZFS pool exists
+          if ! ${pkgs.zfs}/bin/zfs list ${poolName} > /dev/null 2>&1; then
+            echo "Error: ZFS pool '${poolName}' not found"
+            exit 1
           fi
-        done
 
-        # Set dataset properties
-        ${pkgs.zfs}/bin/zfs set compression=lz4 ${cfg.backupsRoot}/timemachine
-        ${pkgs.zfs}/bin/zfs set compression=lz4 ${cfg.backupsRoot}/windows
-        ${pkgs.zfs}/bin/zfs set quota=${cfg.timeMachineQuota} ${cfg.backupsRoot}/timemachine
-        ${pkgs.zfs}/bin/zfs set quota=${cfg.windowsBackupQuota} ${cfg.backupsRoot}/windows
-      '';
+          # Create backup datasets if they don't exist
+          for dataset in ${cfg.backupsRoot} ${cfg.backupsRoot}/timemachine ${cfg.backupsRoot}/windows; do
+            if ! ${pkgs.zfs}/bin/zfs list "$dataset" > /dev/null 2>&1; then
+              echo "Creating ZFS dataset: $dataset"
+              ${pkgs.zfs}/bin/zfs create -p "$dataset"
+            fi
+          done
+
+          # Set dataset properties
+          ${pkgs.zfs}/bin/zfs set compression=lz4 ${cfg.backupsRoot}/timemachine
+          ${pkgs.zfs}/bin/zfs set compression=lz4 ${cfg.backupsRoot}/windows
+          ${pkgs.zfs}/bin/zfs set quota=${cfg.timeMachineQuota} ${cfg.backupsRoot}/timemachine
+          ${pkgs.zfs}/bin/zfs set quota=${cfg.windowsBackupQuota} ${cfg.backupsRoot}/windows
+        '';
     };
 
     # Create backup user and group for Windows backups
-    users.groups.backup = {};
+    users.groups.backup = { };
     users.users.backup = {
       isSystemUser = true;
       group = "backup";
@@ -194,7 +202,7 @@ in {
     };
 
     # Create timemachine user and group for Time Machine backups
-    users.groups.timemachine = {};
+    users.groups.timemachine = { };
     users.users.timemachine = {
       isSystemUser = true;
       group = "timemachine";
@@ -220,9 +228,9 @@ in {
     # Set up Samba timemachine user with password from agenix secret
     systemd.services.samba-timemachine-user = {
       description = "Set up Samba timemachine user";
-      wantedBy = ["multi-user.target"];
-      before = ["samba-smbd.service"];
-      after = ["network.target"];
+      wantedBy = [ "multi-user.target" ];
+      before = [ "samba-smbd.service" ];
+      after = [ "network.target" ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;

@@ -3,7 +3,8 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   # user and group
   users = {
     users.shairport-sync = {
@@ -12,16 +13,20 @@
       createHome = true;
       home = "/var/lib/shairport-sync";
       group = "shairport-sync";
-      extraGroups = ["pulse-access"];
+      extraGroups = [ "pulse-access" ];
     };
-    groups.shairport-sync = {};
+    groups.shairport-sync = { };
   };
 
   # open firewall ports
   networking.firewall = {
     interfaces."enp5s0" = {
-      allowedTCPPorts = [3689 5353 5000];
-      allowedUDPPorts = [5353];
+      allowedTCPPorts = [
+        3689
+        5353
+        5000
+      ];
+      allowedUDPPorts = [ 5353 ];
       allowedTCPPortRanges = [
         {
           from = 7000;
@@ -73,15 +78,15 @@
     enable = true;
     publish.enable = true;
     publish.userServices = true;
-    allowInterfaces = ["enp5s0"];
+    allowInterfaces = [ "enp5s0" ];
   };
   #
   # systemd services
   systemd.services = {
     nqptp = {
       description = "Network Precision Time Protocol for Shairport Sync";
-      wantedBy = ["multi-user.target"];
-      after = ["network.target"];
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
       serviceConfig = {
         ExecStart = "${pkgs.nqptp}/bin/nqptp";
         Restart = "always";
@@ -90,8 +95,11 @@
     };
     desktop-speakers = {
       description = "Desktop speakers shairport-sync instance";
-      wantedBy = ["multi-user.target"];
-      after = ["network.target" "avahi-daemon.service"];
+      wantedBy = [ "multi-user.target" ];
+      after = [
+        "network.target"
+        "avahi-daemon.service"
+      ];
       serviceConfig = {
         ExecStart = "${pkgs.shairport-sync-airplay2}/bin/shairport-sync pa --name 'Desktop Speakers'";
         Restart = "on-failure";
@@ -105,4 +113,3 @@
 # run `sudo -u pulse pactl list sinks short` to display available sinks
 # run `sudo -u pulse alsamixer` to adjust volume levels
 # run `sudo alsactl store` so save the volume levels persistently
-

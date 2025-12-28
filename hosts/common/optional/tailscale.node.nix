@@ -4,17 +4,22 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.services.tailscale.node;
-in {
+in
+{
   options.services.tailscale.node = {
     enable = mkEnableOption "Tailscale node configuration";
 
     tags = mkOption {
       type = types.listOf types.str;
-      default = [];
+      default = [ ];
       description = "List of tags to advertise for this Tailscale node";
-      example = ["tag:k8s-cluster" "tag:k8s-master"];
+      example = [
+        "tag:k8s-cluster"
+        "tag:k8s-master"
+      ];
     };
 
     loginServer = mkOption {
@@ -35,13 +40,12 @@ in {
       enable = true;
       useRoutingFeatures = cfg.useRoutingFeatures;
 
-      extraUpFlags =
-        [
-          "--login-server=${cfg.loginServer}"
-        ]
-        ++ optionals (cfg.tags != []) [
-          "--advertise-tags=${concatStringsSep "," cfg.tags}"
-        ];
+      extraUpFlags = [
+        "--login-server=${cfg.loginServer}"
+      ]
+      ++ optionals (cfg.tags != [ ]) [
+        "--advertise-tags=${concatStringsSep "," cfg.tags}"
+      ];
     };
 
     # Install the tailscale package
@@ -52,8 +56,8 @@ in {
     # Open firewall for Tailscale
     networking.firewall = {
       checkReversePath = "loose";
-      trustedInterfaces = ["tailscale0"];
-      allowedUDPPorts = [config.services.tailscale.port];
+      trustedInterfaces = [ "tailscale0" ];
+      allowedUDPPorts = [ config.services.tailscale.port ];
     };
   };
 }
