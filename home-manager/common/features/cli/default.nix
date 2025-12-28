@@ -4,12 +4,8 @@
   inputs,
   ...
 }:
-let
-  zesh = pkgs.callPackage ../../../../packages/zesh { };
-in
 {
   imports = [
-    ./playwright.nix
     ./ssh.nix
   ];
   # UV - Fast Python package installer and resolver written in Rust
@@ -206,9 +202,6 @@ in
       config.allowUnfree = true;
     }).github-copilot-cli
 
-    # Session management
-    zesh # Zellij session manager with zoxide integration
-
     # Espup - Tool for installing and maintaining ESP Rust toolchain
     # https://github.com/esp-rs/espup
     espup
@@ -237,7 +230,6 @@ in
     dc = "docker-compose";
     k = "kubectl";
     # Session management
-    zs = "zesh connect";
     ztab = "zellij action rename-tab";
     # AI Tools
     opencode = "/home/ncrmro/.opencode/bin/opencode";
