@@ -93,6 +93,17 @@
   # This may help with Hyprland crashes caused by snd_hda_intel spurious responses
   boot.blacklistedKernelModules = [ "snd_hda_intel" ];
 
+  # Enable aarch64 emulation for cross-compilation
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
+  # Increase inotify limits for file watchers (IDEs, build tools, etc.)
+  # Each watch uses ~1KB kernel memory. Rule of thumb: 1M watches per 16GB RAM.
+  # 10M watches ≈ 10GB kernel memory - suitable for 32GB+ systems.
+  boot.kernel.sysctl = {
+    "fs.inotify.max_user_watches" = 10485760;
+    "fs.inotify.max_user_instances" = 8192;
+  };
+
   # Static networking on enp5s0 (router: 192.168.1.254 / 2600:1702:6250:4c80::1, DHCP server at 192.168.1.10)
   networking.useDHCP = false;
   networking.hostId = "cb1216ed"; # generate with: head -c 8 /etc/machine-id
