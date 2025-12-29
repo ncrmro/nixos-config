@@ -25,18 +25,27 @@
     ../common/optional/alloy-client.nix
     ../common/optional/docker-rootless.nix
     ../common/optional/virt-manager.nix
-    ../common/optional/shairport-sync.nix
+    inputs.keystone.nixosModules.operating-system
     inputs.keystone.nixosModules.desktop
     outputs.nixosModules.bambu-studio
     ./windows11-vm.nix
     ../../modules/nixos/steam.nix
   ];
 
+  keystone.os.services.airplay = {
+    enable = true;
+    name = "Workstation Speakers";
+  };
+
   programs.bambu-studio.enable = true;
 
   programs.zsh.enable = true;
   users.mutableUsers = true;
   users.users.ncrmro.shell = pkgs.zsh;
+  users.users.ncrmro.extraGroups = [
+    "render"
+    "video"
+  ];
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
@@ -48,6 +57,7 @@
     alsa-utils
     lsof
     amdgpu_top
+    lutris
     # llama-cpp from upstream flake with Vulkan support for AMD GPU acceleration
     inputs.llama-cpp.packages.${pkgs.system}.vulkan
   ];
@@ -136,7 +146,11 @@
     address = "2600:1702:6250:4c80::1";
     interface = "enp5s0";
   };
-
+  # needed for remote building I think nix --builders
+  nix.settings.trusted-users = [
+    "root"
+    "ncrmro"
+  ];
   networking.nameservers = [
     # Local DNS on ocean (DHCP/DNS host)
     "192.168.1.10"

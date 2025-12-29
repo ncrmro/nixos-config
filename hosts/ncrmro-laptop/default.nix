@@ -22,7 +22,6 @@
     ../common/optional/docker-rootless.nix
     ../common/optional/virt-manager.nix
     # ../common/optional/docker-root.nix
-    ../common/optional/shairport-sync.nix
     ../common/optional/tailscale.node.nix
     ../common/optional/ssh-mosh.nix
     ../common/optional/nfs-client.nix
