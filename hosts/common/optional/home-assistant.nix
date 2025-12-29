@@ -46,4 +46,12 @@
       8123 # Home Assistant
     ];
   };
+
+  networking.firewall.allowedTCPPorts = [
+    21063 # Home Assistant HomeKit extension
+  ];
+
+  networking.firewall.allowedUDPPorts = [
+    5353 # mDNS/Bonjour service discovery
+  ];
 }

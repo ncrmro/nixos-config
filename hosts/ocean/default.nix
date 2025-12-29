@@ -6,7 +6,6 @@
 }:
 {
   imports = [
-    inputs.disko.nixosModules.disko
     inputs.home-manager.nixosModules.default
     ./hardware-configuration.nix
     ./disk-config.nix
@@ -16,7 +15,7 @@
     ./zfs.local-replication.nix
     ../common/global
     ../common/optional/tailscale.node.nix
-    ../common/optional/secureboot.nix
+    # ../common/optional/secureboot.nix
     ../common/optional/agenix.nix
     ./adguard-home.nix
     ../common/optional/servarr.nix
@@ -30,7 +29,13 @@
     ./vms.nix
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
+    inputs.keystone.nixosModules.operating-system
   ];
+
+  keystone.os.enable = true;
+  keystone.os.storage.enable = false;
+  keystone.os.mail.enable = true;
+
 
   # Home Manager configuration
   programs.zsh.enable = true;
