@@ -15,7 +15,6 @@
     ./zfs.local-replication.nix
     ../common/global
     ../common/optional/tailscale.node.nix
-    # ../common/optional/secureboot.nix
     ../common/optional/agenix.nix
     ./adguard-home.nix
     ../common/optional/servarr.nix
@@ -32,8 +31,8 @@
     inputs.keystone.nixosModules.operating-system
   ];
 
-  keystone.os.enable = true;
   keystone.os.storage.enable = false;
+  keystone.os.ssh.enable = false;
   keystone.os.mail.enable = true;
 
 

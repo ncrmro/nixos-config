@@ -51,6 +51,8 @@
     keystone = {
       url = "github:ncrmro/keystone";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.lanzaboote.follows = "lanzaboote";
+      inputs.disko.follows = "disko";
     };
 
     # Omarchy themes (original arch version)
