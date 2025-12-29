@@ -12,6 +12,7 @@
       # List of integrations: https://www.home-assistant.io/integrations/
       "met"
       "radio_browser"
+      "homekit"
       "homekit_controller"
       "apple_tv"
       "brother"
