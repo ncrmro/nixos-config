@@ -68,9 +68,10 @@ Different hardware requires different mouse strategies:
 - `Shift`: Modifications to base keybindings (e.g., reverse direction, new window vs current)
 
 **Why the swap?**
-- Alt key position is more ergonomic for frequent window management
-- By swapping Alt↔Win, we get Super in an accessible position
-- UHK Fn2 layer sends Alt codes, which become Super after swap
+- **Ergonomics**: Physical Alt key is in a more accessible thumb position than Super/Win key, making it ideal for frequent window management operations
+- **Browser compatibility**: Physical Super + Left/Right sends Alt + Left/Right (after swap), which is the standard Chrome/Firefox back/forward shortcut
+- **UHK integration**: Fn2 layer sends Alt codes, which become Super after swap - same muscle memory works
+- **Summary**: Physical Alt = Hyprland window management, Physical Super = browser back/forward
 
 **Consistency Patterns**
 - **Spatial navigation**: `j k i l` (Vim-style, home row focused) across all tools
@@ -570,7 +571,17 @@ If UHK stays with current config, browser already works. No changes needed.
 - `j` / `k` = Scroll down/up
 - `gg` / `G` = Scroll to top/bottom
 - `f` / `F` = Link hints (open in current/new tab)
-- `H` / `L` = History back/forward
+- `H` / `L` = History back/forward (Vimium)
+
+#### Browser Back/Forward (Standard Shortcuts)
+With `altwin:swap_alt_win` enabled, standard browser navigation works naturally:
+- **Physical Super + Left Arrow** → sends `Alt + Left` → Browser back
+- **Physical Super + Right Arrow** → sends `Alt + Right` → Browser forward
+
+This is ergonomically nice because:
+- Physical Alt (thumb position) is reserved for frequent Hyprland window management
+- Physical Super (less accessible) is used for occasional browser navigation
+- No UHK macros needed - just press physical Super + arrow keys directly
 
 #### Tab Management (W/E/R/C Pattern)
 **Current (UHK works already):**
@@ -882,6 +893,10 @@ The UHK uses a layer system where each layer binds actions to keys. Layers are a
 - `Mod + E` → `Ctrl + T` (New tab)
 - `Mod + R` → `Ctrl + PgDn` (Next tab)
 - `Mod + C` → `Ctrl + W` (Close tab)
+
+**Browser Navigation (Mod + Super):**
+- `Mod + Super + J` → `Alt + Left Arrow` (Browser back)
+- `Mod + Super + L` → `Alt + Right Arrow` (Browser forward)
 
 **Current Behavior:**
 - ✅ **Browser (Chrome/Firefox)**: All tab commands work (Ctrl+PgUp/PgDn/T/W are standard)
@@ -1212,6 +1227,8 @@ This table shows how the same window management operations are performed across 
 | **New Tab** | Mod + E → Ctrl+T (current)‡ | Alt + E (recommended) | Mod + E → Alt+E | Cmd + E or Alt+E |
 | **Next Tab** | Mod + R → Ctrl+PgDn (current)‡ | Alt + R (recommended) | Mod + R → Alt+R | Cmd + R or Alt+R |
 | **Close Tab** | Mod + C → Ctrl+W (current)‡ | Alt + C (recommended) | Mod + C → Alt+C | Cmd + C or Alt+C |
+| **Browser Back** | Mod + Super + J → Alt+Left | Alt + Left | Mod + Super + J → Alt+Left | Cmd + Left or Cmd + [ |
+| **Browser Forward** | Mod + Super + L → Alt+Right | Alt + Right | Mod + Super + L → Alt+Right | Cmd + Right or Cmd + ] |
 | **Arrow Keys** | Mod + JKIL → ←↓↑→ | Standard arrows | Firmware layer → ←↓↑→ | Standard arrows |
 | **Caps Lock Mouse Mode** | Remapped to Ctrl | Remapped to Ctrl | Remapped to Ctrl | TBD |
 | **Configuration Method** | UHK Agent (GUI) | N/A (built-in) | QMK/ZMK firmware | N/A (built-in) |
@@ -1864,6 +1881,17 @@ This is a living document. As keybindings are implemented and tested, this docum
 - New tools added to the workflow
 
 ## Changelog
+
+- 2025-12-28: Clarified altwin:swap_alt_win ergonomics and browser navigation
+  - Updated "Why the swap?" section to emphasize ergonomic benefits:
+    - Physical Alt in thumb position for frequent Hyprland window management
+    - Physical Super for browser back/forward (Alt+Left/Right after swap)
+  - Added "Browser Back/Forward (Standard Shortcuts)" section explaining native navigation
+  - No UHK macros needed for browser back/forward - just physical Super + arrow keys
+
+- 2025-12-21: Added UHK browser navigation
+  - Documented `Mod + Super + J/L` for browser back/forward (Alt+Left/Right Arrow)
+  - Added to UHK Mod Layer section and Hardware Translation Table
 
 - 2025-10-25: Initial outline created
   - Added comprehensive structure for all tools (Hyprland, Ghostty, Zellij, Helix, Browser/Vimium)
