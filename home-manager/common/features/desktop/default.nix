@@ -29,14 +29,7 @@
     { id = "nkbihfbeogaeaoehlefnkodbefgpgknn"; } # metamask
     { id = "einnioafmpimabjcddiinlhmijaionap"; } # wander wallet
   ];
-  programs.vscode = {
-    enable = true;
-    package =
-      (import inputs.nixpkgs-unstable {
-        inherit (pkgs) system;
-        config.allowUnfree = true;
-      }).vscode;
-  };
+  programs.vscode.enable = true;
   # Managed by Keystone
   # wayland.windowManager.hyprland.settings = {
   #   # Environment variables
@@ -56,9 +49,6 @@
     telegram-desktop
     discord-ptb
     papers
-    (import inputs.nixpkgs-unstable {
-      inherit (pkgs) system;
-      config.allowUnfree = true;
-    }).uhk-agent
+    uhk-agent
   ];
 }

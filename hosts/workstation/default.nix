@@ -18,7 +18,7 @@
     ../../modules/users/root.nix
     ../common/optional/tailscale.node.nix
     ../common/optional/ssh-mosh.nix
-    ../common/optional/secureboot.nix
+    # ../common/optional/secureboot.nix # Conflict with keystone
     ../common/optional/ollama.nix
     ../common/optional/nfs-client.nix
     ../common/optional/monitoring-client.nix
@@ -35,6 +35,13 @@
   keystone.os.services.airplay = {
     enable = true;
     name = "Workstation Speakers";
+  };
+
+  # Secure Boot configuration (module provided by keystone)
+  boot.loader.systemd-boot.enable = lib.mkForce false;
+  boot.lanzaboote = {
+    enable = true;
+    pkiBundle = "/var/lib/sbctl";
   };
 
   programs.bambu-studio.enable = true;
@@ -59,7 +66,7 @@
     amdgpu_top
     lutris
     # llama-cpp from upstream flake with Vulkan support for AMD GPU acceleration
-    inputs.llama-cpp.packages.${pkgs.system}.vulkan
+    inputs.llama-cpp.packages.${pkgs.stdenv.hostPlatform.system}.vulkan
   ];
 
   environment.variables = {

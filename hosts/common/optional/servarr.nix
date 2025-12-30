@@ -6,11 +6,6 @@
   ...
 }:
 let
-  pkgs-unstable = import inputs.nixpkgs-unstable {
-    inherit (pkgs) system;
-    config.allowUnfree = true;
-  };
-
   # Base SABnzbd config (non-sensitive settings)
   sabnzbdBaseConfig = pkgs.writeText "sabnzbd-base.ini" ''
     [misc]
@@ -87,61 +82,52 @@ in
 
   services.jellyfin = {
     enable = true;
-    package = pkgs-unstable.jellyfin;
     openFirewall = false;
     group = "media";
   };
 
   services.radarr = {
     enable = true;
-    package = pkgs-unstable.radarr;
     openFirewall = false;
     group = "media";
   };
 
   services.sonarr = {
     enable = true;
-    package = pkgs-unstable.sonarr;
     openFirewall = false;
     group = "media";
   };
 
   services.prowlarr = {
     enable = true;
-    package = pkgs-unstable.prowlarr;
     openFirewall = false;
   };
 
   services.bazarr = {
     enable = true;
-    package = pkgs-unstable.bazarr;
     openFirewall = false;
     group = "media";
   };
 
   services.lidarr = {
     enable = true;
-    package = pkgs-unstable.lidarr;
     openFirewall = false;
     group = "media";
   };
 
   services.readarr = {
     enable = true;
-    package = pkgs-unstable.readarr;
     openFirewall = false;
     group = "media";
   };
 
   services.jellyseerr = {
     enable = true;
-    package = pkgs-unstable.jellyseerr;
     openFirewall = false;
   };
 
   services.transmission = {
     enable = true;
-    package = pkgs-unstable.transmission_4;
     openFirewall = false;
     group = "media";
     settings = {
@@ -166,7 +152,6 @@ in
 
   services.sabnzbd = {
     enable = true;
-    package = pkgs-unstable.sabnzbd;
     group = "media";
   };
 

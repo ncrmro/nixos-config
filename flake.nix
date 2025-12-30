@@ -3,8 +3,8 @@
 
   inputs = {
     # Main package sources
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
 
     # Tools and modules
     disko = {
@@ -14,18 +14,20 @@
 
     lanzaboote = {
       url = "github:nix-community/lanzaboote/v0.4.2";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # Must follow stable - lanzaboote's rust-overlay has compatibility issues with nixpkgs-unstable
+      # See: https://github.com/nix-community/lanzaboote/issues/511
+      inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     omarchy-nix = {
       url = "git+https://github.com/ncrmro/omarchy-nix.git?ref=feat/submodule-omarchy-arch";
       #url = "git+file:///home/ncrmro/code/omarchy/omarchy-nix/";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
 
@@ -50,7 +52,7 @@
     # For local dev without commits, use: ./bin/dev-keystone <hostname>
     keystone = {
       url = "github:ncrmro/keystone";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
       inputs.lanzaboote.follows = "lanzaboote";
       inputs.disko.follows = "disko";
     };
@@ -79,7 +81,7 @@
     # Walker launcher
     walker = {
       url = "github:abenz1267/walker";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Ghostty terminal (latest for SIGUSR2 config reload support)
@@ -97,7 +99,6 @@
     inputs@{
       self,
       nixpkgs,
-      nixpkgs-unstable,
       disko,
       home-manager,
       nixos-hardware,
@@ -113,17 +114,6 @@
       pkgsForSystem =
         system:
         import nixpkgs {
-          inherit system;
-          config = {
-            allowUnfree = true;
-          };
-          overlays = overlays;
-        };
-
-      # Same for unstable packages
-      unstablePkgsForSystem =
-        system:
-        import nixpkgs-unstable {
           inherit system;
           config = {
             allowUnfree = true;

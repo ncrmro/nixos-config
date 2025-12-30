@@ -28,6 +28,7 @@
     devcontainer
     obsidian
     signal-desktop
+    inputs.keystone.packages.${pkgs.stdenv.hostPlatform.system}.keystone-agent
   ];
 
   # Keystone desktop includes terminal
@@ -53,7 +54,7 @@
   };
   programs.fastfetch.enable = true;
 
-  programs.git.extraConfig = {
+  programs.git.settings = {
     credential.helper = "store";
     push.autoSetupRemote = true;
     gpg.format = "ssh";

@@ -36,9 +36,11 @@
 
   programs.git = {
     enable = true;
-    userName = "Nicholas Romero";
-    userEmail = "ncrmro@gmail.com";
-    # extraConfig = {
+    settings.user = {
+      name = "Nicholas Romero";
+      email = "ncrmro@gmail.com";
+    };
+    # settings = {
     #   credential.helper = "store";
     #   push.autoSetupRemote = true;
     #   gpg.format = "ssh";

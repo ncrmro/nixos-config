@@ -33,24 +33,20 @@
     wants = [ "network-online.target" ];
     after = [ "network-online.target" ];
     startAt = "hourly"; # Run hourly
-    path =
-      with pkgs;
-      [
-        config.boot.zfs.package
-        openssh
-        perl
-        pv
-        mbuffer
-        lzop
-        gzip
-        inetutils
-      ]
-      ++ [
-        inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.sanoid # Use unstable version
-      ];
+    path = with pkgs; [
+      config.boot.zfs.package
+      openssh
+      perl
+      pv
+      mbuffer
+      lzop
+      gzip
+      inetutils
+      sanoid
+    ];
     script = ''
       # Sync rpool/crypt datasets to maia.mercury
-      ${inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.sanoid}/bin/syncoid \
+      ${pkgs.sanoid}/bin/syncoid \
         --no-privilege-elevation \
         --no-sync-snap \
         --sshkey /home/ncrmro/.ssh/id_ed25519 \

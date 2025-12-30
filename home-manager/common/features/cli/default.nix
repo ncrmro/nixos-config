@@ -25,10 +25,6 @@
   programs.awscli.enable = true;
 
   home.packages = with pkgs; [
-    # Devbox - Instant, portable, and predictable development environments
-    # https://www.jetify.com/devbox
-    devbox
-
     # Kubectl - Kubernetes command-line tool
     # https://kubernetes.io/docs/reference/kubectl/
     kubectl
@@ -46,32 +42,12 @@
     # https://github.com/jesseduffield/lazydocker
     lazydocker
 
-    # Railway CLI - Command line interface for Railway.app
-    # https://railway.app/
-    railway
-
     # traceroute # Does not work on macOS
-
-    # SQLite - Self-contained SQL database engine
-    # https://www.sqlite.org/
-    sqlite
-
-    # Turso CLI - CLI for Turso distributed SQLite database
-    # https://turso.tech/
-    turso-cli
 
     # htop - Interactive process viewer
     # https://htop.dev/
     # Provided by Keystone
     # htop
-
-    # Corepack - Package manager manager for Node.js
-    # https://nodejs.org/api/corepack.html
-    corepack
-
-    # FNM - Fast Node Manager - Fast and simple Node.js version manager
-    # https://github.com/Schniz/fnm
-    fnm
 
     # Zip - Compression and file packaging utility
     zip
@@ -79,25 +55,9 @@
     # Unzip - Extraction utility for .zip archives
     unzip
 
-    # Node.js - JavaScript runtime built on Chrome's V8 engine
-    # https://nodejs.org/
-    nodejs_24
-
     # Devenv - Fast, declarative, reproducible dev environments
     # https://devenv.sh/
     devenv
-
-    # Kind - Kubernetes IN Docker - local Kubernetes cluster
-    # https://kind.sigs.k8s.io/
-    kind
-
-    # Ruby - Dynamic, open source programming language
-    # https://www.ruby-lang.org/
-    ruby
-
-    # Rustup - The Rust toolchain installer
-    # https://rustup.rs/
-    rustup
 
     # Python 3.12 - High-level programming language
     # https://www.python.org/
@@ -105,15 +65,9 @@
     python312
     python312Packages.pip
 
-    # Chart Testing - Tool for testing Helm charts
-    # https://github.com/helm/chart-testing
-    chart-testing
-
     # Alejandra - The Uncompromising Nix Code Formatter
     # https://github.com/kamadorueda/alejandra
     alejandra
-
-    asdf-vm
 
     # Does not support Network Manager
     # impala # TUI for managing wifi
@@ -150,10 +104,6 @@
     # https://www.gnu.org/software/stow/
     stow
 
-    # PostgreSQL - Powerful open source relational database
-    # https://www.postgresql.org/
-    postgresql
-
     # # fd # Better find
     # httpie # Better curl
     # # diffsitter # Better diff
@@ -161,10 +111,6 @@
     # Marksman - Language server for Markdown
     # https://github.com/artempyanykh/marksman
     marksman
-
-    # Yarn - Fast, reliable, and secure dependency management
-    # https://yarnpkg.com/
-    yarn
 
     # network tools
 
@@ -184,27 +130,15 @@
 
     # Agenix - Age-encrypted secrets for NixOS
     # https://github.com/ryantm/agenix
-    inputs.agenix.packages.${pkgs.system}.default
+    inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
 
     # OpenSSL - Cryptography and SSL/TLS toolkit
     # https://www.openssl.org/
     openssl
 
-    # (import inputs.nixpkgs-unstable {
-    #   inherit (pkgs) system;
-    #   config.allowUnfree = true;
-    # }).sbom-tool
-
     # GitHub Copilot CLI - AI pair programmer in your terminal
     # https://githubnext.com/projects/copilot-cli
-    (import inputs.nixpkgs-unstable {
-      inherit (pkgs) system;
-      config.allowUnfree = true;
-    }).github-copilot-cli
-
-    # Espup - Tool for installing and maintaining ESP Rust toolchain
-    # https://github.com/esp-rs/espup
-    espup
+    github-copilot-cli
 
     csview
   ];
@@ -235,7 +169,7 @@
     opencode = "/home/ncrmro/.opencode/bin/opencode";
   };
 
-  programs.git.aliases = {
+  programs.git.settings.alias = {
     s = "switch";
     f = "fetch";
     p = "pull";

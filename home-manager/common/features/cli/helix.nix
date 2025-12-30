@@ -3,12 +3,6 @@
   inputs,
   ...
 }:
-let
-  pkgs-unstable = import inputs.nixpkgs-unstable {
-    system = pkgs.system;
-    config.allowUnfree = true;
-  };
-in
 {
   # Set helix as the default editor
   home.sessionVariables = {
@@ -20,7 +14,7 @@ in
     bash-language-server
     docker-compose-language-service
     yaml-language-server
-    dockerfile-language-server-nodejs
+    dockerfile-language-server
     vscode-langservers-extracted
     helm-ls
     ruby-lsp
@@ -32,7 +26,6 @@ in
 
   programs.helix = {
     enable = true;
-    package = pkgs-unstable.helix;
     settings = {
       theme = "kinda_nvim";
       editor = {
@@ -75,7 +68,7 @@ in
           args = [ "--stdio" ];
         };
         dockerfile-language-server = {
-          command = "${dockerfile-language-server-nodejs}/bin/docker-langserver";
+          command = "${dockerfile-language-server}/bin/docker-langserver";
           args = [ "--stdio" ];
         };
         vscode-json-language-server = {

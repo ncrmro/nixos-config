@@ -6,6 +6,8 @@
 {
   programs.ssh = {
     enable = true;
+    # Disable deprecated default config
+    enableDefaultConfig = false;
     matchBlocks = {
       "unsup-laptop.local" = {
         setEnv = {

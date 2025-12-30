@@ -10,12 +10,9 @@
   # This module provides common settings for sanoid/syncoid-based ZFS replication
   # Each host should extend this with their specific dataset configurations
 
-  # Use unstable version of sanoid/syncoid
-  services.sanoid.package = inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.sanoid;
-
   # Install necessary packages
   environment.systemPackages = [
-    inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.sanoid # For ZFS snapshot management and replication
+    pkgs.sanoid # For ZFS snapshot management and replication
   ];
 
   # Enable basic ZFS maintenance services
