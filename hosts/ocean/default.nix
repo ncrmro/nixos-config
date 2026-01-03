@@ -31,6 +31,7 @@
     inputs.keystone.nixosModules.operating-system
   ];
 
+  keystone.os.enable = true;
   keystone.os.storage.enable = false;
   keystone.os.ssh.enable = false;
   keystone.os.mail.enable = true;
@@ -94,6 +95,11 @@
 
   boot.kernel.sysctl."fs.inotify.max_user_watches" = 524288;
   boot.kernel.sysctl."fs.inotify.max_user_instances" = 512;
+  # Increase the maximum number of IGMP multicast group memberships.
+  # This addresses Avahi mDNS discovery issues where 'IP_ADD_MEMBERSHIP failed'
+  # due to exhaustion of multicast group slots, common in environments with
+  # many virtual network interfaces (e.g., K3s containers).
+  boot.kernel.sysctl."net.ipv4.igmp_max_memberships" = 1000;
 
   environment.systemPackages = [
     pkgs.sbctl
