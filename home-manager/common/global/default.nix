@@ -6,11 +6,17 @@
   ...
 }:
 {
-  home.username = "ncrmro";
-  home.homeDirectory = "/home/ncrmro";
-  home.stateVersion = "25.05";
+  home.username = lib.mkDefault "ncrmro";
+  home.homeDirectory = lib.mkDefault "/home/ncrmro";
+  home.stateVersion = lib.mkDefault "25.05";
 
   programs.home-manager.enable = true;
+
+  home.packages = [ pkgs.lsof ];
+
+  home.shellAliases = {
+    killport = "function _killp(){ lsof -nti:$1 | xargs kill -9 };_killp";
+  };
 
   # Enable Wayland support for Electron/Chromium applications
   home.sessionVariables = {

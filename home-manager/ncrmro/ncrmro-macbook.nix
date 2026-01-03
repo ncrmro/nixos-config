@@ -8,6 +8,7 @@
 }:
 {
   imports = [
+    ../common/global
     ../common/features/macos-dev.nix
     ../common/optional/mosh.nix
   ];

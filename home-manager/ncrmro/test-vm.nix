@@ -8,6 +8,7 @@
 }:
 {
   imports = [
+    ../common/global
     inputs.keystone.homeModules.desktop
   ];
 

@@ -5,6 +5,7 @@
 }:
 {
   imports = [
+    ../common/global
     inputs.keystone.homeModules.terminal
   ];
 
