@@ -20,11 +20,33 @@
       "hue"
       "ipp"
       "spotify"
+      "zha" # Native Zigbee Home Automation
     ];
     config = {
       # Includes dependencies for a basic setup
       # https://www.home-assistant.io/integrations/default_config/
       default_config = { };
+
+      homekit = {
+        filter = {
+          exclude_domains = [
+            "light"
+          ];
+        };
+      };
+
+      # Removed debug logging for HomeKit:
+      # logger = {
+      #   default = "info";
+      #   logs = {
+      #     "homeassistant.components.homekit" = "debug";
+      #     "pyhap" = "debug";
+      #   };
+      # };
+
+      homekit = {
+        advertise_ip = "192.168.1.10";
+      };
 
       http = {
         server_host = "0.0.0.0";
@@ -55,4 +77,18 @@
   networking.firewall.allowedUDPPorts = [
     5353 # mDNS/Bonjour service discovery
   ];
+
+  # ---------------------------------------------------------------------------
+  # Matter Server
+  # ---------------------------------------------------------------------------
+  # SECURITY: Matter Server WebSocket is bound to localhost.
+  # Home Assistant connects to it locally via ws://localhost:5580/ws
+  nixpkgs.config.permittedInsecurePackages = [
+    "openssl-1.1.1w"
+  ];
+
+  services.matter-server = {
+    enable = true;
+    port = 5580;
+  };
 }
