@@ -16,10 +16,8 @@ in
       package = qemuPkg;
       runAsRoot = true;
       swtpm.enable = true;
-      ovmf = {
-        enable = true;
-        packages = [ ovmfPkg.fd ];
-      };
+      # ovmf option removed in nixos-unstable - OVMF is now included by default with QEMU
+      # We still create symlinks via tmpfiles for VM XML compatibility
     };
   };
 
