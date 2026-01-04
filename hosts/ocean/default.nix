@@ -25,6 +25,7 @@
     ./nfs.nix
     ../common/optional/smb-backup-shares.nix
     ./nginx.nix
+    ./vaultwarden.nix
     ../common/kubernetes/default.nix
     ./vms.nix
     ../../modules/users/ncrmro.nix
@@ -36,7 +37,6 @@
   keystone.os.storage.enable = false;
   keystone.os.ssh.enable = false;
   keystone.os.mail.enable = true;
-
 
   # Home Manager configuration
   programs.zsh.enable = true;

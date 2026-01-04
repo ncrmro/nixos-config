@@ -244,5 +244,14 @@
           extraSpecialArgs = { inherit inputs self; };
         };
       };
+
+      # Development shells
+      devShells.x86_64-linux.default = nixpkgs.legacyPackages.x86_64-linux.mkShell {
+        packages = [ nixpkgs.legacyPackages.x86_64-linux.nixfmt-rfc-style ];
+      };
+
+      devShells.aarch64-darwin.default = nixpkgs.legacyPackages.aarch64-darwin.mkShell {
+        packages = [ nixpkgs.legacyPackages.aarch64-darwin.nixfmt-rfc-style ];
+      };
     };
 }

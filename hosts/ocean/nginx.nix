@@ -194,17 +194,6 @@ in
     };
   };
 
-  # K8s services - forward to ingress-nginx (Tailscale only)
-  services.nginx.virtualHosts."vaultwarden.ncrmro.com" = {
-    forceSSL = true;
-    useACMEHost = "wildcard-ncrmro-com";
-    extraConfig = tailscaleOnly;
-    locations."/" = {
-      proxyPass = "http://${k8sIngressHttp}";
-      proxyWebsockets = true;
-    };
-  };
-
   services.nginx.virtualHosts."git.ncrmro.com" = {
     forceSSL = true;
     useACMEHost = "wildcard-ncrmro-com";
@@ -251,6 +240,17 @@ in
     extraConfig = tailscaleOnly;
     locations."/" = {
       proxyPass = "http://${k8sIngressHttp}";
+      proxyWebsockets = true;
+    };
+  };
+
+  # Stalwart Mail Admin - Tailscale only
+  services.nginx.virtualHosts."mail.ncrmro.com" = {
+    forceSSL = true;
+    useACMEHost = "wildcard-ncrmro-com";
+    extraConfig = tailscaleOnly;
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:8082";
       proxyWebsockets = true;
     };
   };

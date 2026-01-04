@@ -10,6 +10,5 @@
     ./alloy.nix
     ./pgo.nix
     ./kube-prometheus-stack.nix
-    ./vaultwarden.nix
   ];
 }
