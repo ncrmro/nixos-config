@@ -8,12 +8,29 @@ let
   cfg = config.services.stalwart-mail;
 in
 {
+  # Stalwart admin password secret
+  age.secrets.stalwart-admin-password = {
+    file = ../../../secrets/stalwart-admin-password.age;
+    owner = "root";
+    mode = "0400";
+  };
+
   services.stalwart-mail = {
     enable = true;
     package = pkgs.stalwart-mail;
     openFirewall = true;
 
+    # Pass the admin password as a systemd credential
+    credentials = {
+      admin_password = config.age.secrets.stalwart-admin-password.path;
+    };
+
     settings = {
+      # Fallback admin account using credential
+      authentication.fallback-admin = {
+        user = "admin";
+        secret = "%{file:/run/credentials/stalwart-mail.service/admin_password}%";
+      };
       # Server configuration
       server = {
         hostname = config.networking.hostName;

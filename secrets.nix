@@ -33,4 +33,10 @@ in
 
   # Samba Time Machine password
   "secrets/samba-timemachine-password.age".publicKeys = adminKeys ++ [ systems.ocean ];
+
+  # Stalwart Mail admin password
+  "secrets/stalwart-admin-password.age".publicKeys = adminKeys ++ [ systems.ocean ];
+
+  # AdGuard Home password hash
+  "secrets/adguard-password-hash.age".publicKeys = adminKeys ++ [ systems.ocean ];
 }

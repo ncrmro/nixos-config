@@ -194,16 +194,6 @@ in
     };
   };
 
-  services.nginx.virtualHosts."git.ncrmro.com" = {
-    forceSSL = true;
-    useACMEHost = "wildcard-ncrmro-com";
-    extraConfig = tailscaleOnly;
-    locations."/" = {
-      proxyPass = "http://${k8sIngressHttp}";
-      proxyWebsockets = true;
-    };
-  };
-
   services.nginx.virtualHosts."grafana.ncrmro.com" = {
     forceSSL = true;
     useACMEHost = "wildcard-ncrmro-com";
