@@ -37,6 +37,15 @@
   keystone.os.storage.enable = false;
   keystone.os.ssh.enable = false;
   keystone.os.mail.enable = true;
+  keystone.os.gitServer = {
+    enable = true;
+    domain = "git.ncrmro.com";
+    httpPort = 3001;
+    ssh = {
+      openFirewall = true;
+      tailscaleOnly = true;
+    };
+  };
 
   # Home Manager configuration
   programs.zsh.enable = true;
