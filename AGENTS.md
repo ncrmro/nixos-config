@@ -42,6 +42,7 @@ Located at `.submodules/keystone`, this is a Git submodule tracking the [ncrmro/
 When developing features intended for upstream Keystone:
 1. Make changes in `.submodules/keystone`.
 2. Test using the local override mechanism (e.g., `nixos-rebuild switch ... --override-input keystone "path:.submodules/keystone"`).
+   - **Tip**: Use `bin/keystone-dev --build` to verify changes build correctly without needing `sudo` or actually switching the system configuration.
 3. Commit and push changes from the submodule directory.
 4. Update the flake input lock in the main repository.
 
@@ -61,6 +62,9 @@ sudo nixos-rebuild switch --flake .#<hostname>
 
 # Deploy to remote host
 ./bin/sync <hostname> <ip_address>
+
+# Verify local keystone changes (without sudo)
+./bin/keystone-dev --build
 
 # Update specific hosts (convenience scripts)
 ./bin/updateMaia       # Update maia host

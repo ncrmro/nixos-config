@@ -43,7 +43,6 @@ else
 fi
 
 rsync "${RSYNC_ARGS[@]}" \
-  --exclude='.git/' \
   --exclude='node_modules/' \
   --exclude='**/node_modules/' \
   --exclude='venv/' \
