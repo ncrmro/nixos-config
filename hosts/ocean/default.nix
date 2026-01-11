@@ -47,6 +47,9 @@
     };
   };
 
+  # Override ROOT_URL to use HTTPS through Nginx
+  services.forgejo.settings.server.ROOT_URL = "https://git.ncrmro.com/";
+
   # Home Manager configuration
   programs.zsh.enable = true;
   users.users.ncrmro.shell = pkgs.zsh;
