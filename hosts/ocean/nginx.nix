@@ -199,7 +199,7 @@ in
     useACMEHost = "wildcard-ncrmro-com";
     extraConfig = tailscaleOnly;
     locations."/" = {
-      proxyPass = "http://${k8sIngressHttp}";
+      proxyPass = "http://127.0.0.1:3001";
       proxyWebsockets = true;
     };
   };
