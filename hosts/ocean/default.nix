@@ -103,6 +103,11 @@
     "8.8.8.8"
   ];
 
+  nix.settings.trusted-users = [
+    "root"
+    "ncrmro"
+  ];
+
   boot.kernel.sysctl."fs.inotify.max_user_watches" = 524288;
   boot.kernel.sysctl."fs.inotify.max_user_instances" = 512;
   # Increase the maximum number of IGMP multicast group memberships.
