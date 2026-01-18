@@ -59,13 +59,18 @@
           rocmPackages.rocm-smi
 
           # Ollama
+
           ollama-rocm
 
           # Python
-          python3
+
+          python312
+
         ];
 
         shellHook = ''
+
+
           echo "Docling GPU Spike Environment"
 
           # Setup Venv
