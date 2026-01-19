@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   outputs,
   pkgs,
@@ -38,6 +39,23 @@
   keystone.os.storage.enable = false;
   keystone.os.ssh.enable = false;
   keystone.os.mail.enable = true;
+
+  # Stalwart admin password (extends keystone.os.mail config)
+  age.secrets.stalwart-admin-password = {
+    file = ../../secrets/stalwart-admin-password.age;
+    owner = "root";
+    mode = "0400";
+  };
+
+  services.stalwart-mail = {
+    credentials = {
+      admin_password = config.age.secrets.stalwart-admin-password.path;
+    };
+    settings.authentication.fallback-admin = {
+      user = "admin";
+      secret = "%{file:/run/credentials/stalwart-mail.service/admin_password}%";
+    };
+  };
   keystone.os.gitServer = {
     enable = true;
     domain = "git.ncrmro.com";
