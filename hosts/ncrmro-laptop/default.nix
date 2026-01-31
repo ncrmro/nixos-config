@@ -32,6 +32,7 @@
     ./zfs.remote-replication.nix
     ../../modules/nixos/steam.nix
     inputs.keystone.nixosModules.desktop
+    outputs.nixosModules.bambu-studio
   ];
 
   # Stalwart mail user password for himalaya
@@ -55,6 +56,7 @@
     mode = "0400";
   };
 
+  programs.bambu-studio.enable = true;
   programs.zsh.enable = true;
   users.mutableUsers = true;
   users.users.ncrmro.shell = pkgs.zsh;
