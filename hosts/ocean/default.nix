@@ -37,6 +37,18 @@
   keystone.os.storage.enable = false;
   keystone.os.ssh.enable = false;
   keystone.os.mail.enable = true;
+
+  # Give stalwart-mail access to ACME certs
+  users.users.stalwart-mail.extraGroups = [ "nginx" ];
+
+  # Configure Stalwart TLS with wildcard ACME certificate
+  services.stalwart-mail.settings = {
+    certificate.default = {
+      cert = "%{file:/var/lib/acme/wildcard-ncrmro-com/fullchain.pem}%";
+      private-key = "%{file:/var/lib/acme/wildcard-ncrmro-com/key.pem}%";
+      default = true;
+    };
+  };
   keystone.os.gitServer = {
     enable = true;
     domain = "git.ncrmro.com";

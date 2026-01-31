@@ -25,6 +25,7 @@
     ../common/optional/alloy-client.nix
     ../common/optional/docker-rootless.nix
     ../common/optional/virt-manager.nix
+    ../common/optional/agenix.nix
     inputs.keystone.nixosModules.operating-system
     inputs.keystone.nixosModules.desktop
     outputs.nixosModules.bambu-studio
@@ -53,6 +54,13 @@
     "render"
     "video"
   ];
+
+  # Stalwart mail user password for himalaya
+  age.secrets.stalwart-mail-ncrmro-password = {
+    file = ../../secrets/stalwart-mail-ncrmro-password.age;
+    owner = "ncrmro";
+    mode = "0400";
+  };
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;

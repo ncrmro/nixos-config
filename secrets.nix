@@ -8,10 +8,16 @@ let
     ocean = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO7Oo3b71YDnN2i3vOsXrE4PFhmByjCIW5YtH7VkrTtC";
     maia = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAtdLpd4fI4U4JSQeo0z/m2KdB+qAGyURSPko7/1BCIa";
     mercury = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK80XMxx82fVvZgZ5djaXKvy1fRriQwkO4OAtf65ElhU";
+    workstation = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMalqC7xISpPwp7pPHcx8Qc3eiA1LOqJAmflFlHH0oCw";
+    laptop = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAdFyolB6Fb6z8r+38nsqDig9II1D400COykJPUs2G18";
   };
 
   # Convenience aliases for common key combinations
   adminKeys = [ users.ncrmro ];
+  desktops = [
+    systems.workstation
+    systems.laptop
+  ];
   k3sServers = [ systems.ocean ]; # Only server nodes
   k3sAgents = [ systems.maia ]; # Only agent nodes
 in
@@ -33,4 +39,10 @@ in
 
   # Samba Time Machine password
   "secrets/samba-timemachine-password.age".publicKeys = adminKeys ++ [ systems.ocean ];
+
+  # Stalwart admin password (ocean mail server)
+  "secrets/stalwart-admin-password.age".publicKeys = adminKeys ++ [ systems.ocean ];
+
+  # Stalwart mail user password (for himalaya client on desktops)
+  "secrets/stalwart-mail-ncrmro-password.age".publicKeys = adminKeys ++ desktops;
 }

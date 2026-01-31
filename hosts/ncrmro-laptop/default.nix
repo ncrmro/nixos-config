@@ -28,10 +28,18 @@
     ../common/optional/monitoring-client.nix
     ../common/optional/alloy-client.nix
     ../common/optional/iphone-tether.nix
+    ../common/optional/agenix.nix
     ./zfs.remote-replication.nix
     ../../modules/nixos/steam.nix
     inputs.keystone.nixosModules.desktop
   ];
+
+  # Stalwart mail user password for himalaya
+  age.secrets.stalwart-mail-ncrmro-password = {
+    file = ../../secrets/stalwart-mail-ncrmro-password.age;
+    owner = "ncrmro";
+    mode = "0400";
+  };
 
   programs.zsh.enable = true;
   users.mutableUsers = true;
