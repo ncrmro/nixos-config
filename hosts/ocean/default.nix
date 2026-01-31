@@ -15,7 +15,7 @@
     ./zfs.local-replication.nix
     ../common/global
     ../common/optional/tailscale.node.nix
-    ../common/optional/ssh-mosh.nix
+
     ../common/optional/agenix.nix
     ./adguard-home.nix
     ../common/optional/servarr.nix

@@ -23,7 +23,7 @@
     ../common/optional/virt-manager.nix
     # ../common/optional/docker-root.nix
     ../common/optional/tailscale.node.nix
-    ../common/optional/ssh-mosh.nix
+    ../common/optional/eternal-terminal.nix
     ../common/optional/nfs-client.nix
     ../common/optional/monitoring-client.nix
     ../common/optional/alloy-client.nix

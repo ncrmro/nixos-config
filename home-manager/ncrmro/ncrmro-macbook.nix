@@ -10,7 +10,7 @@
   imports = [
     ../common/global
     ../common/features/macos-dev.nix
-    ../common/optional/mosh.nix
+    ../common/optional/eternal-terminal.nix
   ];
 
   home = {

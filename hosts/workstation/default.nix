@@ -17,7 +17,7 @@
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
     ../common/optional/tailscale.node.nix
-    ../common/optional/ssh-mosh.nix
+    ../common/optional/eternal-terminal.nix
     # ../common/optional/secureboot.nix # Conflict with keystone
     ../common/optional/ollama.nix
     ../common/optional/nfs-client.nix
