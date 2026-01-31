@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   outputs,
   pkgs,
@@ -41,12 +42,28 @@
   # Give stalwart-mail access to ACME certs
   users.users.stalwart-mail.extraGroups = [ "nginx" ];
 
-  # Configure Stalwart TLS with wildcard ACME certificate
-  services.stalwart-mail.settings = {
-    certificate.default = {
-      cert = "%{file:/var/lib/acme/wildcard-ncrmro-com/fullchain.pem}%";
-      private-key = "%{file:/var/lib/acme/wildcard-ncrmro-com/key.pem}%";
-      default = true;
+  # Stalwart admin password from agenix
+  age.secrets.stalwart-admin-password = {
+    file = ../../secrets/stalwart-admin-password.age;
+    owner = "root";
+    mode = "0400";
+  };
+
+  # Configure Stalwart TLS and admin auth
+  services.stalwart-mail = {
+    credentials = {
+      admin_password = config.age.secrets.stalwart-admin-password.path;
+    };
+    settings = {
+      certificate.default = {
+        cert = "%{file:/var/lib/acme/wildcard-ncrmro-com/fullchain.pem}%";
+        private-key = "%{file:/var/lib/acme/wildcard-ncrmro-com/key.pem}%";
+        default = true;
+      };
+      authentication.fallback-admin = {
+        user = "admin";
+        secret = "%{file:/run/credentials/stalwart-mail.service/admin_password}%";
+      };
     };
   };
   keystone.os.gitServer = {
