@@ -16,7 +16,8 @@
     backend.host = "mail.ncrmro.com"
     backend.port = 993
     backend.encryption.type = "tls"
-    backend.login = "nicholas.romero@ncrmro.com"
+    # Login is the Stalwart account name, not the email address
+    backend.login = "ncrmro"
     backend.auth.type = "password"
     backend.auth.command = "cat /run/agenix/stalwart-mail-ncrmro-password"
 
@@ -24,7 +25,7 @@
     message.send.backend.host = "mail.ncrmro.com"
     message.send.backend.port = 465
     message.send.backend.encryption.type = "tls"
-    message.send.backend.login = "nicholas.romero@ncrmro.com"
+    message.send.backend.login = "ncrmro"
     message.send.backend.auth.type = "password"
     message.send.backend.auth.command = "cat /run/agenix/stalwart-mail-ncrmro-password"
   '';

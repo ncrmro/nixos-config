@@ -42,7 +42,8 @@
   # Give stalwart-mail access to ACME certs
   users.users.stalwart-mail.extraGroups = [ "nginx" ];
 
-  # Stalwart admin password from agenix
+  # Stalwart admin password (SHA-512 hash, not plaintext).
+  # fallback-admin.secret expects a $6$ hash. Generate with: mkpasswd -m sha-512
   age.secrets.stalwart-admin-password = {
     file = ../../secrets/stalwart-admin-password.age;
     owner = "root";
