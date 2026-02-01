@@ -28,6 +28,8 @@ in
   networking.networkmanager.unmanaged = [
     "interface-name:virbr*"
     "interface-name:vnet*"
+    "interface-name:br0"
+    "interface-name:enp*"
   ];
 
   # Create consistent symlinks for firmware files that VM XML files can reference

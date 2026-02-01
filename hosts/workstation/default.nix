@@ -129,21 +129,22 @@
     "fs.inotify.max_user_instances" = 8192;
   };
 
-  # Static networking on enp5s0 (router: 192.168.1.254 / 2600:1702:6250:4c80::1, DHCP server at 192.168.1.10)
+  # Bridge networking: br0 enslaves enp5s0 so VMs can get LAN IPs directly
   networking.useDHCP = false;
   networking.hostId = "cb1216ed"; # generate with: head -c 8 /etc/machine-id
   networking.hostName = "ncrmro-workstation";
 
-  networking.interfaces.enp5s0 = {
-    # Keep the existing static IPv4 address
+  networking.bridges.br0.interfaces = [ "enp5s0" ];
+
+  networking.interfaces.enp5s0 = { };
+
+  networking.interfaces.br0 = {
     ipv4.addresses = [
       {
         address = "192.168.1.69";
         prefixLength = 24;
       }
     ];
-    # Static IPv6 within router-advertised prefix 2600:1702:6250:4c80::/64
-    # Alternative: Remove this block to use SLAAC (auto-configured from router advertisements)
     ipv6.addresses = [
       {
         address = "2600:1702:6250:4c80::69";
@@ -154,12 +155,12 @@
 
   networking.defaultGateway = {
     address = "192.168.1.254";
-    interface = "enp5s0";
+    #interface = "br0";
   };
 
   networking.defaultGateway6 = {
     address = "2600:1702:6250:4c80::1";
-    interface = "enp5s0";
+    #    interface = "br0";
   };
   # needed for remote building I think nix --builders
   nix.settings.trusted-users = [
