@@ -4,7 +4,7 @@
     ./cert-manager.nix
     #./ceph-cluster.nix
     ./cluster-issuer.nix
-    ./gitea.nix
+    # ./gitea.nix # Replaced by keystone.os.gitServer (NixOS Forgejo)
     ./ingress-nginx.nix
     ./loki.nix
     ./alloy.nix
