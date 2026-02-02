@@ -5,18 +5,18 @@
   // Define who can use which tags
   "tagOwners": {
     // GitHub Actions runners
-    "tag:github-actions": ["ncrmro"],
+    "tag:github-actions": ["ncrmro@"],
 
     // Kubernetes cluster nodes
-    "tag:k8s-cluster": ["ncrmro"],
-    "tag:k8s-master": ["ncrmro"],
-    "tag:k8s-worker": ["ncrmro"],
+    "tag:k8s-cluster": ["ncrmro@"],
+    "tag:k8s-master": ["ncrmro@"],
+    "tag:k8s-worker": ["ncrmro@"],
 
     // Server nodes (infrastructure servers like mercury)
-    "tag:server": ["ncrmro"],
+    "tag:server": ["ncrmro@"],
 
     // Nodes running node exporter for monitoring
-    "tag:node-exporter": ["ncrmro"]
+    "tag:node-exporter": ["ncrmro@"]
   },
 
   // Define access control rules
@@ -54,7 +54,7 @@
       "action": "accept",
       "src": ["tag:k8s-cluster"],
       "dst": [
-        "ncrmro:9100"                // Node exporter on ncrmro's devices
+        "ncrmro@:9100"                // Node exporter on ncrmro's devices
       ]
     },
 
@@ -78,27 +78,8 @@
     // Admin user has full access to everything
     {
       "action": "accept",
-      "src": ["ncrmro"],
+      "src": ["ncrmro@"],
       "dst": ["*:*"]
-    }
-  ],
-
-  // Test rules (used with `headscale acls test`)
-  "tests": [
-    {
-      "src": "tag:github-actions",
-      "accept": [
-        "tag:k8s-master:6443",
-        "tag:k8s-cluster:6443"
-      ]
-    },
-    {
-      "src": "ncrmro",
-      "accept": [
-        "tag:k8s-master:6443",
-        "tag:k8s-cluster:*",
-        "tag:k8s-cluster:22"
-      ]
     }
   ]
 }

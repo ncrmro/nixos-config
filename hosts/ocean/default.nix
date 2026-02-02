@@ -27,6 +27,7 @@
     ../common/optional/smb-backup-shares.nix
     ./nginx.nix
     ./vaultwarden.nix
+    ./rsshub.nix
     ../common/kubernetes/default.nix
     ./vms.nix
     ../../modules/users/ncrmro.nix
