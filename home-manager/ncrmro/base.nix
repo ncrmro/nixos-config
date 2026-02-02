@@ -13,7 +13,7 @@
     ../common/features/cli
     ../common/features/desktop
     ../common/features/virtualization.nix
-    ../common/features/newsboat.nix
+    ../common/features/cliflux.nix
     ../common/optional/mcp/github-mcp.nix
     ../common/optional/mcp/kubernetes.nix
     ../common/optional/mcp/mcp-language-server.nix
