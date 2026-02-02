@@ -63,6 +63,20 @@
     mode = "0400";
   };
 
+  # Cliflux config (Miniflux CLI client)
+  age.secrets.cliflux-config = {
+    file = ../../secrets/cliflux-config.age;
+    owner = "ncrmro";
+    mode = "0400";
+  };
+
+  # GitHub read-only token for agents
+  age.secrets.github-read-only-token = {
+    file = ../../secrets/github-read-only-token.age;
+    owner = "ncrmro";
+    mode = "0400";
+  };
+
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";

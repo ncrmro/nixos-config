@@ -48,4 +48,10 @@ in
 
   # Miniflux admin credentials (ocean RSS reader)
   "secrets/miniflux-admin.age".publicKeys = adminKeys ++ [ systems.ocean ];
+
+  # Cliflux config (Miniflux CLI client config with API key, for desktops)
+  "secrets/cliflux-config.age".publicKeys = adminKeys ++ desktops;
+
+  # GitHub read-only token for agents
+  "secrets/github-read-only-token.age".publicKeys = adminKeys ++ desktops;
 }
