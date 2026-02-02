@@ -24,6 +24,7 @@
     ../common/optional/monitoring-client.nix
     ../common/optional/alloy-client.nix
     ../common/optional/docker-rootless.nix
+    ../common/optional/podman.nix
     ../common/optional/virt-manager.nix
     ../common/optional/agenix.nix
     inputs.keystone.nixosModules.operating-system
