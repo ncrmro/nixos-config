@@ -45,4 +45,7 @@ in
 
   # Stalwart mail user password (for himalaya client on desktops)
   "secrets/stalwart-mail-ncrmro-password.age".publicKeys = adminKeys ++ desktops;
+
+  # Miniflux admin credentials (ocean RSS reader)
+  "secrets/miniflux-admin.age".publicKeys = adminKeys ++ [ systems.ocean ];
 }
