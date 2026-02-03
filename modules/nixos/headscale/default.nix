@@ -167,6 +167,11 @@ in
               type = "A";
               value = "100.64.0.6";
             }
+            {
+              name = "mail.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
           ];
         };
         derp = {
