@@ -70,9 +70,9 @@
     mode = "0400";
   };
 
-  # GitHub read-only token for agents
-  age.secrets.github-read-only-token = {
-    file = ../../secrets/github-read-only-token.age;
+  # GitHub agents token
+  age.secrets.github-agents-token = {
+    file = ../../secrets/github-agents-token.age;
     owner = "ncrmro";
     mode = "0400";
   };

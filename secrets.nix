@@ -52,6 +52,6 @@ in
   # Cliflux config (Miniflux CLI client config with API key, for desktops)
   "secrets/cliflux-config.age".publicKeys = adminKeys ++ desktops;
 
-  # GitHub read-only token for agents
-  "secrets/github-read-only-token.age".publicKeys = adminKeys ++ desktops;
+  # GitHub agents token
+  "secrets/github-agents-token.age".publicKeys = adminKeys ++ desktops;
 }
