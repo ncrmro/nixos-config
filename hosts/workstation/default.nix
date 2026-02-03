@@ -19,7 +19,6 @@
     ../common/optional/tailscale.node.nix
     ../common/optional/eternal-terminal.nix
     # ../common/optional/secureboot.nix # Conflict with keystone
-    ../common/optional/ollama.nix
     ../common/optional/nfs-client.nix
     ../common/optional/monitoring-client.nix
     ../common/optional/alloy-client.nix
