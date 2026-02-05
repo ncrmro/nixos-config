@@ -13,4 +13,7 @@
   (final: prev: {
     yazi = inputs.yazi.packages.${prev.stdenv.hostPlatform.system}.default;
   })
+
+  # Local packages
+  (final: prev: import ../packages/default.nix { pkgs = final; })
 ]
