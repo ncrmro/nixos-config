@@ -28,8 +28,19 @@
   programs.home-manager.enable = true;
 
   programs.zsh = {
-    shellAliases = {
-      update = "sudo nixos-rebuild switch --flake ~/nixos-config#ocean";
-    };
+    initExtra = ''
+      # NixOS rebuild function with --boot support for critical changes
+      update() {
+        local cmd="switch"
+        if [[ "$1" == "--boot" ]]; then
+          cmd="boot"
+          shift
+        fi
+        sudo nixos-rebuild "$cmd" --flake ~/nixos-config#ocean "$@"
+        if [[ "$cmd" == "boot" ]]; then
+          echo "Reboot required to apply changes."
+        fi
+      }
+    '';
   };
 }
