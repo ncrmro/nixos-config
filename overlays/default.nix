@@ -2,7 +2,12 @@
 { inputs, ... }:
 [
   # Keystone overlay (provides pkgs.keystone)
-  inputs.keystone.overlays.default
+  (final: prev: {
+    keystone = {
+      zesh = final.callPackage (inputs.keystone + "/packages/zesh") { };
+      himalaya = inputs.keystone.inputs.himalaya.packages.${final.stdenv.hostPlatform.system}.default;
+    };
+  })
 
   # Use ghostty from the official flake (1.2.3+ with SIGUSR2 config reload support)
   (final: prev: {

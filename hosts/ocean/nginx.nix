@@ -204,36 +204,6 @@ in
     };
   };
 
-  services.nginx.virtualHosts."grafana.ncrmro.com" = {
-    forceSSL = true;
-    useACMEHost = "wildcard-ncrmro-com";
-    extraConfig = tailscaleOnly;
-    locations."/" = {
-      proxyPass = "http://${k8sIngressHttp}";
-      proxyWebsockets = true;
-    };
-  };
-
-  services.nginx.virtualHosts."prometheus.ncrmro.com" = {
-    forceSSL = true;
-    useACMEHost = "wildcard-ncrmro-com";
-    extraConfig = tailscaleOnly;
-    locations."/" = {
-      proxyPass = "http://${k8sIngressHttp}";
-      proxyWebsockets = true;
-    };
-  };
-
-  services.nginx.virtualHosts."loki.ncrmro.com" = {
-    forceSSL = true;
-    useACMEHost = "wildcard-ncrmro-com";
-    extraConfig = tailscaleOnly;
-    locations."/" = {
-      proxyPass = "http://${k8sIngressHttp}";
-      proxyWebsockets = true;
-    };
-  };
-
   services.nginx.virtualHosts."longhorn.ncrmro.com" = {
     forceSSL = true;
     useACMEHost = "wildcard-ncrmro-com";

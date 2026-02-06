@@ -30,11 +30,56 @@
     ./rsshub.nix
     ./miniflux.nix
     ../common/kubernetes/default.nix
+    ./observability
+    ../common/optional/alloy-client.nix
     ./vms.nix
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
     inputs.keystone.nixosModules.operating-system
+    inputs.microvm.nixosModules.host
   ];
+
+  microvm.vms."agent-drago" = {
+    flake = outputs;
+    restartIfChanged = true;
+  };
+
+  my.observability = {
+    prometheus = {
+      enable = true;
+      nginxExtraConfig = ''
+        allow 100.64.0.0/10;
+        allow fd7a:115c:a1e0::/48;
+        deny all;
+      '';
+    };
+    loki = {
+      enable = true;
+      nginxExtraConfig = ''
+        allow 100.64.0.0/10;
+        allow fd7a:115c:a1e0::/48;
+        deny all;
+      '';
+    };
+    grafana = {
+      enable = true;
+      nginxExtraConfig = ''
+        allow 100.64.0.0/10;
+        allow fd7a:115c:a1e0::/48;
+        deny all;
+      '';
+    };
+  };
+
+  services.alloy-client = {
+    enable = true;
+    lokiEndpoint = "http://127.0.0.1:3100/loki/api/v1/push";
+    extraLabels = {
+      environment = "home";
+      device_type = "server";
+      service = "k3s-master";
+    };
+  };
 
   keystone.os.enable = true;
   keystone.os.storage.enable = false;
@@ -142,6 +187,8 @@
     "root"
     "ncrmro"
   ];
+
+  networking.firewall.allowedTCPPorts = [ 2223 ];
 
   boot.kernel.sysctl."fs.inotify.max_user_watches" = 524288;
   boot.kernel.sysctl."fs.inotify.max_user_instances" = 512;

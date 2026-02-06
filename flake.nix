@@ -7,6 +7,11 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
 
     # Tools and modules
+    microvm = {
+      url = "github:astro/microvm.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -99,6 +104,7 @@
     inputs@{
       self,
       nixpkgs,
+      microvm,
       disko,
       home-manager,
       nixos-hardware,
@@ -125,6 +131,21 @@
       # Code formatter (official NixOS formatter)
       formatter.x86_64-linux = (pkgsForSystem "x86_64-linux").nixfmt-rfc-style;
       formatter.aarch64-darwin = (pkgsForSystem "aarch64-darwin").nixfmt-rfc-style;
+
+      # Custom packages
+      packages.x86_64-linux =
+        let
+          pkgs = pkgsForSystem "x86_64-linux";
+        in
+        {
+          inherit (pkgs)
+            claude-code
+            # codex
+            gemini-cli
+            mcp-language-server
+            zesh
+            ;
+        };
 
       # Import NixOS and Home Manager modules
       nixosModules = import ./modules/nixos;
@@ -219,6 +240,18 @@
         };
         ncrmro-workstation = nixpkgs.lib.nixosSystem {
           modules = [ ./hosts/workstation ];
+          specialArgs = {
+            inherit inputs self;
+            outputs = self;
+          };
+        };
+
+        agent-drago = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            microvm.nixosModules.microvm
+            ./hosts/agent-drago
+          ];
           specialArgs = {
             inherit inputs self;
             outputs = self;
