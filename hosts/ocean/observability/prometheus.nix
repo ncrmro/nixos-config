@@ -24,6 +24,9 @@ in
       retentionTime = "90d";
       checkConfig = "syntax-only";
 
+      # Enable remote write receiver for Alloy push-based metrics
+      extraFlags = [ "--web.enable-remote-write-receiver" ];
+
       exporters = {
         node = {
           enable = true;
@@ -32,6 +35,7 @@ in
         };
       };
 
+      # Only scrape local node_exporter - remote hosts push via Alloy remote_write
       scrapeConfigs = [
         {
           job_name = "node";
@@ -42,21 +46,6 @@ in
               ];
               labels = {
                 instance = config.networking.hostName;
-                environment = "home";
-              };
-            }
-            # Migrated targets from K8s config
-            {
-              targets = [ "100.64.0.3:9100" ];
-              labels = {
-                instance = "ncrmro-workstation";
-                environment = "home";
-              };
-            }
-            {
-              targets = [ "100.64.0.1:9100" ];
-              labels = {
-                instance = "ncrmro-laptop";
                 environment = "home";
               };
             }

@@ -9,7 +9,7 @@ let
 in
 {
   options.services.alloy-client = {
-    enable = lib.mkEnableOption "Grafana Alloy log shipping client";
+    enable = lib.mkEnableOption "Grafana Alloy log and metrics shipping client";
 
     lokiEndpoint = lib.mkOption {
       type = lib.types.str;
@@ -17,16 +17,28 @@ in
       description = "Loki endpoint URL for log shipping";
     };
 
+    prometheusEndpoint = lib.mkOption {
+      type = lib.types.str;
+      default = "http://100.64.0.6:9090/api/v1/write";
+      description = "Prometheus remote_write endpoint URL";
+    };
+
+    enableMetrics = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable metrics collection and shipping to Prometheus";
+    };
+
     hostLabel = lib.mkOption {
       type = lib.types.str;
       default = config.networking.hostName;
-      description = "Host label to attach to logs";
+      description = "Host label to attach to logs and metrics";
     };
 
     extraLabels = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
       default = { };
-      description = "Additional static labels to attach to logs";
+      description = "Additional static labels to attach to logs and metrics";
       example = {
         environment = "production";
         datacenter = "home";
@@ -123,6 +135,30 @@ in
 
           // Batch configuration for efficiency
           external_labels = {
+            cluster = "nixos-home",
+          }
+        }
+      ''
+      + lib.optionalString cfg.enableMetrics ''
+
+        // ============================================
+        // Metrics Collection (Prometheus remote_write)
+        // ============================================
+
+        // Scrape local node_exporter
+        prometheus.scrape "node" {
+          targets = [{ __address__ = "127.0.0.1:9100" }]
+          scrape_interval = "15s"
+          forward_to = [prometheus.remote_write.central.receiver]
+        }
+
+        // Ship metrics to central Prometheus
+        prometheus.remote_write "central" {
+          endpoint {
+            url = "${cfg.prometheusEndpoint}"
+          }
+          external_labels = {
+            host = "${cfg.hostLabel}",
             cluster = "nixos-home",
           }
         }

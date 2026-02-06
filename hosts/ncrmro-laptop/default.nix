@@ -119,7 +119,6 @@
 
   services.monitoring-client = {
     enable = true;
-    listenAddress = "100.64.0.1";
   };
 
   services.alloy-client = {

@@ -10,32 +10,14 @@ in
 {
   options.services.monitoring-client = {
     enable = lib.mkEnableOption "monitoring client with Prometheus exporters";
-
-    listenAddress = lib.mkOption {
-      type = lib.types.str;
-      default = "127.0.0.1";
-      description = "IP address to listen on (use Tailscale IP for remote access)";
-    };
   };
 
   config = lib.mkIf cfg.enable {
     services.prometheus.exporters.node = {
       enable = true;
-      listenAddress = cfg.listenAddress;
-    };
-
-    # Ensure node exporter waits for tailscale to be ready
-    # Don't block nixos-rebuild if it fails to start
-    systemd.services.prometheus-node-exporter = {
-      after = [ "tailscaled.service" ];
-      wants = [ "tailscaled.service" ];
-      serviceConfig = {
-        Restart = "on-failure";
-        RestartSec = "5s";
-      };
-      unitConfig = {
-        StartLimitIntervalSec = 0;
-      };
+      listenAddress = "127.0.0.1"; # Only localhost - Alloy scrapes locally
+      port = 9100;
+      enabledCollectors = [ "systemd" ];
     };
   };
 }

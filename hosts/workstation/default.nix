@@ -115,9 +115,16 @@
     user = "ncrmro";
   };
 
+  # OOM Killer configuration
+  # Prioritize killing docker/podman rootless processes over Hyprland
+  systemd.user.services = {
+    docker.serviceConfig.OOMScoreAdjust = 1000;
+    podman.serviceConfig.OOMScoreAdjust = 1000;
+    "wayland-wm@Hyprland".serviceConfig.OOMScoreAdjust = -500;
+  };
+
   services.monitoring-client = {
     enable = true;
-    listenAddress = "100.64.0.3";
   };
 
   services.alloy-client = {
