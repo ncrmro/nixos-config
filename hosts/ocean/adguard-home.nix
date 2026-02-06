@@ -204,6 +204,18 @@
             domain = "adguard.home.ncrmro.com";
             answer = "ingress.home.ncrmro.com";
           }
+          {
+            domain = "grafana.ncrmro.com";
+            answer = "ingress.home.ncrmro.com";
+          }
+          {
+            domain = "prometheus.ncrmro.com";
+            answer = "ingress.home.ncrmro.com";
+          }
+          {
+            domain = "loki.ncrmro.com";
+            answer = "ingress.home.ncrmro.com";
+          }
         ];
         safebrowsing_cache_size = 1048576;
         safesearch_cache_size = 1048576;
