@@ -130,6 +130,7 @@
 
   services.alloy-client = {
     enable = true;
+    enableZfsExporter = true;
     extraLabels = {
       environment = "home";
       device_type = "workstation";

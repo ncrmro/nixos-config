@@ -30,6 +30,22 @@ in
       };
 
       provision.enable = true;
+
+      provision.dashboards.settings.providers = [
+        {
+          name = "nixos-dashboards";
+          options.path = pkgs.linkFarm "grafana-dashboards" [
+            {
+              name = "node-exporter-full.json";
+              path = pkgs.fetchurl {
+                url = "https://grafana.com/api/dashboards/1860/revisions/37/download";
+                hash = "sha256-1DE1aaanRHHeCOMWDGdOS1wBXxOF84UXAjJzT5Ek6mM=";
+              };
+            }
+          ];
+        }
+      ];
+
       provision.datasources.settings.datasources = [
         {
           name = "Prometheus";

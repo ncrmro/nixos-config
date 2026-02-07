@@ -29,6 +29,12 @@ in
       description = "Enable metrics collection and shipping to Prometheus";
     };
 
+    enableZfsExporter = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable ZFS exporter metrics collection";
+    };
+
     hostLabel = lib.mkOption {
       type = lib.types.str;
       default = config.networking.hostName;
@@ -59,6 +65,12 @@ in
 
     # Reduce shutdown timeout from default 1m30s to 10s
     systemd.services.alloy.serviceConfig.TimeoutStopSec = 10;
+
+    # Enable ZFS exporter when requested
+    services.prometheus.exporters.zfs = lib.mkIf cfg.enableZfsExporter {
+      enable = true;
+      port = 9134;
+    };
 
     # Create Alloy configuration
     environment.etc."alloy/config.alloy".text =
@@ -149,6 +161,28 @@ in
         prometheus.scrape "node" {
           targets = [{ __address__ = "127.0.0.1:9100" }]
           scrape_interval = "15s"
+          job_name = "node"
+          forward_to = [prometheus.relabel.instance.receiver]
+        }
+      ''
+      + lib.optionalString (cfg.enableMetrics && cfg.enableZfsExporter) ''
+
+        // Scrape local zfs_exporter
+        prometheus.scrape "zfs" {
+          targets = [{ __address__ = "127.0.0.1:9134" }]
+          scrape_interval = "15s"
+          job_name = "zfs"
+          forward_to = [prometheus.relabel.instance.receiver]
+        }
+      ''
+      + lib.optionalString cfg.enableMetrics ''
+
+        // Relabel instance to hostname instead of IP:port
+        prometheus.relabel "instance" {
+          rule {
+            target_label = "instance"
+            replacement  = "${cfg.hostLabel}"
+          }
           forward_to = [prometheus.remote_write.central.receiver]
         }
 

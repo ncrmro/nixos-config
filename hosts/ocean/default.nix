@@ -21,15 +21,12 @@
     ./adguard-home.nix
     ../common/optional/servarr.nix
     ../common/optional/home-assistant.nix
-    ./k3s.nix
-    ./k3s-storage-classes.nix
     ./nfs.nix
     ../common/optional/smb-backup-shares.nix
     ./nginx.nix
     ./vaultwarden.nix
     ./rsshub.nix
     ./miniflux.nix
-    ../common/kubernetes/default.nix
     ./observability
     ../common/optional/alloy-client.nix
     ./vms.nix
@@ -74,10 +71,11 @@
   services.alloy-client = {
     enable = true;
     lokiEndpoint = "http://127.0.0.1:3100/loki/api/v1/push";
+    prometheusEndpoint = "http://127.0.0.1:9090/api/v1/write";
+    enableZfsExporter = true;
     extraLabels = {
       environment = "home";
       device_type = "server";
-      service = "k3s-master";
     };
   };
 
@@ -141,13 +139,8 @@
     TERM = "xterm-256color"; # Or your preferred terminal type
   };
 
-  # Configure Tailscale node with Kubernetes tags
   services.tailscale.node = {
     enable = true;
-    tags = [
-      "tag:k8s-cluster"
-      "tag:k8s-master"
-    ];
   };
 
   # Configure SMB backup shares

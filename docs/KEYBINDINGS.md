@@ -513,6 +513,12 @@ Default Zellij modes:
 #### Normal Mode Enhancements
 <!-- Custom normal mode bindings -->
 
+#### Markdown Integration
+- `F6`: Render Markdown to HTML and preview in browser
+  - **Mechanism**: `:pipe helix-preview-markdown`
+  - **Tools**: Uses `pandoc` for rendering and `xdg-open` for browser preview
+  - **Bonus**: Copies the file URL to clipboard
+
 #### LSP Operations
 <!-- Go-to-definition, hover, rename, code actions -->
 
