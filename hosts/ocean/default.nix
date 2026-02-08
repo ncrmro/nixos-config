@@ -94,15 +94,13 @@
   # fallback-admin.secret expects a $6$ hash. Generate with: mkpasswd -m sha-512
   age.secrets.stalwart-admin-password = {
     file = ../../secrets/stalwart-admin-password.age;
-    owner = "root";
+    owner = "stalwart-mail";
+    group = "stalwart-mail";
     mode = "0400";
   };
 
   # Configure Stalwart TLS and admin auth
   services.stalwart-mail = {
-    credentials = {
-      admin_password = config.age.secrets.stalwart-admin-password.path;
-    };
     settings = {
       certificate.default = {
         cert = "%{file:/var/lib/acme/wildcard-ncrmro-com/fullchain.pem}%";
@@ -111,7 +109,7 @@
       };
       authentication.fallback-admin = {
         user = "admin";
-        secret = "%{file:/run/credentials/stalwart-mail.service/admin_password}%";
+        secret = "%{file:/run/agenix/stalwart-admin-password}%";
       };
     };
   };
