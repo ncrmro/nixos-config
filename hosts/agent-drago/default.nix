@@ -51,9 +51,9 @@
     vcpu = 2;
 
     qemu.extraArgs = [
-      # Virtio-VGA standard mode (no GL required, supports Wayland)
-      "-device"
-      "virtio-vga"
+      # QXL display for better SPICE integration (resize, 2D acceleration)
+      "-vga"
+      "qxl"
       # SPICE remote display
       "-spice"
       "port=5900,addr=100.64.0.6,disable-ticketing=on"
@@ -74,7 +74,6 @@
 
   services.xserver.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
-  services.xserver.displayManager.gdm.wayland = false; # Force X11 for SPICE resize
 
   # SPICE guest integration (clipboard, mouse, display resize)
   services.spice-vdagentd.enable = true;
