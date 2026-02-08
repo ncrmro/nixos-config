@@ -43,7 +43,7 @@
       }
     ];
 
-    # Disable microvm graphics (adds -nographic), use QXL+SPICE
+    # Disable microvm graphics (adds -nographic), we configure display manually
     graphics.enable = false;
 
     # Increase memory for GNOME
@@ -51,13 +51,17 @@
     vcpu = 2;
 
     qemu.extraArgs = [
-      # Virtio-VGA standard mode (no GL required, supports Wayland)
+      # Display: virtio-vga (works, but no auto-resize in remote-viewer)
+      # Known issue: auto-resize doesn't work with current setup
+      # Tried: QXL (-vga qxl) - broke display entirely
+      # Tried: X11 force (gdm.wayland=false) - no effect on resize
+      # TODO: investigate spice-vdagent status in guest, or manual xrandr
       "-device"
       "virtio-vga"
       # SPICE remote display
       "-spice"
       "port=5900,addr=100.64.0.6,disable-ticketing=on"
-      # SPICE agent for clipboard, mouse, resize
+      # SPICE agent for clipboard, mouse, resize (resize not working)
       "-device"
       "virtio-serial-pci"
       "-chardev"
@@ -74,7 +78,6 @@
 
   services.xserver.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
-  services.xserver.displayManager.gdm.wayland = false; # Force X11 for SPICE resize
 
   # SPICE guest integration (clipboard, mouse, display resize)
   services.spice-vdagentd.enable = true;
