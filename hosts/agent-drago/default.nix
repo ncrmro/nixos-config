@@ -74,6 +74,7 @@
 
   services.xserver.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
+  services.xserver.displayManager.gdm.wayland = false; # Force X11 for SPICE resize
 
   # SPICE guest integration (clipboard, mouse, display resize)
   services.spice-vdagentd.enable = true;
