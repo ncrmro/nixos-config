@@ -123,6 +123,40 @@ cat /nix/store/XXX-stalwart.toml | grep -A5 "fallback-admin"
 3. **Database admin overrides fallback**: An admin created via web UI takes precedence over `fallback-admin`
 4. **Service not restarted**: After secret changes, run `sudo systemctl restart stalwart`
 5. **Wrong service name**: The NixOS service is `stalwart.service` (not `stalwart-mail.service`)
+6. **User accounts missing roles**: Accounts without `"roles": ["user"]` will authenticate but be denied IMAP/SMTP/JMAP access (log shows `security.unauthorized`)
+7. **Password starts with `$`**: Stalwart treats `$`-prefixed passwords as hashed (bcrypt/argon2). Regenerate without `$` prefix if IMAP AUTHENTICATE PLAIN fails.
+
+## Operational Status (as of 2026-02-08)
+
+### Domain
+
+- **ncrmro.com** (ID: 1) — registered in Stalwart
+  - DNS still points to iCloud (MX: `mx01.mail.icloud.com`, `mx02.mail.icloud.com`)
+  - SPF includes iCloud only
+  - DKIM and DMARC not configured
+  - **Action needed**: Update DNS when ready to receive mail via Stalwart
+
+### Accounts
+
+| Username | Email | Stalwart ID | Status | Roles |
+|----------|-------|-------------|--------|-------|
+| nicholas.romero | nicholas.romero@ncrmro.com | 2 | Active | user |
+| drago | drago@ncrmro.com | 3 | Active | user |
+
+### Validation Results
+
+All services operational:
+- **IMAP (port 993)**: Both accounts authenticated successfully
+- **SMTP (port 587)**: Send/receive between accounts confirmed
+- **CalDAV/CardDAV**: PROPFIND returns 207 Multi-Status with correct principals
+
+### Important Findings
+
+1. **Accounts require `"roles": ["user"]`** to access IMAP/SMTP/JMAP. Without this role, authentication succeeds but access is denied with `security.unauthorized`.
+
+2. **Avoid passwords starting with `$`**: Stalwart interprets the `$` prefix as a signal that the password is hashed (bcrypt/argon2). Use plain base64-encoded passwords instead.
+
+3. **CalDAV/CardDAV use WebDAV methods**: Test with `curl -X PROPFIND`, not GET. A 403 on GET is expected.
 
 ## API Account Management
 
@@ -136,7 +170,10 @@ curl -s -u admin:'your-password' http://127.0.0.1:8082/api/principal | jq
 
 ### Create a User Account
 
+**Important**: You must add `"roles": ["user"]` after creating the account, or the account will authenticate but be denied access to IMAP/SMTP/JMAP.
+
 ```bash
+# Create the account
 curl -s -u admin:'your-password' http://127.0.0.1:8082/api/principal \
   -H "Content-Type: application/json" \
   -d '{
@@ -145,6 +182,12 @@ curl -s -u admin:'your-password' http://127.0.0.1:8082/api/principal \
     "secrets": ["user-password"],
     "emails": ["user@example.com"]
   }' | jq
+
+# Add the user role (required for IMAP/SMTP/JMAP access)
+curl -s -u admin:'your-password' http://127.0.0.1:8082/api/principal/username \
+  -X PATCH \
+  -H "Content-Type: application/json" \
+  -d '[{"action":"set","field":"roles","value":["user"]}]' | jq
 ```
 
 ### Get a Specific Account
@@ -159,7 +202,12 @@ curl -s -u admin:'your-password' http://127.0.0.1:8082/api/principal/username | 
 curl -s -u admin:'your-password' http://127.0.0.1:8082/api/principal/username \
   -X PATCH \
   -H "Content-Type: application/json" \
-  -d '{"secrets": ["new-password"]}' | jq
+  -d '[{"action":"set","field":"secrets","value":["new-password"]}]' | jq
+```
+
+**Password generation tip**: Generate random passwords without `$` prefix to avoid hash interpretation:
+```bash
+openssl rand -base64 24  # or use: nix run nixpkgs#openssl -- rand -base64 24
 ```
 
 ### Delete an Account
@@ -178,6 +226,76 @@ curl -s -u admin:'your-password' http://127.0.0.1:8082/api/principal \
     "name": "example.com"
   }' | jq
 ```
+
+## Testing User Accounts
+
+### IMAP Login
+
+```bash
+# Test IMAP authentication and list folders
+curl -s --ssl-reqd "imaps://127.0.0.1:993/INBOX" --insecure -u "username:password"
+# Expected: "* LIST () "/" "INBOX"
+```
+
+### SMTP Send
+
+```bash
+# Send a test email
+curl -v --ssl-reqd "smtp://127.0.0.1:587" --insecure \
+  -u "sender:password" \
+  --mail-from "sender@ncrmro.com" \
+  --mail-rcpt "recipient@ncrmro.com" \
+  -T - <<EOF
+From: sender@ncrmro.com
+To: recipient@ncrmro.com
+Subject: Test message
+
+Test content.
+EOF
+# Expected: 250 2.0.0 Message queued with id XXXXX
+```
+
+### Verify Receipt
+
+```bash
+# Check recipient's inbox for new messages
+curl -s --ssl-reqd "imaps://127.0.0.1:993/INBOX?NEW" --insecure -u "recipient:password"
+# Expected: "* SEARCH 1" (or higher numbers if multiple messages)
+```
+
+## CalDAV and CardDAV
+
+Stalwart enables CalDAV and CardDAV by default for all accounts. The well-known endpoints redirect to the JMAP listener.
+
+### Discovery Endpoints
+
+```bash
+# CalDAV discovery
+curl -sL https://mail.ncrmro.com/.well-known/caldav -w "\nHTTP: %{http_code}\n"
+# Returns: 307 redirect to /dav/cal
+
+# CardDAV discovery
+curl -sL https://mail.ncrmro.com/.well-known/carddav -w "\nHTTP: %{http_code}\n"
+# Returns: 307 redirect to /dav/card
+```
+
+### Testing CalDAV/CardDAV
+
+Use WebDAV methods (PROPFIND, not GET) for testing:
+
+```bash
+# CalDAV test
+curl -s -X PROPFIND -u username:'password' http://127.0.0.1:8082/dav/cal \
+  -H "Depth: 0" -w "\nHTTP: %{http_code}\n"
+# Expected: 207 Multi-Status with principal URL
+
+# CardDAV test
+curl -s -X PROPFIND -u username:'password' http://127.0.0.1:8082/dav/card \
+  -H "Depth: 0" -w "\nHTTP: %{http_code}\n"
+# Expected: 207 Multi-Status with principal URL
+```
+
+**Note**: GET requests return 403 — this is expected. CalDAV/CardDAV clients use PROPFIND, REPORT, and other WebDAV methods.
 
 ## User Mail Passwords (Himalaya Client)
 
