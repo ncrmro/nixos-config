@@ -10,6 +10,8 @@ let
     mercury = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK80XMxx82fVvZgZ5djaXKvy1fRriQwkO4OAtf65ElhU";
     workstation = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMalqC7xISpPwp7pPHcx8Qc3eiA1LOqJAmflFlHH0oCw";
     laptop = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAdFyolB6Fb6z8r+38nsqDig9II1D400COykJPUs2G18";
+    # Get with: ssh ocean "cat /var/lib/microvms/agent-drago/etc/ssh/ssh_host_ed25519_key.pub"
+    agent-drago = "ssh-ed25519 PLACEHOLDER_GET_KEY_FROM_VM";
   };
 
   # Convenience aliases for common key combinations
@@ -45,6 +47,9 @@ in
 
   # Stalwart mail user password (for himalaya client on desktops)
   "secrets/stalwart-mail-ncrmro-password.age".publicKeys = adminKeys ++ desktops;
+
+  # Stalwart mail drago user password (for himalaya client on agent-drago VM)
+  "secrets/stalwart-mail-drago-password.age".publicKeys = adminKeys ++ [ systems.agent-drago ];
 
   # Miniflux admin credentials (ocean RSS reader)
   "secrets/miniflux-admin.age".publicKeys = adminKeys ++ [ systems.ocean ];

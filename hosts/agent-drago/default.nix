@@ -5,6 +5,7 @@
     ../../modules/users/drago.nix
     ../../modules/users/ncrmro.nix
     inputs.home-manager.nixosModules.default
+    inputs.agenix.nixosModules.default
   ];
 
   # Apply overlays (provides keystonePkgs for home-manager modules)
@@ -12,6 +13,13 @@
   nixpkgs.config.allowUnfree = true;
 
   networking.hostName = "agent-drago";
+
+  # Stalwart mail password for drago user (for himalaya client)
+  age.secrets.stalwart-mail-drago-password = {
+    file = ../../secrets/stalwart-mail-drago-password.age;
+    owner = "drago";
+    mode = "0400";
+  };
 
   microvm = {
     hypervisor = "qemu";
@@ -95,7 +103,12 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    users.drago = import ../../home-manager/drago/agent-drago.nix;
+    users.drago = {
+      imports = [
+        ../../home-manager/drago/agent-drago.nix
+        ../../home-manager/drago/himalaya.nix
+      ];
+    };
     users.ncrmro = import ../../home-manager/ncrmro/base.nix;
     extraSpecialArgs = { inherit inputs; };
   };
