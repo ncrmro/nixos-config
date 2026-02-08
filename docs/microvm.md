@@ -212,3 +212,115 @@ ssh ocean "/nix/store/<qemu-path>/bin/qemu-system-x86_64 -device help | grep -i 
 - [microvm.nix Options Reference](https://microvm-nix.github.io/microvm.nix/microvm-options.html)
 - [QEMU SPICE Documentation](https://www.spice-space.org/)
 - [NixOS SPICE VDAgent](https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/services/misc/spice-vdagentd.nix)
+
+## User-Level VM Alternatives
+
+Research into running VMs as a regular user (rootless) on NixOS.
+
+### libvirt `qemu:///session`
+
+Libvirt supports a user-session mode that runs QEMU without root privileges:
+
+```bash
+virsh -c qemu:///session list
+```
+
+**Pros:**
+- No root required
+- Standard libvirt tooling (virsh, virt-manager)
+
+**Cons:**
+- No VirtioFS support (requires root for virtiofsd)
+- Limited networking options (user-mode networking only)
+- No direct host device passthrough
+
+### microvm.nix Rootless Options
+
+microvm.nix provides some configuration for non-root operation:
+
+```nix
+microvm = {
+  # Socket ownership for non-root access
+  socket = "control.socket";
+
+  # User/group for the VM process
+  user = "myuser";
+
+  # UID/GID mapping for shared directories
+  shares = [{
+    source = "/home/myuser/shared";
+    mountPoint = "/shared";
+    tag = "shared";
+    proto = "9p";  # 9p works without root, virtiofs doesn't
+  }];
+};
+```
+
+**Note:** VirtioFS shares still require root for virtiofsd. Use 9p for rootless file sharing.
+
+### libvirt System Mode with User Access
+
+Full-featured VMs with user-level access via group membership:
+
+```nix
+# Add user to libvirtd group
+users.users.myuser.extraGroups = [ "libvirtd" ];
+
+# Enable libvirt
+virtualisation.libvirtd.enable = true;
+```
+
+**Pros:**
+- Full feature set (VirtioFS, device passthrough, advanced networking)
+- User can manage VMs via `virsh -c qemu:///system`
+- virt-manager GUI works
+
+**Cons:**
+- libvirtd daemon runs as root
+- User has elevated privileges for VM management
+
+### nixos-shell
+
+Lightweight NixOS VMs for development and testing:
+
+```bash
+# Run a NixOS shell with a configuration
+nix run github:Mic92/nixos-shell
+
+# Or with a custom configuration
+nixos-shell ./vm.nix
+```
+
+Example `vm.nix`:
+```nix
+{ pkgs, ... }: {
+  # Minimal VM configuration
+  environment.systemPackages = [ pkgs.vim ];
+
+  # Share current directory
+  virtualisation.sharedDirectories = {
+    project = {
+      source = "$PWD";
+      target = "/project";
+    };
+  };
+}
+```
+
+**Pros:**
+- Quick iteration for testing NixOS configurations
+- Runs as user (uses QEMU user-mode)
+- Integrates with flakes
+
+**Cons:**
+- Designed for ephemeral dev/test, not persistent VMs
+- Limited GUI support
+
+### Summary
+
+| Option | Root Required | VirtioFS | Best For |
+|--------|---------------|----------|----------|
+| `qemu:///session` | No | No | Simple rootless VMs |
+| microvm.nix (9p) | No | No | NixOS-managed rootless VMs |
+| libvirtd + group | Daemon only | Yes | Full-featured user VMs |
+| nixos-shell | No | No | Quick dev/test iterations |
