@@ -49,6 +49,9 @@ in
   # Miniflux admin credentials (ocean RSS reader)
   "secrets/miniflux-admin.age".publicKeys = adminKeys ++ [ systems.ocean ];
 
+  # Grafana API token for MCP server
+  "secrets/grafana-api-token.age".publicKeys = adminKeys ++ [ systems.ocean ];
+
   # Cliflux config (Miniflux CLI client config with API key, for desktops)
   "secrets/cliflux-config.age".publicKeys = adminKeys ++ desktops;
 

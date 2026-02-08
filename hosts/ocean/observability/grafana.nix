@@ -69,5 +69,44 @@ in
         proxyWebsockets = true;
       };
     };
+
+    # Grafana API token for MCP server
+    age.secrets.grafana-api-token = {
+      file = ../../../secrets/grafana-api-token.age;
+      owner = "root";
+      mode = "0400";
+    };
+
+    # MCP server for Grafana
+    systemd.services.mcp-grafana = {
+      description = "MCP server for Grafana";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "grafana.service" ];
+      serviceConfig = {
+        Restart = "on-failure";
+        DynamicUser = true;
+        LoadCredential = "grafana-token:${config.age.secrets.grafana-api-token.path}";
+      };
+      script = ''
+        export GRAFANA_URL="http://127.0.0.1:${toString config.services.grafana.settings.server.http_port}"
+        export GRAFANA_SERVICE_ACCOUNT_TOKEN="$(cat $CREDENTIALS_DIRECTORY/grafana-token)"
+        exec ${pkgs.mcp-grafana}/bin/mcp-grafana -transport sse -address 127.0.0.1:8090
+      '';
+    };
+
+    services.nginx.virtualHosts."mcp-grafana.ncrmro.com" = {
+      forceSSL = true;
+      useACMEHost = "wildcard-ncrmro-com";
+      extraConfig = cfg.nginxExtraConfig;
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8090";
+        proxyWebsockets = true;
+        extraConfig = ''
+          proxy_buffering off;
+          proxy_cache off;
+          proxy_read_timeout 86400s;
+        '';
+      };
+    };
   };
 }
