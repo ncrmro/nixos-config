@@ -41,6 +41,9 @@
     restartIfChanged = true;
   };
 
+  # Enable Mesa/OpenGL drivers for EGL headless rendering (needed by microvm SPICE+GL)
+  hardware.graphics.enable = true;
+
   my.observability = {
     prometheus = {
       enable = true;

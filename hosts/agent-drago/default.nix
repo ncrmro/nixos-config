@@ -43,20 +43,27 @@
       }
     ];
 
+    # Disable microvm graphics (adds -nographic), use QXL+SPICE
+    graphics.enable = false;
+
+    # Increase memory for GNOME
+    mem = 4096;
+    vcpu = 2;
+
     qemu.extraArgs = [
-      # GPU: virtio-gpu with GL acceleration (requires qemu_full)
+      # Virtio-VGA standard mode (no GL required, supports Wayland)
       "-device"
-      "virtio-gpu-gl-pci"
-      # Display: headless EGL rendering on host GPU (requires /dev/dri/renderD128)
-      "-display"
-      "egl-headless,rendernode=/dev/dri/renderD128"
-      # SPICE: remote display protocol with GL streaming
-      # Bound to Tailscale IP only (100.64.0.6) for security
+      "virtio-vga"
+      # SPICE remote display
       "-spice"
-      "port=5900,addr=100.64.0.6,disable-ticketing=on,gl=on"
-      # SPICE tools: enables clipboard sharing, mouse grab, etc.
+      "port=5900,addr=100.64.0.6,disable-ticketing=on"
+      # SPICE agent for clipboard, mouse, resize
       "-device"
       "virtio-serial-pci"
+      "-chardev"
+      "spicevmc,id=vdagent,debug=0,name=vdagent"
+      "-device"
+      "virtserialport,chardev=vdagent,name=com.redhat.spice.0"
       # Networking: user-mode with SSH port forward
       "-netdev"
       "user,id=net0,hostfwd=tcp::2223-:22"
