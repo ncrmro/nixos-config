@@ -35,7 +35,6 @@ in
         };
       };
 
-      # Only scrape local node_exporter - remote hosts push via Alloy remote_write
       scrapeConfigs = [
         {
           job_name = "node";
@@ -47,6 +46,16 @@ in
               labels = {
                 instance = config.networking.hostName;
                 environment = "home";
+              };
+            }
+            {
+              targets = [ "192.168.1.140:80" ];
+              labels = {
+                instance = "seed-incubator";
+                environment = "home";
+                location = "garage";
+                device_type = "plant-seed-incubator";
+                plants = "dill,arugula";
               };
             }
           ];
