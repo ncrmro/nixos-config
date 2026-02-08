@@ -181,7 +181,11 @@
     "ncrmro"
   ];
 
-  networking.firewall.allowedTCPPorts = [ 2223 ];
+  # 2223: SSH to agent-drago VM, 5900: SPICE display for agent-drago VM
+  networking.firewall.allowedTCPPorts = [
+    2223
+    5900
+  ];
 
   boot.kernel.sysctl."fs.inotify.max_user_watches" = 524288;
   boot.kernel.sysctl."fs.inotify.max_user_instances" = 512;
