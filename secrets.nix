@@ -2,6 +2,7 @@ let
   # SSH public keys for users and systems
   users = {
     ncrmro = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyrDBVcGK+pUZOTUA7MLoD5vYK/kaPF6TNNyoDmwNl2 ncrmro@ncrmro-laptop-fw7k";
+    ncrmro-ocean = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEE6cFSyJoiaURB7+961zETflBNPJUZszH9xyowzbpNu ncrmro@ocean";
   };
 
   systems = {
@@ -43,14 +44,18 @@ in
   "secrets/samba-timemachine-password.age".publicKeys = adminKeys ++ [ systems.ocean ];
 
   # Stalwart admin password (ocean mail server)
-  "secrets/stalwart-admin-password.age".publicKeys = adminKeys ++ [ systems.ocean ];
+  "secrets/stalwart-admin-password.age".publicKeys = adminKeys ++ [
+    systems.ocean
+    users.ncrmro-ocean
+  ];
 
   # Stalwart mail user password (for himalaya client on desktops)
-  "secrets/stalwart-mail-ncrmro-password.age".publicKeys = adminKeys ++ desktops;
+  "secrets/stalwart-mail-ncrmro-password.age".publicKeys =
+    adminKeys ++ desktops ++ [ users.ncrmro-ocean ];
 
   # Stalwart mail drago user password (for himalaya client on agent-drago VM)
   # TODO: add systems.agent-drago back once the real host key replaces the placeholder
-  "secrets/stalwart-mail-drago-password.age".publicKeys = adminKeys;
+  "secrets/stalwart-mail-drago-password.age".publicKeys = adminKeys ++ [ users.ncrmro-ocean ];
 
   # Miniflux admin credentials (ocean RSS reader)
   "secrets/miniflux-admin.age".publicKeys = adminKeys ++ [ systems.ocean ];
