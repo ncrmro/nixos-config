@@ -24,6 +24,10 @@
   microvm = {
     hypervisor = "qemu";
 
+    # Enable writable store overlay to allow nix-daemon and home-manager to function
+    # with read-only /nix/store shared from host
+    writableStoreOverlay = "/nix/.rw-store";
+
     # QEMU Package Selection:
     # - qemu_kvm is actually qemu-host-cpu-only (minimal, no SPICE/virgl)
     # - qemu_full includes SPICE, virgl, and OpenGL support
