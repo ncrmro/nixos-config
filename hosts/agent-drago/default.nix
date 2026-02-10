@@ -107,6 +107,7 @@
       imports = [
         ../../home-manager/drago/agent-drago.nix
         ../../home-manager/drago/himalaya.nix
+      ../../home-manager/drago/email-trigger.nix
       ];
     };
     users.ncrmro = import ../../home-manager/ncrmro/base.nix;
