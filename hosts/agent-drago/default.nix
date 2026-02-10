@@ -101,18 +101,34 @@
   users.users.ncrmro.initialPassword = "password";
 
   # Make /nix/var writable by binding to /var volume
-  # This allows home-manager to create temproots without needing a full writable store overlay
+  # This allows home-manager to create temproots/profiles without needing a full writable store overlay
   fileSystems."/nix/var" = {
     device = "/var/nix-var";
     fsType = "none";
     options = [ "bind" ];
   };
 
-  # Ensure the bind mount directory exists
+  # Ensure the bind mount directory structure exists with proper permissions
   system.activationScripts.createNixVar = ''
-    mkdir -p /var/nix-var/nix/temproots
+    mkdir -p /var/nix-var/nix/{temproots,profiles,gcroots,db}
     chmod 1777 /var/nix-var/nix/temproots
+    chmod 755 /var/nix-var/nix/profiles
+    chmod 755 /var/nix-var/nix/gcroots
+    chmod 755 /var/nix-var/nix/db
   '';
+
+  # Persist SSH host keys across VM restarts by storing them in /var
+  services.openssh.hostKeys = [
+    {
+      path = "/var/ssh/ssh_host_ed25519_key";
+      type = "ed25519";
+    }
+    {
+      path = "/var/ssh/ssh_host_rsa_key";
+      type = "rsa";
+      bits = 4096;
+    }
+  ];
 
   home-manager = {
     useGlobalPkgs = true;
