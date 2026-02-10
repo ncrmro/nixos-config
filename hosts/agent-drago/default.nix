@@ -112,7 +112,13 @@
   systemd.tmpfiles.rules = [
     "d /nix/var/nix 0755 root root -"
     "d /nix/var/nix/profiles 0755 root root -"
+    "d /nix/var/nix/profiles/per-user 0755 root root -"
+    "d /nix/var/nix/profiles/per-user/drago 0755 drago users -"
+    "d /nix/var/nix/profiles/per-user/ncrmro 0755 ncrmro users -"
     "d /nix/var/nix/gcroots 0755 root root -"
+    "d /nix/var/nix/gcroots/per-user 0755 root root -"
+    "d /nix/var/nix/gcroots/per-user/drago 0755 drago users -"
+    "d /nix/var/nix/gcroots/per-user/ncrmro 0755 ncrmro users -"
     "d /nix/var/nix/db 0755 root root -"
     "d /nix/var/nix/temproots 1777 root root -"
   ];
