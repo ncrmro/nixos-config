@@ -108,14 +108,14 @@
     options = [ "bind" ];
   };
 
-  # Ensure the bind mount directory structure exists with proper permissions
-  system.activationScripts.createNixVar = ''
-    mkdir -p /var/nix-var/nix/{temproots,profiles,gcroots,db}
-    chmod 1777 /var/nix-var/nix/temproots
-    chmod 755 /var/nix-var/nix/profiles
-    chmod 755 /var/nix-var/nix/gcroots
-    chmod 755 /var/nix-var/nix/db
-  '';
+  # Create /nix/var directory structure using systemd-tmpfiles (runs after mounts)
+  systemd.tmpfiles.rules = [
+    "d /nix/var/nix 0755 root root -"
+    "d /nix/var/nix/profiles 0755 root root -"
+    "d /nix/var/nix/gcroots 0755 root root -"
+    "d /nix/var/nix/db 0755 root root -"
+    "d /nix/var/nix/temproots 1777 root root -"
+  ];
 
   # Persist SSH host keys across VM restarts by storing them in /var
   services.openssh.hostKeys = [
