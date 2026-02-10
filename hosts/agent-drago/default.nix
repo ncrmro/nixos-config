@@ -97,6 +97,10 @@
   services.openssh.enable = true;
   networking.networkmanager.enable = true;
 
+  # Enable nix-daemon for home-manager to function properly
+  # Home-manager needs access to Nix database to create user profiles
+  nix.enable = true;
+
   # Set a password for ncrmro for console access if needed
   users.users.ncrmro.initialPassword = "password";
 
