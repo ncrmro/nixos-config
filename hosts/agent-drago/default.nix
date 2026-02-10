@@ -24,10 +24,6 @@
   microvm = {
     hypervisor = "qemu";
 
-    # Enable writable store overlay to allow nix-daemon and home-manager to function
-    # with read-only /nix/store shared from host
-    writableStoreOverlay = "/nix/.rw-store";
-
     # QEMU Package Selection:
     # - qemu_kvm is actually qemu-host-cpu-only (minimal, no SPICE/virgl)
     # - qemu_full includes SPICE, virgl, and OpenGL support
@@ -46,9 +42,14 @@
       }
     ];
 
-    # writableStoreOverlay automatically handles /nix/store mounting
-    # so we don't need to manually define it in shares
-    shares = [ ];
+    shares = [
+      {
+        tag = "ro-store";
+        source = "/nix/store";
+        mountPoint = "/nix/store";
+        proto = "virtiofs";
+      }
+    ];
 
     # Disable microvm graphics (adds -nographic), we configure display manually
     graphics.enable = false;
@@ -98,6 +99,20 @@
 
   # Set a password for ncrmro for console access if needed
   users.users.ncrmro.initialPassword = "password";
+
+  # Make /nix/var writable by binding to /var volume
+  # This allows home-manager to create temproots without needing a full writable store overlay
+  fileSystems."/nix/var" = {
+    device = "/var/nix-var";
+    fsType = "none";
+    options = [ "bind" ];
+  };
+
+  # Ensure the bind mount directory exists
+  system.activationScripts.createNixVar = ''
+    mkdir -p /var/nix-var/nix/temproots
+    chmod 1777 /var/nix-var/nix/temproots
+  '';
 
   home-manager = {
     useGlobalPkgs = true;
