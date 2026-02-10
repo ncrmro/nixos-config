@@ -46,14 +46,9 @@
       }
     ];
 
-    shares = [
-      {
-        tag = "ro-store";
-        source = "/nix/store";
-        mountPoint = "/nix/store";
-        proto = "virtiofs";
-      }
-    ];
+    # writableStoreOverlay automatically handles /nix/store mounting
+    # so we don't need to manually define it in shares
+    shares = [ ];
 
     # Disable microvm graphics (adds -nographic), we configure display manually
     graphics.enable = false;
