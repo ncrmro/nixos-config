@@ -1575,11 +1575,11 @@
         "omarchy": "omarchy"
       },
       "locked": {
-        "lastModified": 1770387862,
-        "narHash": "sha256-HGDklVzqwLtK2yGfKA+BOTPrJ95i1xZO8rGzyg4pCkU=",
+        "lastModified": 1771010396,
+        "narHash": "sha256-sRMlIqaDyCCKxN1X1yQ4EQuERkaJ/idqjYA84U2WTGw=",
         "owner": "ncrmro",
         "repo": "keystone",
-        "rev": "5892eaabd1536f1cf3d33d3a5be024a91dffbfad",
+        "rev": "9945510b9cf70e5188e4dcdc4209a5f1dfda6fc4",
         "type": "github"
       },
       "original": {
