@@ -204,6 +204,7 @@
     pkgs.bottom
     pkgs.btop
     pkgs.dig
+    pkgs.passt  # For libvirt user session VMs with passt networking backend
   ];
 
   system.stateVersion = "25.11";
