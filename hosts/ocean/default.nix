@@ -29,6 +29,7 @@
     ./miniflux.nix
     ./observability
     ../common/optional/alloy-client.nix
+    ../common/optional/virt-manager.nix
     ./vms.nix
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix

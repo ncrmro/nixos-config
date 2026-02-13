@@ -20,6 +20,15 @@ in
       # ovmf option removed in unstable - OVMF is now included by default with QEMU
     };
   };
+
+  # Add passt to libvirtd service PATH for user-mode networking with port forwarding
+  # Enables <backend type='passt'/> in VM definitions for rootless VMs
+  systemd.services.libvirtd.path = [
+    pkgs.qemu
+    pkgs.netcat
+    pkgs.passt
+  ];
+
   programs.virt-manager.enable = true;
   users.users.ncrmro.extraGroups = [ "libvirtd" ];
 
