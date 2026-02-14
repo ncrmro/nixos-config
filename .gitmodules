@@ -1,3 +1,6 @@
 [submodule ".submodules/keystone"]
 	path = .submodules/keystone
 	url = git@github.com:ncrmro/keystone.git
+[submodule "agenix-secrets"]
+	path = agenix-secrets
+	url = ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git

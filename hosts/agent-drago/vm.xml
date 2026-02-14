@@ -1,0 +1,66 @@
+<domain type='kvm'>
+  <name>agent-drago</name>
+  <memory unit='GiB'>4</memory>
+  <vcpu>2</vcpu>
+  <os>
+    <type arch='x86_64' machine='q35'>hvm</type>
+    <boot dev='hd'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+  </features>
+  <cpu mode='host-passthrough'/>
+  <devices>
+    <emulator>/run/current-system/sw/bin/qemu-system-x86_64</emulator>
+
+    <!-- Boot disk -->
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='/home/ncrmro/.agentvms/agent-drago.qcow2'/>
+      <target dev='vda' bus='virtio'/>
+    </disk>
+
+    <!-- User-mode networking with SSH port forward -->
+    <interface type='user'>
+      <mac address='52:54:00:12:34:56'/>
+      <model type='virtio'/>
+    </interface>
+
+    <!-- SPICE display on port 5900 -->
+    <graphics type='spice' port='5900' autoport='no' listen='127.0.0.1'>
+      <listen type='address' address='127.0.0.1'/>
+    </graphics>
+
+    <!-- Video device -->
+    <video>
+      <model type='virtio' heads='1' primary='yes'/>
+    </video>
+
+    <!-- SPICE agent channel -->
+    <channel type='spicevmc'>
+      <target type='virtio' name='com.redhat.spice.0'/>
+    </channel>
+
+    <!-- QEMU guest agent -->
+    <channel type='unix'>
+      <target type='virtio' name='org.qemu.guest_agent.0'/>
+    </channel>
+
+    <!-- Serial console -->
+    <serial type='pty'>
+      <target port='0'/>
+    </serial>
+    <console type='pty'>
+      <target type='serial' port='0'/>
+    </console>
+  </devices>
+
+  <!-- QEMU command line for SSH port forwarding -->
+  <qemu:commandline xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+    <qemu:arg value='-netdev'/>
+    <qemu:arg value='user,id=net0,hostfwd=tcp::2223-:22'/>
+    <qemu:arg value='-device'/>
+    <qemu:arg value='virtio-net-pci,netdev=net0,mac=52:54:00:12:34:56'/>
+  </qemu:commandline>
+</domain>

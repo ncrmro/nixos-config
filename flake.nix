@@ -246,12 +246,29 @@
           };
         };
 
+        # Agent VMs - standalone qcow2 images
+        # Base image with both users (for cloning)
+        agent-base = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [ ./hosts/agent-base ];
+          specialArgs = {
+            inherit inputs self;
+            outputs = self;
+          };
+        };
+
         agent-drago = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          modules = [
-            microvm.nixosModules.microvm
-            ./hosts/agent-drago
-          ];
+          modules = [ ./hosts/agent-drago ];
+          specialArgs = {
+            inherit inputs self;
+            outputs = self;
+          };
+        };
+
+        agent-luce = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [ ./hosts/agent-luce ];
           specialArgs = {
             inherit inputs self;
             outputs = self;

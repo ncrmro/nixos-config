@@ -4,7 +4,7 @@
   imports = [
     ../common/optional/agent-base.nix
     ./qcow.nix
-    ../../modules/users/drago.nix
+    ../../modules/users/luce.nix
     ../../modules/users/ncrmro.nix
     inputs.home-manager.nixosModules.default
     inputs.agenix.nixosModules.default
@@ -14,16 +14,16 @@
   nixpkgs.overlays = import ../../overlays { inherit inputs; };
   nixpkgs.config.allowUnfree = true;
 
-  networking.hostName = "agent-drago";
+  networking.hostName = "agent-luce";
 
-  # Auto-login for drago user
+  # Auto-login for luce user
   services.displayManager.autoLogin.enable = true;
-  services.displayManager.autoLogin.user = "drago";
+  services.displayManager.autoLogin.user = "luce";
 
-  # Stalwart mail password for drago user (for himalaya client)
-  age.secrets.stalwart-mail-drago-password = {
-    file = ../../agenix-secrets/secrets/stalwart-mail-drago-password.age;
-    owner = "drago";
+  # Stalwart mail password for luce user (for himalaya client)
+  age.secrets.stalwart-mail-luce-password = {
+    file = ../../agenix-secrets/secrets/stalwart-mail-luce-password.age;
+    owner = "luce";
     mode = "0400";
   };
 
@@ -33,11 +33,10 @@
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
-    users.drago = {
+    users.luce = {
       imports = [
-        ../../home-manager/drago/agent.nix
-        ../../home-manager/drago/himalaya.nix
-        ../../home-manager/drago/email-trigger.nix
+        ../../home-manager/luce/agent.nix
+        ../../home-manager/luce/himalaya.nix
       ];
     };
     users.ncrmro = import ../../home-manager/ncrmro/base.nix;
