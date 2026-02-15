@@ -48,8 +48,8 @@
   networking.networkmanager.enable = true;
   networking.firewall.enable = true;
 
-  # Tailscale for VPN access (agent mode - non-admin)
-  services.tailscale.enable = true;
+  # Tailscale is configured via tailscale-authkey.nix for auto-auth
+  # If not using authkey, enable manually: services.tailscale.enable = true;
 
   # Nix Configuration with Flakes
   nix = {

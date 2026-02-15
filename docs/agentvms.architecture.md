@@ -156,10 +156,12 @@ Create `modules/users/{name}.nix`:
 Create `hosts/agent-{name}/default.nix`:
 
 ```nix
-{ pkgs, inputs, ... }:
+{ config, pkgs, inputs, ... }:
 {
   imports = [
     ../common/optional/agent-base.nix
+    ../common/optional/tailscale-authkey.nix
+    ./qcow.nix
     ../../modules/users/{name}.nix
     ../../modules/users/ncrmro.nix  # Admin user
     inputs.home-manager.nixosModules.default
@@ -169,13 +171,27 @@ Create `hosts/agent-{name}/default.nix`:
   networking.hostName = "agent-{name}";
 
   # Auto-login user
+  services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = "{name}";
 
-  # Secrets
+  # Secrets (deployed after first boot when host key is known)
+  age.secrets.headscale-authkey = {
+    file = ../../agenix-secrets/secrets/headscale-authkey-{name}.age;
+    owner = "root";
+    mode = "0400";
+  };
+
   age.secrets.stalwart-mail-{name}-password = {
-    file = ../../secrets/stalwart-mail-{name}-password.age;
+    file = ../../agenix-secrets/secrets/stalwart-mail-{name}-password.age;
     owner = "{name}";
     mode = "0400";
+  };
+
+  # Tailscale auto-connect with headscale authkey
+  services.tailscale.authkey = {
+    enable = true;
+    secretFile = config.age.secrets.headscale-authkey.path;
+    tags = [ "tag:agent" ];
   };
 
   home-manager.users.{name} = {
@@ -260,13 +276,37 @@ cp result/nixos.qcow2 ~/.agentvms/agent-{name}.qcow2
 | luce | 2224 | 5901 |
 | (next) | 2225 | 5902 |
 
-### Tailscale
+### Tailscale / Headscale
 
-Agents join the tailnet with agent-specific tags for ACL control:
+Agents auto-connect to the tailnet on boot using pre-auth keys stored as agenix secrets. This eliminates manual `tailscale up` commands.
 
-```bash
-tailscale up --login-server=https://headscale.ncrmro.com --advertise-tags=tag:agent
+**Architecture**:
 ```
+Mercury (headscale server)
+├── User: ncrmro (personal devices)
+├── User: drago (agent-drago VM)
+│   └── Pre-auth key → agenix secret → auto-join on boot
+└── User: luce (agent-luce VM)
+    └── Pre-auth key → agenix secret → auto-join on boot
+```
+
+**Setup Flow**:
+1. Create headscale user on mercury: `sudo headscale users create {name}`
+2. Generate pre-auth key: `sudo headscale preauthkeys create --user {name} --expiration 8760h`
+3. Add key to agenix: `echo "key" | agenix -e secrets/headscale-authkey-{name}.age`
+4. Update agent's `default.nix` to use `tailscale-authkey.nix` module
+5. Deploy: `nixos-rebuild switch`
+
+**Module**: `hosts/common/optional/tailscale-authkey.nix` provides:
+- `services.tailscale.authkey.enable` - Enable auto-connect
+- `services.tailscale.authkey.secretFile` - Path to agenix secret
+- `services.tailscale.authkey.tags` - ACL tags (default: `["tag:agent"]`)
+- `services.tailscale.authkey.loginServer` - Headscale URL (default: `https://mercury.ncrmro.com`)
+
+**ACL Tags**: Agents use `tag:agent` for ACL control:
+- Agents can access server services (DNS, mail, monitoring)
+- Agents can communicate with each other
+- ncrmro user has full access to agents
 
 ## Libvirt XML Template
 

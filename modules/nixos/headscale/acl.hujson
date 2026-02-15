@@ -16,7 +16,10 @@
     "tag:server": ["ncrmro@"],
 
     // Nodes running node exporter for monitoring
-    "tag:node-exporter": ["ncrmro@"]
+    "tag:node-exporter": ["ncrmro@"],
+
+    // Autonomous agent VMs (drago, luce)
+    "tag:agent": ["drago@", "luce@"]
   },
 
   // Define access control rules
@@ -80,6 +83,27 @@
       "action": "accept",
       "src": ["ncrmro@"],
       "dst": ["*:*"]
+    },
+
+    // Agent VMs can access server services (DNS, monitoring, mail, git)
+    {
+      "action": "accept",
+      "src": ["tag:agent"],
+      "dst": [
+        "tag:server:53",             // DNS
+        "tag:server:443",            // HTTPS services
+        "tag:server:993",            // IMAP (mail)
+        "tag:server:465",            // SMTP (mail)
+        "tag:server:3000",           // Grafana, Gitea
+        "tag:server:8080"            // Various services
+      ]
+    },
+
+    // Agents can communicate with each other (for agent-to-agent work)
+    {
+      "action": "accept",
+      "src": ["tag:agent"],
+      "dst": ["tag:agent:*"]
     }
   ]
 }

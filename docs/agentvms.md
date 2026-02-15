@@ -114,13 +114,20 @@ himalaya message write --to someone@example.com
 
 ### Tailscale
 
-```bash
-# Join the tailnet (run inside VM)
-sudo tailscale up --login-server=https://headscale.ncrmro.com
+Agent VMs auto-connect to the headscale network on boot using pre-auth keys.
 
-# Check status
+```bash
+# Check status (should show connected after first nixos-rebuild with secrets)
 tailscale status
+
+# Manual join (only needed if auto-connect fails)
+sudo tailscale up --login-server=https://mercury.ncrmro.com
 ```
+
+**Note**: Auto-connect requires:
+1. VM host key added to `secrets.nix`
+2. Pre-auth key created on mercury for the agent user
+3. `nixos-rebuild switch` to deploy secrets
 
 ## Adding SSH Keys to GitHub
 
