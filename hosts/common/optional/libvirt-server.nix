@@ -1,6 +1,6 @@
 # Libvirt server for hosting VMs with remote virt-manager access
 # Connect from workstation/laptop using: qemu+ssh://ncrmro@ocean/system
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   ovmfPkg = pkgs.OVMF.override {
     secureBoot = true;
@@ -13,7 +13,7 @@ in
   virtualisation.libvirtd = {
     enable = true;
     qemu = {
-      package = qemuPkg;
+      package = lib.mkDefault qemuPkg;
       runAsRoot = true;
       swtpm.enable = true;
       # ovmf option removed in nixos-unstable - OVMF is now included by default with QEMU

@@ -7,7 +7,8 @@
     ../../modules/users/drago.nix
     ../../modules/users/ncrmro.nix
     inputs.home-manager.nixosModules.default
-    inputs.agenix.nixosModules.default
+    # Note: agenix secrets are configured after deployment via nixos-rebuild
+    # The qcow2 build cannot include secrets - they're added post-deploy
   ];
 
   # Apply overlays (provides keystonePkgs for home-manager modules)
@@ -20,13 +21,6 @@
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = "drago";
 
-  # Stalwart mail password for drago user (for himalaya client)
-  age.secrets.stalwart-mail-drago-password = {
-    file = ../../agenix-secrets/secrets/stalwart-mail-drago-password.age;
-    owner = "drago";
-    mode = "0400";
-  };
-
   # Set a password for ncrmro for console access if needed
   users.users.ncrmro.initialPassword = "password";
 
@@ -36,8 +30,7 @@
     users.drago = {
       imports = [
         ../../home-manager/drago/agent.nix
-        ../../home-manager/drago/himalaya.nix
-        ../../home-manager/drago/email-trigger.nix
+        # Note: himalaya.nix requires agenix secrets - add after deployment
       ];
     };
     users.ncrmro = import ../../home-manager/ncrmro/base.nix;

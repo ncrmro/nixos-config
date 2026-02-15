@@ -25,7 +25,7 @@ This is a NixOS configuration repository using flakes for managing system config
 - `/bin/` - Helper scripts for deployment and management
 - `/docs/` - Documentation for various setup procedures
 - `/kubernetes/` - Raw Kubernetes manifests (legacy)
-- `/secrets/` - Encrypted secrets managed by agenix
+- `/agenix-secrets/` - Private submodule containing encrypted agenix secrets
 
 ### Keystone Submodule
 
@@ -45,6 +45,28 @@ When developing features intended for upstream Keystone:
    - **Tip**: Use `bin/keystone-dev --build` to verify changes build correctly without needing `sudo` or actually switching the system configuration.
 3. Commit and push changes from the submodule directory.
 4. Update the flake input lock in the main repository.
+
+### Agenix Secrets Submodule
+
+Located at `agenix-secrets/`, this is a Git submodule tracking a private repository. Secrets are stored separately to allow publishing nixos-config publicly while keeping encrypted secrets private.
+
+**Repository:** `ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git`
+
+**Contents:**
+- `secrets.nix` - Defines which SSH keys can decrypt which secrets
+- `secrets/` - Directory containing all `.age` encrypted secret files
+
+**Working with the submodule:**
+```bash
+# Clone with submodules
+git clone --recurse-submodules <repo-url>
+
+# Initialize after cloning
+git submodule update --init --recursive
+
+# Update to latest commit
+git submodule update --remote agenix-secrets
+```
 
 ## Common Commands
 
@@ -156,6 +178,6 @@ After the first deployment attempt, Nix will provide the correct hash which shou
 ## Important Notes
 
 - Use `nix flake check` to validate configuration before deployment
-- Host-specific secrets are in `/secrets/` and require appropriate age keys
+- Host-specific secrets are in `/agenix-secrets/secrets/` and require appropriate age keys
 - ZFS systems require `networking.hostId` to be set uniquely per host
 - Secure Boot systems use TPM for automatic disk unlock

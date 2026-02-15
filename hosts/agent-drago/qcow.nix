@@ -4,6 +4,7 @@
   config,
   lib,
   pkgs,
+  modulesPath,
   ...
 }:
 
@@ -17,13 +18,10 @@
   ];
 
   # QCOW2 image configuration
-  system.build.qcow2 = import "${pkgs.path}/nixos/lib/make-disk-image.nix" {
-    inherit config lib pkgs;
-    name = "agent-drago";
+  system.build.qcow2 = import "${toString modulesPath}/../lib/make-disk-image.nix" {
+    inherit lib config pkgs;
+    diskSize = 65536; # 64GB
     format = "qcow2";
-    diskSize = "65536"; # 64GB
-    partitionTableType = "efi";
-    # Include the full closure
-    copyChannel = false;
+    partitionTableType = "hybrid";
   };
 }

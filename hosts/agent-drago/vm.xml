@@ -21,12 +21,6 @@
       <target dev='vda' bus='virtio'/>
     </disk>
 
-    <!-- User-mode networking with SSH port forward -->
-    <interface type='user'>
-      <mac address='52:54:00:12:34:56'/>
-      <model type='virtio'/>
-    </interface>
-
     <!-- SPICE display on port 5900 -->
     <graphics type='spice' port='5900' autoport='no' listen='127.0.0.1'>
       <listen type='address' address='127.0.0.1'/>
@@ -56,11 +50,12 @@
     </console>
   </devices>
 
+
   <!-- QEMU command line for SSH port forwarding -->
   <qemu:commandline xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
     <qemu:arg value='-netdev'/>
-    <qemu:arg value='user,id=net0,hostfwd=tcp::2223-:22'/>
+    <qemu:arg value='user,id=net0,hostfwd=tcp::2230-:22'/>
     <qemu:arg value='-device'/>
-    <qemu:arg value='virtio-net-pci,netdev=net0,mac=52:54:00:12:34:56'/>
+    <qemu:arg value='virtio-net-pci,netdev=net0,mac=52:54:00:12:34:56,bus=pcie.0,addr=0x5'/>
   </qemu:commandline>
 </domain>

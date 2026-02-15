@@ -7,7 +7,8 @@
     ../../modules/users/luce.nix
     ../../modules/users/ncrmro.nix
     inputs.home-manager.nixosModules.default
-    inputs.agenix.nixosModules.default
+    # Note: agenix secrets are configured after deployment via nixos-rebuild
+    # The qcow2 build cannot include secrets - they're added post-deploy
   ];
 
   # Apply overlays (provides keystonePkgs for home-manager modules)
@@ -20,13 +21,6 @@
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = "luce";
 
-  # Stalwart mail password for luce user (for himalaya client)
-  age.secrets.stalwart-mail-luce-password = {
-    file = ../../agenix-secrets/secrets/stalwart-mail-luce-password.age;
-    owner = "luce";
-    mode = "0400";
-  };
-
   # Set a password for ncrmro for console access if needed
   users.users.ncrmro.initialPassword = "password";
 
@@ -36,7 +30,7 @@
     users.luce = {
       imports = [
         ../../home-manager/luce/agent.nix
-        ../../home-manager/luce/himalaya.nix
+        # Note: himalaya.nix requires agenix secrets - add after deployment
       ];
     };
     users.ncrmro = import ../../home-manager/ncrmro/base.nix;

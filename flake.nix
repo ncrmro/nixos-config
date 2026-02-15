@@ -274,6 +274,18 @@
             outputs = self;
           };
         };
+
+        # Minimal agent images - fast build, add full config post-boot
+        # Build: nix build .#nixosConfigurations.agent-drago-minimal.config.system.build.qcow2
+        # Copy:  cp result/nixos.qcow2 ~/.agentvms/agent-drago.qcow2
+        agent-drago-minimal = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [ ./hosts/agent-drago-minimal ];
+          specialArgs = {
+            inherit inputs self;
+            outputs = self;
+          };
+        };
       };
 
       # Home Manager configurations

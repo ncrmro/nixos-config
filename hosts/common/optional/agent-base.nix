@@ -94,18 +94,14 @@
   # Locale
   i18n.defaultLocale = "en_US.UTF-8";
 
-  # Boot configuration for qcow2 VMs
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  # Boot configuration for qcow2 VMs (hybrid partition table)
+  boot.loader.grub.device = "/dev/vda";
+  boot.loader.timeout = 0;
 
   # Filesystem for qcow2 image
   fileSystems."/" = {
-    device = "/dev/vda2";
+    device = "/dev/disk/by-label/nixos";
     fsType = "ext4";
-  };
-
-  fileSystems."/boot" = {
-    device = "/dev/vda1";
-    fsType = "vfat";
+    autoResize = true;
   };
 }

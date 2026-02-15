@@ -18,7 +18,7 @@ let
 in
 {
   age.secrets.cloudflare-api-token = {
-    file = ../../secrets/cloudflare-api-token.age;
+    file = ../../agenix-secrets/secrets/cloudflare-api-token.age;
     owner = "acme";
     group = "acme";
   };

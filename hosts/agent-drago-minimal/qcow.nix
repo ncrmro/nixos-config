@@ -1,5 +1,4 @@
-# qcow2 disk image settings for agent-base
-# This module configures the NixOS image builder for qcow2 output.
+# Minimal qcow2 disk image - 8GB
 {
   config,
   lib,
@@ -9,7 +8,6 @@
 }:
 
 {
-  # Virtio block device for qcow2
   boot.initrd.availableKernelModules = [
     "virtio_pci"
     "virtio_blk"
@@ -17,10 +15,9 @@
     "virtio_net"
   ];
 
-  # QCOW2 image configuration
   system.build.qcow2 = import "${toString modulesPath}/../lib/make-disk-image.nix" {
     inherit lib config pkgs;
-    diskSize = 65536; # 64GB
+    diskSize = 8192; # 8GB - minimal
     format = "qcow2";
     partitionTableType = "hybrid";
   };

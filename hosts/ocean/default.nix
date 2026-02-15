@@ -34,15 +34,9 @@
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
     inputs.keystone.nixosModules.operating-system
-    inputs.microvm.nixosModules.host
   ];
 
-  microvm.vms."agent-drago" = {
-    flake = outputs;
-    restartIfChanged = true;
-  };
-
-  # Enable Mesa/OpenGL drivers for EGL headless rendering (needed by microvm SPICE+GL)
+  # Enable Mesa/OpenGL drivers for EGL headless rendering
   hardware.graphics.enable = true;
 
   my.observability = {
@@ -94,7 +88,7 @@
   # Stalwart admin password (SHA-512 hash, not plaintext).
   # fallback-admin.secret expects a $6$ hash. Generate with: mkpasswd -m sha-512
   age.secrets.stalwart-admin-password = {
-    file = ../../secrets/stalwart-admin-password.age;
+    file = ../../agenix-secrets/secrets/stalwart-admin-password.age;
     owner = "stalwart-mail";
     group = "stalwart-mail";
     mode = "0400";
@@ -149,7 +143,7 @@
   services.smb-backup-shares = {
     enable = true;
     backupsRoot = "ocean/backups";
-    timeMachinePasswordFile = ../../secrets/samba-timemachine-password.age;
+    timeMachinePasswordFile = ../../agenix-secrets/secrets/samba-timemachine-password.age;
     timeMachineQuota = "2T";
     windowsBackupQuota = "1T";
   };
@@ -183,12 +177,6 @@
     "ncrmro"
   ];
 
-  # 2223: SSH to agent-drago VM, 5900: SPICE display for agent-drago VM
-  networking.firewall.allowedTCPPorts = [
-    2223
-    5900
-  ];
-
   boot.kernel.sysctl."fs.inotify.max_user_watches" = 524288;
   boot.kernel.sysctl."fs.inotify.max_user_instances" = 512;
   # Increase the maximum number of IGMP multicast group memberships.
@@ -204,7 +192,7 @@
     pkgs.bottom
     pkgs.btop
     pkgs.dig
-    pkgs.passt  # For libvirt user session VMs with passt networking backend
+    pkgs.passt # For libvirt user session VMs with passt networking backend
   ];
 
   system.stateVersion = "25.11";

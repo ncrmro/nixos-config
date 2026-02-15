@@ -6,7 +6,7 @@ in
 {
   # Cloudflare API token for ACME DNS-01 challenge
   age.secrets.cloudflare-api-token = {
-    file = ../../secrets/cloudflare-api-token.age;
+    file = ../../agenix-secrets/secrets/cloudflare-api-token.age;
     owner = "acme";
     group = "acme";
   };

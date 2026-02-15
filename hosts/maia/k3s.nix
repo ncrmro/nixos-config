@@ -11,7 +11,7 @@
   ];
   # Define the K3s agent token secret
   age.secrets.k3s-agent-token = {
-    file = ../../secrets/k3s-agent-token.age;
+    file = ../../agenix-secrets/secrets/k3s-agent-token.age;
     owner = "root";
     group = "root";
     mode = "0400";

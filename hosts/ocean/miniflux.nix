@@ -8,7 +8,7 @@ let
 in
 {
   age.secrets.miniflux-admin = {
-    file = ../../secrets/miniflux-admin.age;
+    file = ../../agenix-secrets/secrets/miniflux-admin.age;
     owner = "root";
     mode = "0400";
   };

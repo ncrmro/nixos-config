@@ -7,7 +7,7 @@
 {
   # Secret for AdGuard admin password hash
   age.secrets.adguard-password-hash = {
-    file = ../../secrets/adguard-password-hash.age;
+    file = ../../agenix-secrets/secrets/adguard-password-hash.age;
     owner = "root";
     mode = "0400";
   };
