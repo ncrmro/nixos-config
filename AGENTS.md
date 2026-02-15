@@ -165,6 +165,45 @@ services.k3s.autoDeployCharts = {
 
 After the first deployment attempt, Nix will provide the correct hash which should then be updated in the configuration.
 
+## Agent VMs
+
+Agent VMs are isolated NixOS virtual machines for autonomous AI agents. Each agent has its own identity, credentials, and environment.
+
+### Available Agents
+
+| Agent | Purpose | SSH Port | SPICE Port | Headscale User |
+|-------|---------|----------|------------|----------------|
+| drago | Primary coding agent | 2230 | 5900 | drago |
+| luce | Secondary agent | 2224 | 5901 | luce |
+
+### Remote Rebuild and Deploy
+
+Agents auto-connect to headscale on boot. After the initial setup, update agents remotely:
+
+```bash
+# From any tailscale-connected machine
+ssh drago@agent-drago "sudo nixos-rebuild switch --flake github:ncrmro/nixos-config#agent-drago"
+ssh luce@agent-luce "sudo nixos-rebuild switch --flake github:ncrmro/nixos-config#agent-luce"
+
+# Or via localhost port forwarding (if VMs running locally)
+ssh -p 2230 drago@localhost "sudo nixos-rebuild switch --flake github:ncrmro/nixos-config#agent-drago"
+ssh -p 2224 luce@localhost "sudo nixos-rebuild switch --flake github:ncrmro/nixos-config#agent-luce"
+```
+
+### Building Agent Images
+
+```bash
+# Build base qcow2 image
+nix build .#nixosConfigurations.agent-base.config.system.build.qcow2
+cp result/nixos.qcow2 ~/.agentvms/agent-drago.qcow2
+
+# Define and start VM
+virsh --connect qemu:///session define hosts/agent-drago/vm.xml
+virsh --connect qemu:///session start agent-drago
+```
+
+See [docs/agentvms.md](docs/agentvms.md) for full documentation.
+
 ## Key Technologies
 
 - **NixOS 25.05**: Primary stable channel
