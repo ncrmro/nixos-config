@@ -33,7 +33,7 @@
         # Note: himalaya.nix requires agenix secrets - add after deployment
       ];
     };
-    users.ncrmro = import ../../home-manager/ncrmro/base.nix;
+    # ncrmro user has minimal config on agent VMs (console access only)
     extraSpecialArgs = { inherit inputs; };
   };
 
