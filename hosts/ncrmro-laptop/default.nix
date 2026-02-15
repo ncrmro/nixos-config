@@ -5,8 +5,7 @@
   lib,
   pkgs,
   ...
-}@args:
-{
+} @ args: {
   imports = [
     inputs.lanzaboote.nixosModules.lanzaboote
     # inputs.omarchy-nix.nixosModules.default
@@ -32,6 +31,7 @@
     ./zfs.remote-replication.nix
     ../../modules/nixos/steam.nix
     inputs.keystone.nixosModules.desktop
+    inputs.keystone.nixosModules.hardwareKey
     outputs.nixosModules.bambu-studio
   ];
 
@@ -64,13 +64,15 @@
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.backupFileExtension = "backup";
-  home-manager.extraSpecialArgs = { inherit inputs outputs; };
+  home-manager.extraSpecialArgs = {inherit inputs outputs;};
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-laptop.nix;
 
   keystone.desktop = {
     enable = true;
     user = "ncrmro";
   };
+
+  keystone.hardwareKey.enable = true;
 
   # services.greetd = {
   #   enable = true;
@@ -111,7 +113,7 @@
     pkiBundle = "/var/lib/sbctl";
   };
   systemd.services.fprintd = {
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = ["multi-user.target"];
     serviceConfig.Type = "simple";
   };
   services.fprintd.enable = true;
