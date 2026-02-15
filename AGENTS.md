@@ -178,16 +178,16 @@ Agent VMs are isolated NixOS virtual machines for autonomous AI agents. Each age
 
 ### Remote Rebuild and Deploy
 
-Agents auto-connect to headscale on boot. After the initial setup, update agents remotely:
+Agents auto-connect to headscale on boot. Update agents by building locally and deploying remotely:
 
 ```bash
-# From any tailscale-connected machine
-ssh drago@agent-drago "sudo nixos-rebuild switch --flake github:ncrmro/nixos-config#agent-drago"
-ssh luce@agent-luce "sudo nixos-rebuild switch --flake github:ncrmro/nixos-config#agent-luce"
+# Build on host, deploy to VM (from nixos-config directory)
+nixos-rebuild switch --flake .#agent-drago --target-host drago@localhost --build-host localhost
+nixos-rebuild switch --flake .#agent-luce --target-host luce@localhost --build-host localhost
 
-# Or via localhost port forwarding (if VMs running locally)
-ssh -p 2230 drago@localhost "sudo nixos-rebuild switch --flake github:ncrmro/nixos-config#agent-drago"
-ssh -p 2224 luce@localhost "sudo nixos-rebuild switch --flake github:ncrmro/nixos-config#agent-luce"
+# With explicit SSH port
+NIX_SSHOPTS="-p 2230" nixos-rebuild switch --flake .#agent-drago --target-host drago@localhost --build-host localhost
+NIX_SSHOPTS="-p 2224" nixos-rebuild switch --flake .#agent-luce --target-host luce@localhost --build-host localhost
 ```
 
 ### Building Agent Images
