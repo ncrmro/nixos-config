@@ -19,7 +19,11 @@
     "tag:node-exporter": ["ncrmro@"],
 
     // Autonomous agent VMs (drago, luce)
-    "tag:agent": ["drago@", "luce@"]
+    "tag:agent": ["drago@", "luce@"],
+
+    // Ocean node services
+    "tag:ocean-ingress": ["ncrmro@"],
+    "tag:ocean-email": ["ncrmro@"]
   },
 
   // Define access control rules
@@ -85,17 +89,24 @@
       "dst": ["*:*"]
     },
 
-    // Agent VMs can access server services (DNS, monitoring, mail, git)
+    // Agent VMs can access ocean ingress services (Grafana, Gitea, etc)
     {
       "action": "accept",
       "src": ["tag:agent"],
       "dst": [
-        "tag:server:53",             // DNS
-        "tag:server:443",            // HTTPS services
-        "tag:server:993",            // IMAP (mail)
-        "tag:server:465",            // SMTP (mail)
-        "tag:server:3000",           // Grafana, Gitea
-        "tag:server:8080"            // Various services
+        "tag:ocean-ingress:80",      // HTTP
+        "tag:ocean-ingress:443"      // HTTPS
+      ]
+    },
+
+    // Agent VMs can access ocean email services
+    {
+      "action": "accept",
+      "src": ["tag:agent"],
+      "dst": [
+        "tag:ocean-email:993",       // IMAP
+        "tag:ocean-email:465",       // SMTP
+        "tag:ocean-email:25"         // SMTP (alternate)
       ]
     },
 

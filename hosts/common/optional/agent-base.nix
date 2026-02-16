@@ -46,7 +46,20 @@
 
   # Network Configuration
   networking.networkmanager.enable = true;
+  networking.networkmanager.dns = "systemd-resolved"; # Use systemd-resolved for DNS
   networking.firewall.enable = true;
+
+  # DNS resolution via systemd-resolved (required for Tailscale MagicDNS)
+  services.resolved = {
+    enable = true;
+    settings.Resolve = {
+      DNSSEC = "allow-downgrade";
+      FallbackDNS = [
+        "1.1.1.1"
+        "8.8.8.8"
+      ];
+    };
+  };
 
   # Tailscale is configured via tailscale-authkey.nix for auto-auth
   # If not using authkey, enable manually: services.tailscale.enable = true;
@@ -83,6 +96,7 @@
     git
     gnome-tweaks
     spice-vdagent
+    dnsutils # Provides dig, nslookup, host
   ];
 
   # Enable sudo for wheel group
