@@ -22,7 +22,8 @@
     ../common/optional/secureboot.nix
     ../common/optional/tailscale.node.nix
     ../common/optional/agenix.nix
-    ./k3s.nix
+    ../common/optional/alloy-client.nix
+    ../common/optional/monitoring-client.nix
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix
   ];
@@ -41,13 +42,21 @@
     TERM = "xterm-256color"; # Or your preferred terminal type
   };
 
-  # Configure Tailscale node with Kubernetes worker tags
+  # Configure Tailscale node
   services.tailscale.node = {
     enable = true;
-    tags = [
-      "tag:k8s-cluster"
-      "tag:k8s-worker"
-    ];
+    tags = [ "tag:server" ];
+  };
+
+  # Ship logs and metrics to ocean via Alloy
+  services.monitoring-client.enable = true;
+  services.alloy-client = {
+    enable = true;
+    enableZfsExporter = true;
+    extraLabels = {
+      environment = "production";
+      device_type = "server";
+    };
   };
 
   # Set your time zone.
