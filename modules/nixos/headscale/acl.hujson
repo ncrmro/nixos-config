@@ -1,6 +1,11 @@
 {
   // Headscale ACL Configuration
   // This file defines tag-based access control for your Tailscale network
+  //
+  // IMPORTANT: After modifying this file, you must:
+  // 1. Deploy to mercury: nixos-rebuild switch --flake .#mercury
+  // 2. Restart headscale: sudo systemctl restart headscale
+  // 3. Restart tailscaled on affected nodes to pick up the new network map
 
   // Define who can use which tags
   "tagOwners": {
