@@ -87,6 +87,21 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  # Chrome/Chromium policy: auto-install Bitwarden extension
+  # This applies to both Google Chrome and Chromium
+  # Extension ID from Chrome Web Store URL
+  programs.chromium = {
+    enable = true;
+    extraOpts = {
+      # Force install extensions
+      # Format: extension_id;update_url
+      ExtensionInstallForcelist = [
+        "nngceckbapebfimnlniiiahkandclblb;https://clients2.google.com/service/update2/crx" # Bitwarden
+        "hpbjkfadkecgpnpjnfflahhdcfboimek;https://clients2.google.com/service/update2/crx" # Claude
+      ];
+    };
+  };
+
   # Basic system packages for agents
   environment.systemPackages = with pkgs; [
     vim

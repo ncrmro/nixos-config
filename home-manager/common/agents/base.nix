@@ -40,8 +40,9 @@
     claude-code # Claude Code CLI
     gemini-cli # Gemini CLI
 
-    # Browser for web automation
+    # Browsers for web automation
     google-chrome # Chrome browser
+    chromium # Chromium browser
 
     # Bitwarden CLI for secrets
     bitwarden-cli
