@@ -18,6 +18,7 @@ This repository contains my NixOS flake and host configurations.
 - [Fingerprint Enrollment](docs/fingerprint-enrollment.md) - Fingerprint authentication setup
 - [Mounting Old Disks](docs/mounting-old-disks.md) - Instructions for mounting legacy disks
 - [ZFS Tweaks](docs/zfs-tweaks.md) - ZFS performance and configuration tweaks
+- [Keybindings](docs/KEYBINDINGS.md) - Comprehensive keybinding documentation for all tools (Hyprland, Ghostty, Zellij, Helix, etc.)
 
 ### GitHub Actions Setup
 
