@@ -37,6 +37,9 @@
   keystone.desktop.hyprland.enable = true;
 
   wayland.windowManager.hyprland.settings = {
+    # Start on workspace 2 (primary workspace for user activity)
+    exec-once = [ "hyprctl dispatch workspace 2" ];
+
     windowrule = [
       # Tag messaging apps
       "tag +messaging, match:class Signal"
@@ -56,11 +59,15 @@
   programs.fastfetch.enable = true;
 
   programs.git.settings = {
+    user = {
+      name = "Nicholas Romero";
+      email = "ncrmro@gmail.com";
+      signingkey = "~/.ssh/id_ed25519";
+    };
     credential.helper = "store";
     push.autoSetupRemote = true;
     gpg.format = "ssh";
     commit.gpgsign = true;
-    user.signingkey = "~/.ssh/id_ed25519";
     includeIf."gitdir:~/code/unsupervised/" = {
       path = "~/code/unsupervised/.gitconfig";
     };
