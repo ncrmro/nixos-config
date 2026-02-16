@@ -42,6 +42,7 @@
   #   };
   # };
   home.packages = with pkgs; [
+    bitwarden-cli
     bitwarden-desktop
     code-cursor
     zoom-us
@@ -50,5 +51,6 @@
     discord-ptb
     papers
     uhk-agent
+    gimp
   ];
 }
