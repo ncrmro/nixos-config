@@ -25,6 +25,22 @@
         "type": "github"
       }
     },
+    "agenix-secrets": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1771194743,
+        "narHash": "sha256-wzScZtHwkbUobjfYZ+2O3+7hjisYsEtsMWCgeow2Cos=",
+        "ref": "refs/heads/main",
+        "rev": "b43b100e7feee08535e2e9b5ba71433a5cf1c5d1",
+        "revCount": 4,
+        "type": "git",
+        "url": "ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git"
+      }
+    },
     "aquamarine": {
       "inputs": {
         "hyprutils": [
@@ -2088,6 +2104,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "agenix-secrets": "agenix-secrets",
         "disko": "disko",
         "ghostty": "ghostty",
         "home-manager": "home-manager_2",

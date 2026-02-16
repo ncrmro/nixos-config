@@ -33,13 +33,13 @@
 
   # Agenix secrets (deployed after first boot when host key is known)
   age.secrets.headscale-authkey = {
-    file = ../../agenix-secrets/secrets/headscale-authkey-drago.age;
+    file = "${inputs.agenix-secrets}/secrets/headscale-authkey-drago.age";
     owner = "root";
     mode = "0400";
   };
 
   age.secrets.stalwart-mail-drago-password = {
-    file = ../../agenix-secrets/secrets/stalwart-mail-drago-password.age;
+    file = "${inputs.agenix-secrets}/secrets/stalwart-mail-drago-password.age";
     owner = "drago";
     mode = "0400";
   };

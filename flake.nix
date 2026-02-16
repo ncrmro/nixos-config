@@ -50,6 +50,13 @@
       inputs.home-manager.follows = "home-manager";
     };
 
+    # Private secrets repository (requires Tailscale connection to git.ncrmro.com)
+    # This is a private repo - builds will fail without Tailscale access
+    agenix-secrets = {
+      url = "git+ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git";
+      flake = false;
+    };
+
     # Hyprland (latest from official flake)
     hyprland.url = "github:hyprwm/Hyprland";
 

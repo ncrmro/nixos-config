@@ -37,21 +37,21 @@
 
   # Stalwart mail user password for himalaya
   age.secrets.stalwart-mail-ncrmro-password = {
-    file = ../../agenix-secrets/secrets/stalwart-mail-ncrmro-password.age;
+    file = "${inputs.agenix-secrets}/secrets/stalwart-mail-ncrmro-password.age";
     owner = "ncrmro";
     mode = "0400";
   };
 
   # Cliflux config (Miniflux CLI client)
   age.secrets.cliflux-config = {
-    file = ../../agenix-secrets/secrets/cliflux-config.age;
+    file = "${inputs.agenix-secrets}/secrets/cliflux-config.age";
     owner = "ncrmro";
     mode = "0400";
   };
 
   # GitHub agents token
   age.secrets.github-agents-token = {
-    file = ../../agenix-secrets/secrets/github-agents-token.age;
+    file = "${inputs.agenix-secrets}/secrets/github-agents-token.age";
     owner = "ncrmro";
     mode = "0400";
   };

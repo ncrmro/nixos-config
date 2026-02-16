@@ -88,7 +88,7 @@
   # Stalwart admin password (SHA-512 hash, not plaintext).
   # fallback-admin.secret expects a $6$ hash. Generate with: mkpasswd -m sha-512
   age.secrets.stalwart-admin-password = {
-    file = ../../agenix-secrets/secrets/stalwart-admin-password.age;
+    file = "${inputs.agenix-secrets}/secrets/stalwart-admin-password.age";
     owner = "stalwart-mail";
     group = "stalwart-mail";
     mode = "0400";
@@ -143,7 +143,7 @@
   services.smb-backup-shares = {
     enable = true;
     backupsRoot = "ocean/backups";
-    timeMachinePasswordFile = ../../agenix-secrets/secrets/samba-timemachine-password.age;
+    timeMachinePasswordFile = "${inputs.agenix-secrets}/secrets/samba-timemachine-password.age";
     timeMachineQuota = "2T";
     windowsBackupQuota = "1T";
   };

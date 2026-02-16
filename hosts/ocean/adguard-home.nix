@@ -2,12 +2,13 @@
   config,
   pkgs,
   lib,
+  inputs,
   ...
 }:
 {
   # Secret for AdGuard admin password hash
   age.secrets.adguard-password-hash = {
-    file = ../../agenix-secrets/secrets/adguard-password-hash.age;
+    file = "${inputs.agenix-secrets}/secrets/adguard-password-hash.age";
     owner = "root";
     mode = "0400";
   };

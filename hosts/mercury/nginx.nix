@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, inputs, ... }:
 let
   adguardDomain = "adguard.mercury.ncrmro.com";
   tailscaleIP = "100.64.0.38";
@@ -6,7 +6,7 @@ in
 {
   # Cloudflare API token for ACME DNS-01 challenge
   age.secrets.cloudflare-api-token = {
-    file = ../../agenix-secrets/secrets/cloudflare-api-token.age;
+    file = "${inputs.agenix-secrets}/secrets/cloudflare-api-token.age";
     owner = "acme";
     group = "acme";
   };

@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, inputs, ... }:
 let
   k8sIngressHttp = "127.0.0.1:8080";
   # Allow/deny config for Tailscale-only services
@@ -18,7 +18,7 @@ let
 in
 {
   age.secrets.cloudflare-api-token = {
-    file = ../../agenix-secrets/secrets/cloudflare-api-token.age;
+    file = "${inputs.agenix-secrets}/secrets/cloudflare-api-token.age";
     owner = "acme";
     group = "acme";
   };

@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  inputs,
   ...
 }:
 {
@@ -11,7 +12,7 @@
   ];
   # Define the K3s agent token secret
   age.secrets.k3s-agent-token = {
-    file = ../../agenix-secrets/secrets/k3s-agent-token.age;
+    file = "${inputs.agenix-secrets}/secrets/k3s-agent-token.age";
     owner = "root";
     group = "root";
     mode = "0400";

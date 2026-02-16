@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  inputs,
   ...
 }:
 {
@@ -11,7 +12,7 @@
   ];
   # Define the K3s server token secret
   age.secrets.k3s-server-token = {
-    file = ../../agenix-secrets/secrets/k3s-server-token.age;
+    file = "${inputs.agenix-secrets}/secrets/k3s-server-token.age";
     owner = "root";
     group = "root";
     mode = "0400";

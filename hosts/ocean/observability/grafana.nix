@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 let
@@ -72,7 +73,7 @@ in
 
     # Grafana API token for MCP server
     age.secrets.grafana-api-token = {
-      file = ../../../agenix-secrets/secrets/grafana-api-token.age;
+      file = "${inputs.agenix-secrets}/secrets/grafana-api-token.age";
       owner = "root";
       mode = "0400";
     };

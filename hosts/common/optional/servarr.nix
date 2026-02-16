@@ -144,7 +144,7 @@ in
 
   # SABnzbd server credentials (usenet providers)
   age.secrets.sabnzbd-servers = {
-    file = ../../../agenix-secrets/secrets/sabnzbd-servers.age;
+    file = "${inputs.agenix-secrets}/secrets/sabnzbd-servers.age";
     owner = "sabnzbd";
     group = "media";
     mode = "0440";

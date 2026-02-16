@@ -33,13 +33,13 @@
 
   # Agenix secrets (deployed after first boot when host key is known)
   age.secrets.headscale-authkey = {
-    file = ../../agenix-secrets/secrets/headscale-authkey-luce.age;
+    file = "${inputs.agenix-secrets}/secrets/headscale-authkey-luce.age";
     owner = "root";
     mode = "0400";
   };
 
   age.secrets.stalwart-mail-luce-password = {
-    file = ../../agenix-secrets/secrets/stalwart-mail-luce-password.age;
+    file = "${inputs.agenix-secrets}/secrets/stalwart-mail-luce-password.age";
     owner = "luce";
     mode = "0400";
   };

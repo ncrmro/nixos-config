@@ -46,26 +46,38 @@ When developing features intended for upstream Keystone:
 3. Commit and push changes from the submodule directory.
 4. Update the flake input lock in the main repository.
 
-### Agenix Secrets Submodule
+### Agenix Secrets Flake Input
 
-Located at `agenix-secrets/`, this is a Git submodule tracking a private repository. Secrets are stored separately to allow publishing nixos-config publicly while keeping encrypted secrets private.
+The `agenix-secrets` input is a private Git repository containing encrypted secrets. It's fetched as a flake input rather than a submodule to ensure secrets are properly included in nix store paths.
 
 **Repository:** `ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git`
+
+**Important:** This repository is only accessible via Tailscale (git.ncrmro.com resolves to a Tailscale IP). Builds will fail without Tailscale connection.
 
 **Contents:**
 - `secrets.nix` - Defines which SSH keys can decrypt which secrets
 - `secrets/` - Directory containing all `.age` encrypted secret files
 
-**Working with the submodule:**
+**Updating secrets:**
 ```bash
-# Clone with submodules
-git clone --recurse-submodules <repo-url>
+# Update the flake lock to latest commit
+nix flake lock --update-input agenix-secrets
 
-# Initialize after cloning
-git submodule update --init --recursive
+# Or update all inputs
+nix flake update
+```
 
-# Update to latest commit
-git submodule update --remote agenix-secrets
+**Local development with submodule (optional):**
+The `agenix-secrets/` directory still exists as a submodule for local editing convenience:
+```bash
+cd agenix-secrets
+# Edit secrets.nix, create/rekey secrets
+agenix -e secrets/new-secret.age
+git add -A && git commit -m "Add new secret" && git push
+
+# Then update the flake input
+cd ..
+nix flake lock --update-input agenix-secrets
 ```
 
 ## Common Commands

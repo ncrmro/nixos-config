@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, inputs, ... }:
 let
   tailscaleOnly = ''
     allow 100.64.0.0/10;
@@ -8,7 +8,7 @@ let
 in
 {
   age.secrets.miniflux-admin = {
-    file = ../../agenix-secrets/secrets/miniflux-admin.age;
+    file = "${inputs.agenix-secrets}/secrets/miniflux-admin.age";
     owner = "root";
     mode = "0400";
   };
