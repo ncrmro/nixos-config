@@ -94,6 +94,13 @@
     mode = "0400";
   };
 
+  # Stalwart mail user password for himalaya
+  age.secrets.stalwart-mail-ncrmro-password = {
+    file = "${inputs.agenix-secrets}/secrets/stalwart-mail-ncrmro-password.age";
+    owner = "ncrmro";
+    mode = "0400";
+  };
+
   # Configure Stalwart TLS and admin auth
   services.stalwart-mail = {
     settings = {
