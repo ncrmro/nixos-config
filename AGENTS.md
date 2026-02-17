@@ -188,16 +188,55 @@ Agent VMs are isolated NixOS virtual machines for autonomous AI agents. Each age
 | drago | Primary coding agent | 2230 | 5900 | drago |
 | luce | Secondary agent | 2224 | 5901 | luce |
 
+### Agent VM Configuration
+
+Key configuration files:
+- `hosts/common/optional/agent-base.nix` - System-level config (GNOME, SSH, DNS, browser policies)
+- `home-manager/common/agents/base.nix` - User packages (Claude Code, Gemini CLI, browsers)
+- `home-manager/drago/agent.nix` - Agent-specific overrides
+
+### DNS Resolution (Tailscale MagicDNS)
+
+Agent VMs require systemd-resolved for Tailscale MagicDNS to work. Without this, internal DNS names (grafana.ncrmro.com, git.ncrmro.com) won't resolve.
+
+Configuration in `hosts/common/optional/agent-base.nix`:
+```nix
+networking.networkmanager.dns = "systemd-resolved";
+services.resolved = {
+  enable = true;
+  settings.Resolve = {
+    DNSSEC = "allow-downgrade";
+    FallbackDNS = [ "1.1.1.1" "8.8.8.8" ];
+  };
+};
+```
+
+### Browser Extension Policies
+
+Chrome/Chromium extensions are auto-installed via system policy in `agent-base.nix`:
+```nix
+programs.chromium = {
+  enable = true;
+  extraOpts = {
+    ExtensionInstallForcelist = [
+      "nngceckbapebfimnlniiiahkandclblb;https://clients2.google.com/service/update2/crx" # Bitwarden
+      "hpbjkfadkecgpnpjnfflahhdcfboimek;https://clients2.google.com/service/update2/crx" # Claude
+    ];
+  };
+};
+```
+
 ### Remote Rebuild and Deploy
 
 Agents auto-connect to headscale on boot. Update agents by building locally and deploying remotely:
 
 ```bash
-# Build on host, deploy to VM (from nixos-config directory)
-nixos-rebuild switch --flake .#agent-drago --target-host drago@localhost --build-host localhost
-nixos-rebuild switch --flake .#agent-luce --target-host luce@localhost --build-host localhost
+# Build and deploy (recommended method)
+nix build .#nixosConfigurations.agent-drago.config.system.build.toplevel --print-out-paths
+nix copy --to ssh://drago@localhost:2230 /nix/store/<hash>-nixos-system-agent-drago-...
+ssh -p 2230 drago@localhost "sudo /nix/store/<hash>-nixos-system-agent-drago-.../bin/switch-to-configuration switch"
 
-# With explicit SSH port
+# Alternative: nixos-rebuild with SSH port
 NIX_SSHOPTS="-p 2230" nixos-rebuild switch --flake .#agent-drago --target-host drago@localhost --build-host localhost
 NIX_SSHOPTS="-p 2224" nixos-rebuild switch --flake .#agent-luce --target-host luce@localhost --build-host localhost
 ```
@@ -216,6 +255,26 @@ virsh --connect qemu:///session start agent-drago
 
 See [docs/agentvms.md](docs/agentvms.md) for full documentation.
 
+## Headscale ACL Management
+
+ACL configuration is in `modules/nixos/headscale/acl.hujson`. See the file header for deployment instructions.
+
+**IMPORTANT**: After modifying ACLs, you must:
+1. Deploy to mercury: `nixos-rebuild switch --flake .#mercury`
+2. Restart headscale: `sudo systemctl restart headscale`
+3. Restart tailscaled on affected nodes to pick up the new network map
+
+**Applying tags to nodes:**
+```bash
+headscale nodes list -t  # Show current tags
+headscale nodes tag -i <node-id> -t tag:name1,tag:name2
+```
+
+**Agent-relevant tags:**
+- `tag:agent` - Applied to agent VMs (allows access to ocean services)
+- `tag:ocean-ingress` - Ocean node ingress (ports 80, 443, 2222)
+- `tag:ocean-email` - Ocean node email (ports 993, 465, 25)
+
 ## Key Technologies
 
 - **NixOS 25.05**: Primary stable channel
@@ -232,3 +291,30 @@ See [docs/agentvms.md](docs/agentvms.md) for full documentation.
 - Host-specific secrets are in `/agenix-secrets/secrets/` and require appropriate age keys
 - ZFS systems require `networking.hostId` to be set uniquely per host
 - Secure Boot systems use TPM for automatic disk unlock
+
+### Agenix Secrets Update Workflow
+
+When updating secrets (e.g., mail passwords):
+
+1. Edit secret in submodule:
+   ```bash
+   cd agenix-secrets
+   agenix -e secrets/secret-name.age
+   git add -A && git commit -m "Update secret" && git push
+   ```
+
+2. Update flake input (REQUIRED - secrets are a flake input, not just submodule):
+   ```bash
+   cd ..  # back to nixos-config
+   nix flake update agenix-secrets
+   ```
+
+3. Rebuild and deploy:
+   ```bash
+   nix build .#nixosConfigurations.<host>.config.system.build.toplevel --print-out-paths
+   # Then copy and activate on target host
+   ```
+
+The submodule and flake input are separate concerns:
+- Submodule: for local editing convenience
+- Flake input: what Nix actually uses during builds
