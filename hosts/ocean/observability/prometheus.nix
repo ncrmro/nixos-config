@@ -58,6 +58,14 @@ in
                 plants = "dill,arugula";
               };
             }
+            {
+              targets = [ "192.168.1.145:80" ];
+              labels = {
+                instance = "plant-monitor";
+                environment = "home";
+                device_type = "plant-monitor";
+              };
+            }
           ];
         }
       ];
