@@ -5,7 +5,10 @@
   ...
 }:
 {
-  # Himalaya email client configuration for Stalwart on ocean
+  # Himalaya email client for Stalwart on ocean
+  home.packages = [ pkgs.himalaya ];
+
+  # Himalaya configuration
   xdg.configFile."himalaya/config.toml".text = ''
     [accounts.ncrmro]
     email = "nicholas.romero@ncrmro.com"
