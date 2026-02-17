@@ -100,7 +100,8 @@
       "src": ["tag:agent"],
       "dst": [
         "tag:ocean-ingress:80",      // HTTP
-        "tag:ocean-ingress:443"      // HTTPS
+        "tag:ocean-ingress:443",     // HTTPS
+        "tag:ocean-ingress:2222"     // Git SSH
       ]
     },
 
