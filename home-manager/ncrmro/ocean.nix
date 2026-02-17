@@ -6,6 +6,7 @@
 {
   imports = [
     ../common/global
+    ../common/features/cli
     inputs.keystone.homeModules.terminal
   ];
 
