@@ -1,7 +1,10 @@
 { pkgs, ... }:
 
 {
-  imports = [ ../common/agents/base.nix ];
+  imports = [
+    ../common/agents/base.nix
+    ../common/features/cli/himalaya.nix
+  ];
 
   home.username = "drago";
   home.homeDirectory = "/home/drago";

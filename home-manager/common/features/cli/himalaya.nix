@@ -4,32 +4,73 @@
   pkgs,
   ...
 }:
-{
-  # Himalaya email client for Stalwart on ocean
-  home.packages = [ pkgs.himalaya ];
+with lib; let
+  cfg = config.programs.himalaya-stalwart;
+in {
+  options.programs.himalaya-stalwart = {
+    enable = mkEnableOption "Himalaya email client for Stalwart";
 
-  # Himalaya configuration
-  xdg.configFile."himalaya/config.toml".text = ''
-    [accounts.ncrmro]
-    email = "nicholas.romero@ncrmro.com"
-    display-name = "Nicholas Romero"
-    default = true
+    accountName = mkOption {
+      type = types.str;
+      description = "Account name in Himalaya config";
+    };
 
-    backend.type = "imap"
-    backend.host = "mail.ncrmro.com"
-    backend.port = 993
-    backend.encryption.type = "tls"
-    # Login is the Stalwart account name, not the email address
-    backend.login = "ncrmro"
-    backend.auth.type = "password"
-    backend.auth.command = "cat /run/agenix/stalwart-mail-ncrmro-password"
+    email = mkOption {
+      type = types.str;
+      description = "Email address";
+    };
 
-    message.send.backend.type = "smtp"
-    message.send.backend.host = "mail.ncrmro.com"
-    message.send.backend.port = 465
-    message.send.backend.encryption.type = "tls"
-    message.send.backend.login = "ncrmro"
-    message.send.backend.auth.type = "password"
-    message.send.backend.auth.command = "cat /run/agenix/stalwart-mail-ncrmro-password"
-  '';
+    displayName = mkOption {
+      type = types.str;
+      description = "Display name for sent emails";
+    };
+
+    login = mkOption {
+      type = types.str;
+      description = "Stalwart account login name";
+    };
+
+    passwordCommand = mkOption {
+      type = types.str;
+      description = "Command to retrieve the password";
+    };
+
+    host = mkOption {
+      type = types.str;
+      default = "mail.ncrmro.com";
+      description = "Mail server hostname";
+    };
+  };
+
+  config = mkIf cfg.enable {
+    home.packages = [pkgs.himalaya];
+
+    xdg.configFile."himalaya/config.toml".text = ''
+      [accounts.${cfg.accountName}]
+      email = "${cfg.email}"
+      display-name = "${cfg.displayName}"
+      default = true
+
+      backend.type = "imap"
+      backend.host = "${cfg.host}"
+      backend.port = 993
+      backend.encryption.type = "tls"
+      backend.login = "${cfg.login}"
+      backend.auth.type = "password"
+      backend.auth.command = "${cfg.passwordCommand}"
+
+      message.send.backend.type = "smtp"
+      message.send.backend.host = "${cfg.host}"
+      message.send.backend.port = 465
+      message.send.backend.encryption.type = "tls"
+      message.send.backend.login = "${cfg.login}"
+      message.send.backend.auth.type = "password"
+      message.send.backend.auth.command = "${cfg.passwordCommand}"
+
+      # Stalwart folder names (differ from Himalaya defaults)
+      folder.sent = "Sent Items"
+      folder.drafts = "Drafts"
+      folder.trash = "Deleted Items"
+    '';
+  };
 }

@@ -5,8 +5,7 @@
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   imports = [
     inputs.keystone.homeModules.desktop
     ../common/global
@@ -71,5 +70,14 @@
     includeIf."gitdir:~/code/unsupervised/" = {
       path = "~/code/unsupervised/.gitconfig";
     };
+  };
+
+  programs.himalaya-stalwart = {
+    enable = true;
+    accountName = "ncrmro";
+    email = "nicholas.romero@ncrmro.com";
+    displayName = "Nicholas Romero";
+    login = "ncrmro";
+    passwordCommand = "cat /run/agenix/stalwart-mail-ncrmro-password";
   };
 }
