@@ -16,6 +16,29 @@ in
       default = "";
       description = "Extra configuration for the Nginx virtual host";
     };
+    smtp = {
+      enable = lib.mkEnableOption "SMTP for Grafana alerting";
+      host = lib.mkOption {
+        type = lib.types.str;
+        example = "localhost:587";
+        description = "SMTP server host:port";
+      };
+      from = lib.mkOption {
+        type = lib.types.str;
+        example = "alerts@ncrmro.com";
+        description = "From address for alert emails";
+      };
+      user = lib.mkOption {
+        type = lib.types.str;
+        example = "alerts@ncrmro.com";
+        description = "SMTP auth username";
+      };
+      passwordFile = lib.mkOption {
+        type = lib.types.path;
+        example = "/run/agenix/grafana-smtp-password";
+        description = "Path to file containing SMTP password";
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -27,6 +50,13 @@ in
           http_port = 3002;
           http_addr = "127.0.0.1";
           root_url = "https://grafana.ncrmro.com/";
+        };
+        smtp = lib.mkIf cfg.smtp.enable {
+          enabled = true;
+          host = cfg.smtp.host;
+          from_address = cfg.smtp.from;
+          user = cfg.smtp.user;
+          password = "$__file{${cfg.smtp.passwordFile}}";
         };
       };
 

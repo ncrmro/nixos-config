@@ -59,6 +59,9 @@ in
   # Grafana API token for MCP server
   "secrets/grafana-api-token.age".publicKeys = adminKeys ++ [ systems.ocean ];
 
+  # Grafana SMTP password (for alerting via Stalwart)
+  "secrets/grafana-smtp-password.age".publicKeys = adminKeys ++ [ systems.ocean ];
+
   # Cliflux config (Miniflux CLI client config with API key, for desktops)
   "secrets/cliflux-config.age".publicKeys = adminKeys ++ desktops;
 

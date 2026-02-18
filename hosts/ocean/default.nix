@@ -63,7 +63,22 @@
         allow fd7a:115c:a1e0::/48;
         deny all;
       '';
+      smtp = {
+        enable = true;
+        host = "localhost:587";
+        from = "alerts@ncrmro.com";
+        user = "alerts@ncrmro.com";
+        passwordFile = config.age.secrets.grafana-smtp-password.path;
+      };
     };
+  };
+
+  # Grafana SMTP password for alerting
+  age.secrets.grafana-smtp-password = {
+    file = ../../secrets/grafana-smtp-password.age;
+    owner = "grafana";
+    group = "grafana";
+    mode = "0400";
   };
 
   services.alloy-client = {
