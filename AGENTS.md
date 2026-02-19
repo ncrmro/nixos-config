@@ -350,6 +350,23 @@ If Himalaya/IMAP clients get "TLS handshake EOF" errors:
 
 Himalaya is configured via a shared module with per-user overrides.
 
+### Sending Raw Emails
+
+When using `himalaya message send` with raw email format, always include the `Date:` header:
+
+```bash
+echo "From: user@ncrmro.com
+To: recipient@ncrmro.com
+Subject: Test
+Date: $(date -R)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Body here" | himalaya message send
+```
+
+**Important**: Without `Date: $(date -R)`, emails show as 1970-01-01 (Unix epoch).
+
 ### Module Location
 
 - Module definition: `home-manager/common/features/cli/himalaya.nix`
