@@ -4,9 +4,11 @@
   pkgs,
   ...
 }:
-with lib; let
+with lib;
+let
   cfg = config.programs.himalaya-stalwart;
-in {
+in
+{
   options.programs.himalaya-stalwart = {
     enable = mkEnableOption "Himalaya email client for Stalwart";
 
@@ -43,7 +45,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    home.packages = [pkgs.himalaya];
+    home.packages = [ pkgs.himalaya ];
 
     xdg.configFile."himalaya/config.toml".text = ''
       [accounts.${cfg.accountName}]
@@ -68,9 +70,9 @@ in {
       message.send.backend.auth.command = "${cfg.passwordCommand}"
 
       # Stalwart folder names (differ from Himalaya defaults)
-      folder.sent = "Sent Items"
-      folder.drafts = "Drafts"
-      folder.trash = "Deleted Items"
+      folder.aliases.sent = "Sent Items"
+      folder.aliases.drafts = "Drafts"
+      folder.aliases.trash = "Deleted Items"
     '';
   };
 }

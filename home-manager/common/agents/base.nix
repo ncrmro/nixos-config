@@ -1,8 +1,6 @@
 # Shared home-manager configuration for Agent VMs
-# This module provides common user configuration for all agent VMs
-# including terminal packages, SSH key generation, Git config, and Bitwarden.
-#
-# Import this in each agent's agent.nix and override username/email.
+# This module provides agent-specific configuration that complements keystone.terminal.
+# Each agent's agent.nix should import keystone.homeModules.terminal and this module.
 {
   config,
   pkgs,
@@ -17,39 +15,29 @@
   # Ensure systemd user services start properly
   systemd.user.startServices = "sd-switch";
 
-  # Terminal Packages (Keystone-style)
+  # Agent-specific packages (not provided by keystone.terminal)
   home.packages = with pkgs; [
-    # Core utilities
-    eza # Modern ls
+    # Core utilities not in keystone
     bat # Modern cat
-    ripgrep # Fast grep
     fd # Fast find
     fzf # Fuzzy finder
     jq # JSON processor
-    htop # Process viewer
     btop # Modern resource monitor
-
-    # Development tools
-    git
-    gh # GitHub CLI
     curl
     wget
-    vim
 
-    # AI coding assistants
-    claude-code # Claude Code CLI
-    gemini-cli # Gemini CLI
+    # GitHub CLI for agent workflows
+    gh
 
     # Browsers for web automation
-    google-chrome # Chrome browser
-    chromium # Chromium browser
+    google-chrome
+    chromium
 
     # Bitwarden CLI for secrets
     bitwarden-cli
 
-    # Terminal tools
+    # tmux as backup multiplexer
     tmux
-    zellij
   ];
 
   # SSH Key Auto-Generation Service
@@ -71,36 +59,11 @@
   # Ensure .ssh directory exists
   home.file.".ssh/.keep".text = "";
 
-  # Git Configuration with SSH Signing
-  programs.git = {
-    enable = true;
-    # These should be overridden in agent-specific config
-    userName = lib.mkDefault "Agent";
-    userEmail = lib.mkDefault "agent@example.com";
-
-    extraConfig = {
-      init.defaultBranch = "main";
-      push.autoSetupRemote = true;
-      pull.rebase = true;
-
-      # SSH signing (use the generated key)
-      commit.gpgsign = true;
-      gpg.format = "ssh";
-      user.signingkey = "~/.ssh/id_ed25519.pub";
-    };
-  };
-
-  # Bash Configuration
-  programs.bash = {
-    enable = true;
-    shellAliases = {
-      ls = "eza";
-      ll = "eza -la";
-      la = "eza -a";
-      cat = "bat";
-      grep = "rg";
-      find = "fd";
-    };
+  # Enable SSH commit signing (keystone.terminal handles the rest of git config)
+  programs.git.settings = {
+    commit.gpgsign = true;
+    gpg.format = "ssh";
+    user.signingkey = "~/.ssh/id_ed25519.pub";
   };
 
   # GNOME Keyring Integration
@@ -111,12 +74,6 @@
       "secrets"
       "ssh"
     ];
-  };
-
-  # Environment variables
-  home.sessionVariables = {
-    EDITOR = "vim";
-    VISUAL = "vim";
   };
 
   # Ensure agents directory exists for work

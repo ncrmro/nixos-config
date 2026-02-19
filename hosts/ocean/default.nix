@@ -75,7 +75,7 @@
 
   # Grafana SMTP password for alerting
   age.secrets.grafana-smtp-password = {
-    file = ../../secrets/grafana-smtp-password.age;
+    file = "${inputs.agenix-secrets}/secrets/grafana-smtp-password.age";
     owner = "grafana";
     group = "grafana";
     mode = "0400";
@@ -127,6 +127,12 @@
       authentication.fallback-admin = {
         user = "admin";
         secret = "%{file:/run/agenix/stalwart-admin-password}%";
+      };
+      # Allow Tailscale IPs (agent VMs, phones, etc) - prevents fail2ban blocking
+      # Using table syntax instead of set notation (NixOS can't generate { "ip" } sets)
+      server."allowed-ip" = {
+        "100.64.0.0/10" = "";
+        "fd7a:115c:a1e0::/48" = "";
       };
     };
   };

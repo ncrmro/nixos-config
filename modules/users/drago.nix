@@ -1,5 +1,7 @@
 { config, pkgs, ... }:
 {
+  programs.zsh.enable = true;
+
   users.users.drago = {
     isNormalUser = true;
     description = "Autonomous Agent";
@@ -8,7 +10,7 @@
       "networkmanager"
     ];
     initialPassword = "password"; # For testing, change later
-    shell = pkgs.bash;
+    shell = pkgs.zsh;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEE6cFSyJoiaURB7+961zETflBNPJUZszH9xyowzbpNu ncrmro@ocean"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyrDBVcGK+pUZOTUA7MLoD5vYK/kaPF6TNNyoDmwNl2 ncrmro@ncrmro-laptop-fw7k"

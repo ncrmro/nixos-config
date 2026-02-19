@@ -292,6 +292,118 @@ headscale nodes tag -i <node-id> -t tag:name1,tag:name2
 - ZFS systems require `networking.hostId` to be set uniquely per host
 - Secure Boot systems use TPM for automatic disk unlock
 
+## Stalwart Mail Server
+
+### Service Name
+
+The NixOS service is `stalwart.service` (not `stalwart-mail.service`):
+```bash
+systemctl status stalwart
+journalctl -u stalwart --since "10 min ago"
+```
+
+### Stalwart TOML Custom Syntax
+
+Stalwart uses a custom TOML parser with glob/set notation. Key differences from standard TOML:
+
+| Setting | Stalwart Syntax | Standard TOML (WRONG) |
+|---------|----------------|----------------------|
+| IP allowlist | `allowed-ip = { "10.0.0.0/8" }` | `allowed-ip = ["10.0.0.0/8"]` |
+| Multiple values | `{ "a", "b", "c" }` | `["a", "b", "c"]` |
+
+### Configuring `server.allowed-ip` in NixOS
+
+The `server.allowed-ip` setting whitelists IPs from Stalwart's automatic fail2ban-style blocking. Stalwart's default syntax uses set notation `{ "ip" }` which NixOS can't generate, but there's an alternative **table syntax**:
+
+```nix
+services.stalwart-mail.settings = {
+  # Table syntax - NixOS generates [server.allowed-ip] section
+  server."allowed-ip" = {
+    "100.64.0.0/10" = "";      # Tailscale IPv4 CGNAT range
+    "fd7a:115c:a1e0::/48" = ""; # Tailscale IPv6 range
+  };
+};
+```
+
+This generates valid TOML that Stalwart accepts:
+```toml
+[server.allowed-ip]
+"100.64.0.0/10" = ""
+"fd7a:115c:a1e0::/48" = ""
+```
+
+**Important**: This prevents future blocking only. To clear existing blocked IPs, use the Stalwart admin UI (Settings → Allowed IP addresses) or API:
+```bash
+curl -X DELETE -u admin:$(sudo cat /run/agenix/stalwart-admin-password) \
+  "http://localhost:8082/api/blocked?ip=100.64.0.7"
+```
+
+### Debugging IP Blocking
+
+If Himalaya/IMAP clients get "TLS handshake EOF" errors:
+1. Check Stalwart logs: `journalctl -u stalwart --since "10 min ago" | grep -i block`
+2. Look for `security.ip-blocked` messages
+3. Verify `server.allowed-ip` is set correctly (curly braces, singular key name)
+4. Clear any existing blocks via UI or API
+
+## Himalaya Email Client
+
+Himalaya is configured via a shared module with per-user overrides.
+
+### Module Location
+
+- Module definition: `home-manager/common/features/cli/himalaya.nix`
+- Defines `programs.himalaya-stalwart` options: `accountName`, `email`, `displayName`, `login`, `passwordCommand`, `host`
+
+### Per-User Configuration
+
+- Drago: `home-manager/drago/himalaya.nix` - enables module with drago account settings
+- ncrmro: `home-manager/ncrmro/base.nix` - enables module with ncrmro account settings
+
+### Stalwart Folder Names
+
+Stalwart uses different folder names than Himalaya defaults. The module configures these automatically:
+
+| Himalaya Default | Stalwart Name   |
+|------------------|-----------------|
+| Sent             | Sent Items      |
+| Drafts           | Drafts          |
+| Trash            | Deleted Items   |
+
+### Adding a New Himalaya User
+
+1. Create agenix secret in `agenix-secrets/`:
+   ```bash
+   cd agenix-secrets
+   # Add entry to secrets.nix first, then:
+   agenix -e secrets/stalwart-mail-USERNAME-password.age
+   git add -A && git commit -m "Add USERNAME mail password" && git push
+   cd .. && nix flake update agenix-secrets
+   ```
+
+2. Import the himalaya module and enable it:
+   ```nix
+   imports = [ ../common/features/cli/himalaya.nix ];
+
+   programs.himalaya-stalwart = {
+     enable = true;
+     accountName = "username";
+     email = "user@ncrmro.com";
+     displayName = "Display Name";
+     login = "username";
+     passwordCommand = "cat /run/agenix/stalwart-mail-username-password";
+   };
+   ```
+
+3. Add agenix secret decryption in host config (`hosts/HOSTNAME/default.nix`):
+   ```nix
+   age.secrets.stalwart-mail-username-password = {
+     file = ../../agenix-secrets/secrets/stalwart-mail-username-password.age;
+     owner = "username";
+     mode = "0400";
+   };
+   ```
+
 ### Agenix Secrets Update Workflow
 
 When updating secrets (e.g., mail passwords):

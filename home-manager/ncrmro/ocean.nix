@@ -28,6 +28,15 @@
 
   programs.home-manager.enable = true;
 
+  programs.himalaya-stalwart = {
+    enable = true;
+    accountName = "ncrmro";
+    email = "nicholas.romero@ncrmro.com";
+    displayName = "Nicholas Romero";
+    login = "ncrmro";
+    passwordCommand = "cat /run/agenix/stalwart-mail-ncrmro-password";
+  };
+
   programs.zsh = {
     initExtra = ''
       # NixOS rebuild function with --boot support for critical changes
