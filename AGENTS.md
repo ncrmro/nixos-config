@@ -46,6 +46,19 @@ When developing features intended for upstream Keystone:
 3. Commit and push changes from the submodule directory.
 4. Update the flake input lock in the main repository.
 
+**Adding External Nix Package Sources:**
+When adding external Nix package sources (e.g., `numtide/llm-agents.nix` for AI coding tools), add them as **flake inputs**, NOT as git submodules. Choose the appropriate flake based on scope:
+- **nixos-config flake.nix**: For packages/modules specific to this configuration
+- **keystone flake.nix**: For packages/modules that should be part of the upstream Keystone platform
+
+Example flake input:
+```nix
+llm-agents = {
+  url = "github:numtide/llm-agents.nix";
+  inputs.nixpkgs.follows = "nixpkgs";
+};
+```
+
 ### Agenix Secrets Flake Input
 
 The `agenix-secrets` input is a private Git repository containing encrypted secrets. It's fetched as a flake input rather than a submodule to ensure secrets are properly included in nix store paths.
@@ -228,17 +241,17 @@ programs.chromium = {
 
 ### Remote Rebuild and Deploy
 
-Agents auto-connect to headscale on boot. Update agents by building locally and deploying remotely:
+Agents auto-connect to headscale on boot. Update agents by building locally and deploying remotely via Tailscale:
 
 ```bash
-# Build and deploy (recommended method)
+# Build and deploy via Tailscale (recommended)
 nix build .#nixosConfigurations.agent-drago.config.system.build.toplevel --print-out-paths
-nix copy --to ssh://drago@localhost:2230 /nix/store/<hash>-nixos-system-agent-drago-...
-ssh -p 2230 drago@localhost "sudo /nix/store/<hash>-nixos-system-agent-drago-.../bin/switch-to-configuration switch"
+nix copy --to ssh://drago@agent-drago /nix/store/<hash>-nixos-system-agent-drago-...
+ssh drago@agent-drago "sudo /nix/store/<hash>-nixos-system-agent-drago-.../bin/switch-to-configuration switch"
 
-# Alternative: nixos-rebuild with SSH port
-NIX_SSHOPTS="-p 2230" nixos-rebuild switch --flake .#agent-drago --target-host drago@localhost --build-host localhost
-NIX_SSHOPTS="-p 2224" nixos-rebuild switch --flake .#agent-luce --target-host luce@localhost --build-host localhost
+# Alternative: nixos-rebuild via Tailscale
+nixos-rebuild switch --flake .#agent-drago --target-host drago@agent-drago --build-host localhost
+nixos-rebuild switch --flake .#agent-luce --target-host luce@agent-luce --build-host localhost
 ```
 
 ### Building Agent Images
