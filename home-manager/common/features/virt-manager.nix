@@ -11,10 +11,10 @@
   # Add connection bookmarks for virt-manager
   dconf.settings = {
     "org/virt-manager/virt-manager/connections" = {
-      autoconnect = [ "qemu+ssh://ncrmro@ocean/system" ];
+      autoconnect = [ "qemu+ssh://ncrmro@ocean/session" ];
       uris = [
         "qemu:///system"
-        "qemu+ssh://ncrmro@ocean/system"
+        "qemu+ssh://ncrmro@ocean/session"
       ];
     };
   };
