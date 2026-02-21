@@ -28,12 +28,13 @@
 
   programs.home-manager.enable = true;
 
-  programs.himalaya-stalwart = {
+  keystone.terminal.mail = {
     enable = true;
     accountName = "ncrmro";
     email = "nicholas.romero@ncrmro.com";
     displayName = "Nicholas Romero";
     login = "ncrmro";
+    host = "mail.ncrmro.com";
     passwordCommand = "cat /run/agenix/stalwart-mail-ncrmro-password";
   };
 
