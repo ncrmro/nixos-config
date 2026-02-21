@@ -96,7 +96,14 @@
   keystone.os.enable = true;
   keystone.os.storage.enable = false;
   keystone.os.ssh.enable = false;
-  keystone.os.mail.enable = true;
+  keystone.os.mail = {
+    enable = true;
+    # Allow Tailscale IPs (agent VMs, phones, etc) - prevents fail2ban blocking
+    allowedIps = [
+      "100.64.0.0/10" # Tailscale IPv4 CGNAT
+      "fd7a:115c:a1e0::/48" # Tailscale IPv6
+    ];
+  };
 
   # Give stalwart-mail access to ACME certs
   users.users.stalwart-mail.extraGroups = [ "nginx" ];
@@ -128,12 +135,6 @@
       authentication.fallback-admin = {
         user = "admin";
         secret = "%{file:/run/agenix/stalwart-admin-password}%";
-      };
-      # Allow Tailscale IPs (agent VMs, phones, etc) - prevents fail2ban blocking
-      # Using table syntax instead of set notation (NixOS can't generate { "ip" } sets)
-      server."allowed-ip" = {
-        "100.64.0.0/10" = "";
-        "fd7a:115c:a1e0::/48" = "";
       };
     };
   };

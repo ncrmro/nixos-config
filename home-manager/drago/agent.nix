@@ -7,7 +7,7 @@
 {
   imports = [
     ../common/agents/base.nix
-    ../common/features/cli/himalaya.nix
+    ./himalaya.nix
     inputs.keystone.homeModules.terminal
   ];
 
@@ -20,6 +20,11 @@
     git = {
       userName = "Drago";
       userEmail = "drago@ncrmro.com";
+    };
+    secrets = {
+      enable = true;
+      email = "drago@ncrmro.com";
+      baseUrl = "https://vaultwarden.ncrmro.com";
     };
   };
 
