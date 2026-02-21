@@ -194,6 +194,20 @@ in
     };
   };
 
+  # Immich - Tailscale only
+  services.nginx.virtualHosts."photos.ncrmro.com" = {
+    forceSSL = true;
+    useACMEHost = "wildcard-ncrmro-com";
+    extraConfig = ''
+      ${tailscaleOnly}
+      client_max_body_size 50G;
+    '';
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:2283";
+      proxyWebsockets = true;
+    };
+  };
+
   services.nginx.virtualHosts."git.ncrmro.com" = {
     forceSSL = true;
     useACMEHost = "wildcard-ncrmro-com";

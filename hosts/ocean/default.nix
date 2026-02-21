@@ -30,6 +30,7 @@
     ./observability
     ../common/optional/alloy-client.nix
     ../common/optional/virt-manager.nix
+    ./immich.nix
     ./vms.nix
     ../../modules/users/ncrmro.nix
     ../../modules/users/root.nix

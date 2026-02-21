@@ -255,6 +255,30 @@ virsh --connect qemu:///session start agent-drago
 
 See [docs/agentvms.md](docs/agentvms.md) for full documentation.
 
+## Headscale DNS
+
+Internal DNS for Tailscale-only services is managed via Headscale extra records in `modules/nixos/headscale/default.nix`. These records resolve `*.ncrmro.com` subdomains to Tailscale IPs for clients on the tailnet.
+
+**Configuration location:** `modules/nixos/headscale/default.nix` → `settings.dns.extra_records`
+
+**Adding a new DNS record:**
+
+1. Add an entry to the `extra_records` list:
+   ```nix
+   {
+     name = "myservice.ncrmro.com";
+     type = "A";
+     value = "100.64.0.6"; # ocean's Tailscale IP
+   }
+   ```
+2. Add an nginx virtual host in the target host's nginx config (e.g., `hosts/ocean/nginx.nix`)
+3. Rebuild mercury to apply DNS: `./bin/updateMercury`
+4. Rebuild the target host to apply nginx: `./bin/updateOcean`
+
+**Key Tailscale IPs:**
+- `100.64.0.6` — ocean (homelab server, most services)
+- `100.64.0.38` — mercury (headscale/DERP server, AdGuard)
+
 ## Headscale ACL Management
 
 ACL configuration is in `modules/nixos/headscale/acl.hujson`. See the file header for deployment instructions.
