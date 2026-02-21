@@ -750,6 +750,16 @@ programs.zellij = {
 
         # Close tab (works on all keyboards)
         "bind \"Ctrl w\"" = { CloseTab = {}; };
+
+        # Move tab left: Ctrl+Shift+PgUp
+        # - UHK: Mod+Shift+W → Ctrl+Shift+PgUp
+        # - Framework: Fn+Ctrl+Shift+Arrow Up → Ctrl+Shift+PgUp
+        "bind \"Ctrl Shift PageUp\"" = { MoveTab = "Left"; };
+
+        # Move tab right: Ctrl+Shift+PgDn
+        # - UHK: Mod+Shift+R → Ctrl+Shift+PgDn
+        # - Framework: Fn+Ctrl+Shift+Arrow Down → Ctrl+Shift+PgDn
+        "bind \"Ctrl Shift PageDown\"" = { MoveTab = "Right"; };
       };
     };
   };
@@ -899,6 +909,8 @@ The UHK uses a layer system where each layer binds actions to keys. Layers are a
 - `Mod + E` → `Ctrl + T` (New tab)
 - `Mod + R` → `Ctrl + PgDn` (Next tab)
 - `Mod + C` → `Ctrl + W` (Close tab)
+- `Mod + Shift + W` → `Ctrl + Shift + PgUp` (Move tab left)
+- `Mod + Shift + R` → `Ctrl + Shift + PgDn` (Move tab right)
 
 **Browser Navigation (Mod + Super):**
 - `Mod + Super + J` → `Alt + Left Arrow` (Browser back)
@@ -1233,6 +1245,8 @@ This table shows how the same window management operations are performed across 
 | **New Tab** | Mod + E → Ctrl+T (current)‡ | Alt + E (recommended) | Mod + E → Alt+E | Cmd + E or Alt+E |
 | **Next Tab** | Mod + R → Ctrl+PgDn (current)‡ | Alt + R (recommended) | Mod + R → Alt+R | Cmd + R or Alt+R |
 | **Close Tab** | Mod + C → Ctrl+W (current)‡ | Alt + C (recommended) | Mod + C → Alt+C | Cmd + C or Alt+C |
+| **Move Tab Left** | Mod + Shift + W → Ctrl+Shift+PgUp | Fn+Ctrl+Shift+↑ | Mod + Shift + W → Ctrl+Shift+PgUp | — |
+| **Move Tab Right** | Mod + Shift + R → Ctrl+Shift+PgDn | Fn+Ctrl+Shift+↓ | Mod + Shift + R → Ctrl+Shift+PgDn | — |
 | **Browser Back** | Mod + Super + J → Alt+Left | Alt + Left | Mod + Super + J → Alt+Left | Cmd + Left or Cmd + [ |
 | **Browser Forward** | Mod + Super + L → Alt+Right | Alt + Right | Mod + Super + L → Alt+Right | Cmd + Right or Cmd + ] |
 | **Arrow Keys** | Mod + JKIL → ←↓↑→ | Standard arrows | Firmware layer → ←↓↑→ | Standard arrows |
@@ -1295,6 +1309,8 @@ This table shows how the same window management operations are performed across 
 | New Tab | N/A | Not used† | `Alt+E`‡ or `Ctrl+T` | N/A | `Alt+E`‡ or `Ctrl+T` or `t` |
 | Next Tab | N/A | Not used† | `Alt+R`‡ or `Ctrl+PgDn` | N/A | `Alt+R`‡ or `Ctrl+PgDn` or `K` |
 | Close Tab | N/A | Not used† | `Alt+C`‡ or `Ctrl+W` | N/A | `Alt+C`‡ or `Ctrl+W` or `x` |
+| Move Tab Left | N/A | Not used† | `Ctrl+Shift+PgUp` | N/A | N/A |
+| Move Tab Right | N/A | Not used† | `Ctrl+Shift+PgDn` | N/A | N/A |
 | **Window/Pane Management** |
 | New Window/Pane | `Super+Return`* | TBD | `Ctrl+G → n` | `:vsplit` | N/A |
 | Close Window/Pane | `Super+Q`* (recommended, currently `Alt+W`) | TBD | `Ctrl+G → x` | `:q` | N/A |
@@ -1887,6 +1903,13 @@ This is a living document. As keybindings are implemented and tested, this docum
 - New tools added to the workflow
 
 ## Changelog
+
+- 2026-02-19: Added move tab left/right keybindings
+  - New Zellij bindings: `Ctrl+Shift+PageUp` (move left), `Ctrl+Shift+PageDown` (move right)
+  - UHK: `Mod+Shift+W` (left), `Mod+Shift+R` (right)
+  - Framework: `Fn+Ctrl+Shift+Arrow Up/Down`
+  - Updated Hardware Translation Table with new bindings
+  - Added documentation sync reminder comment to keybindings.nix
 
 - 2025-12-28: Clarified altwin:swap_alt_win ergonomics and browser navigation
   - Updated "Why the swap?" section to emphasize ergonomic benefits:

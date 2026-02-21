@@ -8,6 +8,9 @@
   # Centralized Keybinding Configuration
   # ONLY keybinding settings - enable/theme/other configs stay in respective modules
   #
+  # IMPORTANT: Any changes to this file MUST be documented in docs/KEYBINDINGS.md
+  # Keep the documentation in sync with the actual configuration.
+  #
   # Tab Navigation Strategy:
   # - Browser-standard shortcuts (Ctrl+PgUp/PgDn, Ctrl+Tab) work in Chrome, Firefox, Zellij, most apps
   # - UHK Mod layer: W/E/R/C → Ctrl+PgUp/T/PgDn/W for ergonomic home row access
