@@ -44,6 +44,12 @@
     mode = "0400";
   };
 
+  age.secrets.bitwarden-drago-password = {
+    file = "${inputs.agenix-secrets}/secrets/bitwarden-drago-password.age";
+    owner = "drago";
+    mode = "0400";
+  };
+
   # Tailscale auto-connect with headscale authkey
   services.tailscale.authkey = {
     enable = true;

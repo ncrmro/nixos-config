@@ -33,9 +33,6 @@
     google-chrome
     chromium
 
-    # Bitwarden CLI for secrets
-    bitwarden-cli
-
     # tmux as backup multiplexer
     tmux
   ];
