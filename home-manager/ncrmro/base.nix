@@ -36,6 +36,13 @@
   keystone.desktop.enable = true;
   keystone.desktop.hyprland.enable = true;
 
+  keystone.desktop.ageYubikey = {
+    enable = true;
+    keys.yubi-black = {
+      serial = "36854515";
+    };
+  };
+
   # CRITICAL: exec-once MUST go in extraConfig, NOT in settings.
   # The hyprland HM settings type is a raw freeform valueType — setting
   # exec-once in settings silently REPLACES keystone's entire exec-once list,
