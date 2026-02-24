@@ -36,10 +36,11 @@
   keystone.desktop.enable = true;
   keystone.desktop.hyprland.enable = true;
 
-  # Additional exec-once via extraConfig to avoid overriding keystone's
-  # exec-once defaults (hyprlock, dbus-update, hyprsunset, etc.).
-  # The hyprland HM module's settings type is a raw valueType — setting
-  # exec-once in settings replaces rather than appends.
+  # CRITICAL: exec-once MUST go in extraConfig, NOT in settings.
+  # The hyprland HM settings type is a raw freeform valueType — setting
+  # exec-once in settings silently REPLACES keystone's entire exec-once list,
+  # which breaks: lock screen on boot (hyprlock), D-Bus activation environment,
+  # hyprsunset, hyprpolkitagent, and clipboard manager (clipse).
   wayland.windowManager.hyprland.extraConfig = ''
     exec-once = hyprctl dispatch workspace 2
   '';
