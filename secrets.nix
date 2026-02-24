@@ -2,6 +2,7 @@ let
   # SSH public keys for users and systems
   users = {
     ncrmro = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyrDBVcGK+pUZOTUA7MLoD5vYK/kaPF6TNNyoDmwNl2 ncrmro@ncrmro-laptop-fw7k";
+    ncrmro-workstation = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGiFUbcDdzBGNgo7GdRvuRvZ9Yf195pIm2jbiM0uJwW0 ncrmro@ncrmro-workstation";
     ncrmro-ocean = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEE6cFSyJoiaURB7+961zETflBNPJUZszH9xyowzbpNu ncrmro@ocean";
   };
 
@@ -16,7 +17,10 @@ let
   };
 
   # Convenience aliases for common key combinations
-  adminKeys = [ users.ncrmro ];
+  adminKeys = [
+    users.ncrmro
+    users.ncrmro-workstation
+  ];
   desktops = [
     systems.workstation
     systems.laptop
@@ -44,10 +48,14 @@ in
   "secrets/samba-timemachine-password.age".publicKeys = adminKeys ++ [ systems.ocean ];
 
   # Stalwart admin password (ocean mail server)
-  "secrets/stalwart-admin-password.age".publicKeys = adminKeys ++ [ users.ncrmro-ocean systems.ocean ];
+  "secrets/stalwart-admin-password.age".publicKeys = adminKeys ++ [
+    users.ncrmro-ocean
+    systems.ocean
+  ];
 
   # Stalwart mail user password (for himalaya client on desktops)
-  "secrets/stalwart-mail-ncrmro-password.age".publicKeys = adminKeys ++ [ users.ncrmro-ocean ] ++ desktops;
+  "secrets/stalwart-mail-ncrmro-password.age".publicKeys =
+    adminKeys ++ [ users.ncrmro-ocean ] ++ desktops;
 
   # Stalwart mail drago user password (for himalaya client on agent-drago VM)
   # TODO: add systems.agent-drago back once the real host key replaces the placeholder

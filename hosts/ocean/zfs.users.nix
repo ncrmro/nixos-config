@@ -1,4 +1,7 @@
 { pkgs, ... }:
+let
+  keys = import ../../modules/users/keys.nix;
+in
 {
   # Enable ZFS backup and NAS
   # zfs create -p ocean/backups/maia
@@ -27,8 +30,6 @@
     isSystemUser = true;
     shell = pkgs.bash;
     group = "zfs-sync";
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyrDBVcGK+pUZOTUA7MLoD5vYK/kaPF6TNNyoDmwNl2 ncrmro@ncrmro-laptop-fw7k"
-    ];
+    openssh.authorizedKeys.keys = keys.root;
   };
 }

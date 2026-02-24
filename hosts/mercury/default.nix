@@ -1,4 +1,7 @@
 { ... }:
+let
+  keys = import ../../modules/users/keys.nix;
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -20,9 +23,7 @@
     "8.8.8.8"
   ];
   services.openssh.enable = true;
-  users.users.root.openssh.authorizedKeys.keys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyrDBVcGK+pUZOTUA7MLoD5vYK/kaPF6TNNyoDmwNl2 ncrmro@ncrmro-laptop-fw7k"
-  ];
+  users.users.root.openssh.authorizedKeys.keys = keys.root;
 
   services.alloy-client = {
     enable = true;
