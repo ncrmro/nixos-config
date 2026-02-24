@@ -9,13 +9,12 @@
 {
   imports = [
     inputs.disko.nixosModules.disko
-    inputs.home-manager.nixosModules.default
+    ../common/optional/home-manager-base.nix
+    ../common/optional/keystone-desktop.nix
     ./disk-config.nix
     ../common/optional/zfs.luks.root.nix
     ./hardware-configuration.nix
     ../common/global
-    ../../modules/users/ncrmro.nix
-    ../../modules/users/root.nix
     ../common/optional/tailscale.node.nix
     ../common/optional/eternal-terminal.nix
     # ../common/optional/secureboot.nix # Conflict with keystone
@@ -27,7 +26,6 @@
     ../common/optional/virt-manager.nix
     ../common/optional/agenix.nix
     inputs.keystone.nixosModules.operating-system
-    inputs.keystone.nixosModules.desktop
     outputs.nixosModules.bambu-studio
     ./windows11-vm.nix
     ../../modules/nixos/steam.nix
@@ -47,9 +45,6 @@
 
   programs.bambu-studio.enable = true;
 
-  programs.zsh.enable = true;
-  users.mutableUsers = true;
-  users.users.ncrmro.shell = pkgs.zsh;
   users.users.ncrmro.extraGroups = [
     "render"
     "video"
@@ -76,10 +71,7 @@
     mode = "0400";
   };
 
-  home-manager.useGlobalPkgs = true;
-  home-manager.useUserPackages = true;
-  home-manager.backupFileExtension = "backup";
-  home-manager.extraSpecialArgs = { inherit inputs outputs; };
+  # Per-host home-manager config: monitor layout, rebuild target, host-specific packages
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-workstation.nix;
 
   environment.systemPackages = with pkgs; [
@@ -109,11 +101,6 @@
   };
 
   services.openssh.settings.PermitRootLogin = "yes";
-
-  keystone.desktop = {
-    enable = true;
-    user = "ncrmro";
-  };
 
   # OOM Killer configuration
   # Prioritize killing docker/podman rootless processes over Hyprland

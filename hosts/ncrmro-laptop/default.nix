@@ -5,18 +5,18 @@
   lib,
   pkgs,
   ...
-} @ args: {
+}@args:
+{
   imports = [
     inputs.lanzaboote.nixosModules.lanzaboote
     # inputs.omarchy-nix.nixosModules.default
-    inputs.home-manager.nixosModules.default
+    ../common/optional/home-manager-base.nix
+    ../common/optional/keystone-desktop.nix
     # outputs.nixosModules.omarchy-config
     ./disk-config.nix
     ../common/optional/zfs.luks.root.nix
     ./hardware-configuration.nix
     ../common/global
-    ../../modules/users/ncrmro.nix
-    ../../modules/users/root.nix
     # ../common/optional/podman.nix
     ../common/optional/docker-rootless.nix
     ../common/optional/virt-manager.nix
@@ -30,8 +30,6 @@
     ../common/optional/agenix.nix
     ./zfs.remote-replication.nix
     ../../modules/nixos/steam.nix
-    inputs.keystone.nixosModules.desktop
-    inputs.keystone.nixosModules.hardwareKey
     outputs.nixosModules.bambu-studio
   ];
 
@@ -57,22 +55,9 @@
   };
 
   programs.bambu-studio.enable = true;
-  programs.zsh.enable = true;
-  users.mutableUsers = true;
-  users.users.ncrmro.shell = pkgs.zsh;
 
-  home-manager.useGlobalPkgs = true;
-  home-manager.useUserPackages = true;
-  home-manager.backupFileExtension = "backup";
-  home-manager.extraSpecialArgs = {inherit inputs outputs;};
+  # Per-host home-manager config: monitor layout, rebuild target
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ncrmro-laptop.nix;
-
-  keystone.desktop = {
-    enable = true;
-    user = "ncrmro";
-  };
-
-  keystone.hardwareKey.enable = true;
 
   # services.greetd = {
   #   enable = true;
@@ -113,7 +98,7 @@
     pkiBundle = "/var/lib/sbctl";
   };
   systemd.services.fprintd = {
-    wantedBy = ["multi-user.target"];
+    wantedBy = [ "multi-user.target" ];
     serviceConfig.Type = "simple";
   };
   services.fprintd.enable = true;

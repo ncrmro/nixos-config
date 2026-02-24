@@ -7,7 +7,7 @@
 }:
 {
   imports = [
-    inputs.home-manager.nixosModules.default
+    ../common/optional/home-manager-base.nix
     ./hardware-configuration.nix
     ./disk-config.nix
     ../common/optional/zfs.luks.root.nix
@@ -33,8 +33,6 @@
     ./immich.nix
     ../common/optional/podman.nix
     ./vms.nix
-    ../../modules/users/ncrmro.nix
-    ../../modules/users/root.nix
     inputs.keystone.nixosModules.operating-system
   ];
 
@@ -152,14 +150,7 @@
   # Override ROOT_URL to use HTTPS through Nginx
   services.forgejo.settings.server.ROOT_URL = "https://git.ncrmro.com/";
 
-  # Home Manager configuration
-  programs.zsh.enable = true;
-  users.users.ncrmro.shell = pkgs.zsh;
-
-  home-manager.useGlobalPkgs = true;
-  home-manager.useUserPackages = true;
-  home-manager.backupFileExtension = "backup";
-  home-manager.extraSpecialArgs = { inherit inputs outputs; };
+  # Per-host home-manager config: terminal-only, rebuild target, mail
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ocean.nix;
 
   environment.variables = {
