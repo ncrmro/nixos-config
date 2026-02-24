@@ -38,8 +38,8 @@
 
   wayland.windowManager.hyprland.settings = {
     # Start on workspace 2 (primary workspace for user activity)
-    # Uses mkAfter to append to keystone's exec-once defaults (hyprlock, dbus, etc.)
-    exec-once = lib.mkAfter [ "hyprctl dispatch workspace 2" ];
+    # Must use mkDefault to match keystone autostart.nix priority so lists merge
+    exec-once = lib.mkDefault [ "hyprctl dispatch workspace 2" ];
 
     windowrule = [
       # Tag messaging apps
