@@ -38,9 +38,9 @@
 
   keystone.desktop.ageYubikey = {
     enable = true;
-    keys.yubi-black = {
-      serial = "36854515";
-    };
+    identities = [
+      # TODO: run `age-plugin-yubikey --identity --serial 36854515 --slot 1` and paste here
+    ];
   };
 
   # CRITICAL: exec-once MUST go in extraConfig, NOT in settings.
