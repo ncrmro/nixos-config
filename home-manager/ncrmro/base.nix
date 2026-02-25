@@ -36,7 +36,7 @@
   keystone.desktop.enable = true;
   keystone.desktop.hyprland.enable = true;
 
-  keystone.desktop.ageYubikey = {
+  keystone.terminal.ageYubikey = {
     enable = true;
     identities = [
       "AGE-PLUGIN-YUBIKEY-17DDRYQ5ZFMHALWQJTKHAV" # Serial: 36854515, Slot: 1 (yubi-black)
