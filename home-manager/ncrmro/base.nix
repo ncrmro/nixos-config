@@ -39,7 +39,7 @@
   keystone.desktop.ageYubikey = {
     enable = true;
     identities = [
-      # TODO: run `age-plugin-yubikey --identity --serial 36854515 --slot 1` and paste here
+      "AGE-PLUGIN-YUBIKEY-17DDRYQ5ZFMHALWQJTKHAV" # Serial: 36854515, Slot: 1 (yubi-black)
     ];
   };
 
