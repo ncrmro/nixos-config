@@ -65,7 +65,7 @@
       '';
       smtp = {
         enable = true;
-        host = "localhost:587";
+        host = "mail.ncrmro.com:587";
         from = "alerts@ncrmro.com";
         user = "alerts@ncrmro.com";
         passwordFile = config.age.secrets.grafana-smtp-password.path;
