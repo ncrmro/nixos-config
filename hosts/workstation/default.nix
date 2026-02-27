@@ -31,6 +31,18 @@
     ../../modules/nixos/steam.nix
   ];
 
+  keystone.os.enable = true;
+  keystone.os.storage.enable = false; # Disko handles storage separately
+  keystone.os.ssh.enable = false; # SSH already configured independently
+  keystone.os.secureBoot.enable = false; # Lanzaboote configured directly above
+  keystone.os.tpm.enable = false; # TPM managed independently
+
+  keystone.os.agents.drago = {
+    fullName = "Drago";
+    email = "drago@ncrmro.com";
+    terminal.enable = true;
+  };
+
   keystone.os.services.airplay = {
     enable = true;
     name = "Workstation Speakers";
