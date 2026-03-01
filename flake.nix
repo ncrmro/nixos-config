@@ -57,8 +57,8 @@
       flake = false;
     };
 
-    # Hyprland (latest from official flake)
-    hyprland.url = "github:hyprwm/Hyprland";
+    # Hyprland - follows keystone's pinned version
+    hyprland.follows = "keystone/hyprland";
 
     # Keystone - self-sovereign infrastructure platform
     # For local dev without commits, use: ./bin/dev-keystone <hostname>
