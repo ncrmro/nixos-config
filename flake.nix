@@ -136,8 +136,8 @@
     in
     {
       # Code formatter (official NixOS formatter)
-      formatter.x86_64-linux = (pkgsForSystem "x86_64-linux").nixfmt-rfc-style;
-      formatter.aarch64-darwin = (pkgsForSystem "aarch64-darwin").nixfmt-rfc-style;
+      formatter.x86_64-linux = (pkgsForSystem "x86_64-linux").nixfmt;
+      formatter.aarch64-darwin = (pkgsForSystem "aarch64-darwin").nixfmt;
 
       # Custom packages
       packages.x86_64-linux =
@@ -316,11 +316,11 @@
 
       # Development shells
       devShells.x86_64-linux.default = nixpkgs.legacyPackages.x86_64-linux.mkShell {
-        packages = [ nixpkgs.legacyPackages.x86_64-linux.nixfmt-rfc-style ];
+        packages = [ nixpkgs.legacyPackages.x86_64-linux.nixfmt ];
       };
 
       devShells.aarch64-darwin.default = nixpkgs.legacyPackages.aarch64-darwin.mkShell {
-        packages = [ nixpkgs.legacyPackages.aarch64-darwin.nixfmt-rfc-style ];
+        packages = [ nixpkgs.legacyPackages.aarch64-darwin.nixfmt ];
       };
     };
 }

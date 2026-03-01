@@ -21,7 +21,7 @@
     export PATH="${config.home.profileDirectory}/bin:$PATH"
   '';
 
-  programs.bash.initExtra = lib.mkIf config.programs.bash.enable ''
+  programs.bash.initContent = lib.mkIf config.programs.bash.enable ''
     export PATH="${config.home.profileDirectory}/bin:$PATH"
   '';
 }

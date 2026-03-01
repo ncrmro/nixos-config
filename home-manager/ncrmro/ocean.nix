@@ -39,7 +39,7 @@
   };
 
   programs.zsh = {
-    initExtra = ''
+    initContent = ''
       # NixOS rebuild function with --boot support for critical changes
       update() {
         local cmd="switch"

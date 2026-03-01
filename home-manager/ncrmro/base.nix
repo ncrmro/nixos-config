@@ -21,7 +21,7 @@
   ];
 
   home.packages = with pkgs; [
-    nixfmt-rfc-style
+    nixfmt
     google-chrome
     zig
     gh
