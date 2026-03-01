@@ -1,10 +1,31 @@
 {
   lib,
+  pkgs,
   config,
   utils,
   ...
 }:
 {
+  # Use the latest ZFS-compatible kernel
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
+  # Fail at build time if kernel is incompatible with ZFS
+  assertions = [
+    {
+      assertion =
+        let
+          zfsAttr = config.boot.zfs.package.kernelModuleAttribute;
+          zfsModule = config.boot.kernelPackages.${zfsAttr};
+        in
+        !(zfsModule.meta.broken or false);
+      message = ''
+        Kernel ${config.boot.kernelPackages.kernel.version} is incompatible with
+        ZFS (${config.boot.zfs.package.version}).
+        Pin a compatible kernel, e.g.: boot.kernelPackages = pkgs.linuxPackages_6_12;
+      '';
+    }
+  ];
+
   services.zfs.autoScrub.enable = true;
   boot.initrd.systemd.emergencyAccess = lib.mkDefault false;
   # Use the systemd-boot EFI boot loader.
