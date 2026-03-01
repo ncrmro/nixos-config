@@ -4,8 +4,6 @@
   inputs = {
     # Main package sources
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
-
     # Tools and modules
     microvm = {
       url = "github:astro/microvm.nix";
@@ -18,10 +16,8 @@
     };
 
     lanzaboote = {
-      url = "github:nix-community/lanzaboote/v0.4.2";
-      # Must follow stable - lanzaboote's rust-overlay has compatibility issues with nixpkgs-unstable
-      # See: https://github.com/nix-community/lanzaboote/issues/511
-      inputs.nixpkgs.follows = "nixpkgs-stable";
+      url = "github:nix-community/lanzaboote/v1.0.0";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     home-manager = {
