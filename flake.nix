@@ -15,10 +15,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    lanzaboote = {
-      url = "github:nix-community/lanzaboote";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    lanzaboote.follows = "keystone/lanzaboote";
 
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -61,7 +58,6 @@
     keystone = {
       url = "github:ncrmro/keystone";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.lanzaboote.follows = "lanzaboote";
       inputs.disko.follows = "disko";
     };
 

@@ -427,6 +427,7 @@
     "gitignore_2": {
       "inputs": {
         "nixpkgs": [
+          "keystone",
           "lanzaboote",
           "pre-commit",
           "nixpkgs"
@@ -1194,9 +1195,7 @@
         "himalaya": "himalaya",
         "home-manager": "home-manager_3",
         "hyprland": "hyprland",
-        "lanzaboote": [
-          "lanzaboote"
-        ],
+        "lanzaboote": "lanzaboote",
         "llm-agents": "llm-agents",
         "nixpkgs": [
           "nixpkgs"
@@ -1237,6 +1236,7 @@
       "inputs": {
         "crane": "crane",
         "nixpkgs": [
+          "keystone",
           "nixpkgs"
         ],
         "pre-commit": "pre-commit",
@@ -1593,6 +1593,7 @@
         "flake-compat": "flake-compat_3",
         "gitignore": "gitignore_2",
         "nixpkgs": [
+          "keystone",
           "lanzaboote",
           "nixpkgs"
         ]
@@ -1672,7 +1673,10 @@
         ],
         "keystone": "keystone",
         "kinda-nvim-hx": "kinda-nvim-hx",
-        "lanzaboote": "lanzaboote",
+        "lanzaboote": [
+          "keystone",
+          "lanzaboote"
+        ],
         "llama-cpp": "llama-cpp",
         "microvm": "microvm",
         "nix-flatpak": "nix-flatpak",
@@ -1705,6 +1709,7 @@
     "rust-overlay": {
       "inputs": {
         "nixpkgs": [
+          "keystone",
           "lanzaboote",
           "nixpkgs"
         ]
