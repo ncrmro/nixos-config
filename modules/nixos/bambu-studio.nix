@@ -19,5 +19,8 @@ in
     services.flatpak.packages = [
       "com.bambulab.BambuStudio"
     ];
+    services.flatpak.overrides."com.bambulab.BambuStudio".Environment = {
+      GDK_SCALE = "1";
+    };
   };
 }
