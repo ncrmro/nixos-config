@@ -54,9 +54,10 @@
     hyprland.follows = "keystone/hyprland";
 
     # Keystone - self-sovereign infrastructure platform
+    # NEVER CHANGE THIS URL TO A LOCAL PATH. EVER. USE THE GITHUB REPO.
     # For local dev without commits, use: ./bin/dev-keystone <hostname>
     keystone = {
-      url = "/home/ncrmro/code/ncrmro/obsidian/.repos/ncrmro/keystone";
+      url = "github:ncrmro/keystone";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.disko.follows = "disko";
     };

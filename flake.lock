@@ -1249,14 +1249,17 @@
         "omarchy": "omarchy"
       },
       "locked": {
-        "lastModified": 1772458882,
-        "narHash": "sha256-wIgHZAI8ASe13wT1pqpSue0uhlz9cSv4FkRL9IvOiNI=",
-        "path": "/home/ncrmro/code/ncrmro/obsidian/.repos/ncrmro/keystone",
-        "type": "path"
+        "lastModified": 1772457558,
+        "narHash": "sha256-e3zSvlVqroOAcnNC71WCalrHrkcEVRsR9cC/U6lZ+2U=",
+        "owner": "ncrmro",
+        "repo": "keystone",
+        "rev": "fb55026e1a69edbba776f89b0ab43fffebd4bc18",
+        "type": "github"
       },
       "original": {
-        "path": "/home/ncrmro/code/ncrmro/obsidian/.repos/ncrmro/keystone",
-        "type": "path"
+        "owner": "ncrmro",
+        "repo": "keystone",
+        "type": "github"
       }
     },
     "kinda-nvim-hx": {
