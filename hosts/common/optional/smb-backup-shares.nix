@@ -56,9 +56,11 @@ in
 
   config = lib.mkIf cfg.enable {
     # Enable Samba with full feature set for backup shares
+    # FIXME: Using regular samba instead of samba4Full due to upstream nixpkgs
+    # issue where sphinx 9.1.0 doesn't support Python 3.11 (samba4Full dependency)
     services.samba = {
       enable = true;
-      package = pkgs.samba4Full; # Includes Avahi support
+      # package = pkgs.samba4Full; # Includes Avahi support
       openFirewall = true;
 
       settings = {
@@ -118,10 +120,12 @@ in
     };
 
     # Enable Samba Web Service Discovery for Windows
-    services.samba-wsdd = {
-      enable = true;
-      openFirewall = true;
-    };
+    # FIXME: Temporarily disabled due to upstream nixpkgs issue where
+    # sphinx 9.1.0 doesn't support Python 3.11 (wsdd dependency chain)
+    # services.samba-wsdd = {
+    #   enable = true;
+    #   openFirewall = true;
+    # };
 
     # Enable Avahi for service discovery
     services.avahi = {

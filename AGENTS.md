@@ -41,10 +41,25 @@ Located at `.submodules/keystone`, this is a Git submodule tracking the [ncrmro/
 **Development Workflow:**
 When developing features intended for upstream Keystone:
 1. Make changes in `.submodules/keystone`.
-2. Test using the local override mechanism (e.g., `nixos-rebuild switch ... --override-input keystone "path:.submodules/keystone"`).
-   - **Tip**: Use `bin/keystone-dev --build` to verify changes build correctly without needing `sudo` or actually switching the system configuration.
-3. Commit and push changes from the submodule directory.
-4. Update the flake input lock in the main repository.
+2. Test using the local override mechanism:
+   - **Recommended**: Use `bin/keystone-dev --build` to verify changes build correctly without needing `sudo`.
+   - Alternative: `nixos-rebuild switch ... --override-input keystone "path:.submodules/keystone"`
+3. Commit and push changes from the submodule directory:
+   ```bash
+   cd .submodules/keystone
+   git add -A && git commit -m "feat(server): description" && git push
+   cd ../..
+   ```
+4. **IMPORTANT**: Update flake input AND stage submodule together in ONE commit:
+   ```bash
+   nix flake update keystone
+   git add .submodules/keystone flake.lock
+   git commit -m "feat: update keystone with description"
+   # Or amend if updating an existing commit:
+   # git commit --amend
+   ```
+
+**Why both together?** The flake.lock pins the GitHub version while `.submodules/keystone` tracks the local checkout. Both must point to the same commit for consistency. Committing them separately can cause confusion about which version is active.
 
 **Adding External Nix Package Sources:**
 When adding external Nix package sources (e.g., `numtide/llm-agents.nix` for AI coding tools), add them as **flake inputs**, NOT as git submodules. Choose the appropriate flake based on scope:
@@ -71,27 +86,22 @@ The `agenix-secrets` input is a private Git repository containing encrypted secr
 - `secrets.nix` - Defines which SSH keys can decrypt which secrets
 - `secrets/` - Directory containing all `.age` encrypted secret files
 
-**Updating secrets:**
+**Update Workflow:**
+When updating secrets, always commit the submodule and flake.lock together:
 ```bash
-# Update the flake lock to latest commit
-nix flake lock --update-input agenix-secrets
-
-# Or update all inputs
-nix flake update
-```
-
-**Local development with submodule (optional):**
-The `agenix-secrets/` directory still exists as a submodule for local editing convenience:
-```bash
+# 1. Edit secrets in submodule
 cd agenix-secrets
-# Edit secrets.nix, create/rekey secrets
-agenix -e secrets/new-secret.age
+agenix -e secrets/new-secret.age  # or edit secrets.nix
 git add -A && git commit -m "Add new secret" && git push
-
-# Then update the flake input
 cd ..
-nix flake lock --update-input agenix-secrets
+
+# 2. IMPORTANT: Update flake input AND stage submodule together in ONE commit
+nix flake update agenix-secrets
+git add agenix-secrets flake.lock
+git commit -m "chore: update agenix-secrets"
 ```
+
+**Why both together?** The flake.lock pins the Git version while `agenix-secrets/` tracks the local checkout. Both must point to the same commit for consistency. Committing them separately can cause confusion about which version is active.
 
 ## Common Commands
 
@@ -432,7 +442,11 @@ Stalwart uses different folder names than Himalaya defaults. The module configur
    # Add entry to secrets.nix first, then:
    agenix -e secrets/stalwart-mail-USERNAME-password.age
    git add -A && git commit -m "Add USERNAME mail password" && git push
-   cd .. && nix flake update agenix-secrets
+   cd ..
+   # Update flake AND stage submodule together
+   nix flake update agenix-secrets
+   git add agenix-secrets flake.lock
+   git commit -m "chore: add USERNAME mail secret"
    ```
 
 2. Import the himalaya module and enable it:
@@ -467,12 +481,14 @@ When updating secrets (e.g., mail passwords):
    cd agenix-secrets
    agenix -e secrets/secret-name.age
    git add -A && git commit -m "Update secret" && git push
+   cd ..
    ```
 
-2. Update flake input (REQUIRED - secrets are a flake input, not just submodule):
+2. **IMPORTANT**: Update flake input AND stage submodule together in ONE commit:
    ```bash
-   cd ..  # back to nixos-config
    nix flake update agenix-secrets
+   git add agenix-secrets flake.lock
+   git commit -m "chore: update agenix-secrets"
    ```
 
 3. Rebuild and deploy:
@@ -481,6 +497,4 @@ When updating secrets (e.g., mail passwords):
    # Then copy and activate on target host
    ```
 
-The submodule and flake input are separate concerns:
-- Submodule: for local editing convenience
-- Flake input: what Nix actually uses during builds
+**Why both together?** The flake.lock pins the Git version while `agenix-secrets/` tracks the local checkout. Both must point to the same commit for consistency.
