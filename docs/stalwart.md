@@ -302,13 +302,13 @@ curl -s -X PROPFIND -u username:'password' http://127.0.0.1:8082/dav/card \
 Separate secrets exist for mail client authentication:
 
 - `secrets/stalwart-mail-ncrmro-password.age` - for ncrmro user on desktops
-- `secrets/stalwart-mail-drago-password.age` - for drago user on agent-drago VM
+- `secrets/agent-drago-mail-password.age` - for drago user on agent-drago VM
 
 These are plaintext passwords used by the Himalaya email client.
 
 Configuration in Home Manager:
 ```nix
-programs.himalaya.accounts.<name>.backend.auth.command = "cat /run/agenix/stalwart-mail-<user>-password";
+programs.himalaya.accounts.<name>.backend.auth.command = "cat /run/agenix/agent-<name>-mail-password";
 ```
 
 ## References
