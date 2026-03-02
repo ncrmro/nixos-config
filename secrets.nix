@@ -57,9 +57,9 @@ in
   "secrets/stalwart-mail-ncrmro-password.age".publicKeys =
     adminKeys ++ [ users.ncrmro-ocean ] ++ desktops;
 
-  # Stalwart mail drago user password (for himalaya client on agent-drago VM)
+  # Agent drago mail password (for himalaya client on agent-drago)
   # TODO: add systems.agent-drago back once the real host key replaces the placeholder
-  "secrets/stalwart-mail-drago-password.age".publicKeys = adminKeys ++ [ users.ncrmro-ocean ];
+  "secrets/agent-drago-mail-password.age".publicKeys = adminKeys ++ [ users.ncrmro-ocean ];
 
   # Miniflux admin credentials (ocean RSS reader)
   "secrets/miniflux-admin.age".publicKeys = adminKeys ++ [ systems.ocean ];

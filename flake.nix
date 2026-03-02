@@ -56,7 +56,7 @@
     # Keystone - self-sovereign infrastructure platform
     # For local dev without commits, use: ./bin/dev-keystone <hostname>
     keystone = {
-      url = "github:ncrmro/keystone";
+      url = "/home/ncrmro/code/ncrmro/obsidian/.repos/ncrmro/keystone";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.disko.follows = "disko";
     };
@@ -154,6 +154,7 @@
       nixosConfigurations = {
         # Desktop/workstation configuration
         mox = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
           modules = [ ./hosts/mox ];
           specialArgs = {
             inherit inputs self;
@@ -163,6 +164,7 @@
 
         # Home server configuration
         maia = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
           modules = [ ./hosts/maia ];
           specialArgs = {
             inherit inputs self;
@@ -172,6 +174,7 @@
 
         # Test VM configuration - Desktop testing VM
         test-vm = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
           modules = [
             home-manager.nixosModules.default
             {
@@ -203,6 +206,7 @@
         # };
 
         ncrmro-laptop = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
           modules = [ ./hosts/ncrmro-laptop ];
           specialArgs = {
             inherit inputs self;
@@ -210,6 +214,7 @@
           };
         };
         devbox = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
           modules = [ ./hosts/devbox ];
           specialArgs = {
             inherit inputs self;
@@ -217,6 +222,7 @@
           };
         };
         mercury = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
           modules = [ ./hosts/mercury ];
           specialArgs = {
             inherit inputs self;
@@ -224,6 +230,7 @@
           };
         };
         catalystPrimary = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
           modules = [ ./hosts/catalystPrimary ];
           specialArgs = {
             inherit inputs self;
@@ -231,6 +238,7 @@
           };
         };
         ocean = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
           modules = [ ./hosts/ocean ];
           specialArgs = {
             inherit inputs self;
@@ -238,6 +246,7 @@
           };
         };
         ncrmro-workstation = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
           modules = [ ./hosts/workstation ];
           specialArgs = {
             inherit inputs self;

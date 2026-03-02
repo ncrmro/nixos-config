@@ -6,6 +6,13 @@
     keystone = {
       zesh = final.callPackage (inputs.keystone + "/packages/zesh") { };
       himalaya = inputs.keystone.inputs.himalaya.packages.${final.stdenv.hostPlatform.system}.default;
+      google-chrome =
+        inputs.keystone.inputs.browser-previews.packages.${final.stdenv.hostPlatform.system}.google-chrome;
+      # Coding agents from keystone's llm-agents input
+      claude-code =
+        inputs.keystone.inputs.llm-agents.packages.${final.stdenv.hostPlatform.system}.claude-code;
+      gemini-cli =
+        inputs.keystone.inputs.llm-agents.packages.${final.stdenv.hostPlatform.system}.gemini-cli;
     };
   })
 
