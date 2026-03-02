@@ -34,6 +34,7 @@
     ../common/optional/podman.nix
     ./vms.nix
     inputs.keystone.nixosModules.operating-system
+    inputs.keystone.nixosModules.server
   ];
 
   # Enable Mesa/OpenGL drivers for EGL headless rendering
@@ -137,6 +138,25 @@
       };
     };
   };
+  # Keystone server services
+  keystone.server = {
+    enable = true;
+    domain = "ncrmro.com";
+    binaryCache = {
+      enable = true;
+      signKeyPaths = [ config.age.secrets.harmonia-signing-key.path ];
+      publicKey = "harmonia.ncrmro.com-1:+ch6VQl2xutZ4M6U1uRQdCFb110MloNgRhH0/Dg+ut0=";
+    };
+  };
+
+  # Harmonia binary cache signing key
+  age.secrets.harmonia-signing-key = {
+    file = "${inputs.agenix-secrets}/secrets/harmonia-signing-key.age";
+    owner = "harmonia";
+    group = "harmonia";
+    mode = "0400";
+  };
+
   keystone.os.gitServer = {
     enable = true;
     domain = "git.ncrmro.com";

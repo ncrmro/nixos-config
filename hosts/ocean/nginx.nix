@@ -228,6 +228,16 @@ in
     };
   };
 
+  # Harmonia binary cache - Tailscale only
+  services.nginx.virtualHosts."harmonia.ncrmro.com" = {
+    forceSSL = true;
+    useACMEHost = "wildcard-ncrmro-com";
+    extraConfig = tailscaleOnly;
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:5000";
+    };
+  };
+
   # Stalwart Mail Admin - Tailscale only
   services.nginx.virtualHosts."mail.ncrmro.com" = {
     forceSSL = true;
