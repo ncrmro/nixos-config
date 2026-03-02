@@ -24,7 +24,7 @@ in
   # Add passt to libvirtd service PATH for user-mode networking with port forwarding
   # Enables <backend type='passt'/> in VM definitions for rootless VMs
   systemd.services.libvirtd.path = [
-    pkgs.qemu
+    qemuPkg
     pkgs.netcat
     pkgs.passt
   ];
