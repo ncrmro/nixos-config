@@ -61,6 +61,15 @@ When developing features intended for upstream Keystone:
 
 **Why both together?** The flake.lock pins the GitHub version while `.submodules/keystone` tracks the local checkout. Both must point to the same commit for consistency. Committing them separately can cause confusion about which version is active.
 
+**Handling flake.lock Conflicts During Rebase:**
+When rebasing and encountering `flake.lock` conflicts, always accept upstream changes then re-lock:
+```bash
+git checkout --theirs flake.lock
+nix flake update keystone  # or whatever input was updated
+git add flake.lock
+git rebase --continue
+```
+
 **Adding External Nix Package Sources:**
 When adding external Nix package sources (e.g., `numtide/llm-agents.nix` for AI coding tools), add them as **flake inputs**, NOT as git submodules. Choose the appropriate flake based on scope:
 - **nixos-config flake.nix**: For packages/modules specific to this configuration
@@ -102,6 +111,15 @@ git commit -m "chore: update agenix-secrets"
 ```
 
 **Why both together?** The flake.lock pins the Git version while `agenix-secrets/` tracks the local checkout. Both must point to the same commit for consistency. Committing them separately can cause confusion about which version is active.
+
+**Handling flake.lock Conflicts During Rebase:**
+When rebasing and encountering `flake.lock` conflicts, always accept upstream changes then re-lock:
+```bash
+git checkout --theirs flake.lock
+nix flake update agenix-secrets  # or whatever input was updated
+git add flake.lock
+git rebase --continue
+```
 
 ## Common Commands
 
