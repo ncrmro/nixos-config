@@ -36,6 +36,10 @@
   keystone.os.ssh.enable = false; # SSH already configured independently
   keystone.os.secureBoot.enable = false; # Lanzaboote configured directly above
   keystone.os.tpm.enable = false; # TPM managed independently
+  # Desktop module sets mode = "direct-symlink" for Tailscale MagicDNS
+  environment.etc."resolv.conf".source = "/run/systemd/resolve/stub-resolv.conf";
+  # Desktop module needs resolved for resolv.conf
+  keystone.os.services.resolved.enable = true;
 
   keystone.os.agents.drago = {
     fullName = "Drago";
