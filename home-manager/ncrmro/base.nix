@@ -22,7 +22,7 @@
 
   home.packages = with pkgs; [
     nixfmt
-    google-chrome
+    keystone.google-chrome
     zig
     gh
     gh-dash
