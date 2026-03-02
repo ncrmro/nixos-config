@@ -42,6 +42,12 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    age.secrets.grafana-secret-key = {
+      file = "${inputs.agenix-secrets}/secrets/grafana-secret-key.age";
+      owner = "grafana";
+      mode = "0400";
+    };
+
     services.grafana = {
       enable = true;
       settings = {
@@ -51,6 +57,7 @@ in
           http_addr = "127.0.0.1";
           root_url = "https://grafana.ncrmro.com/";
         };
+        security.secret_key = "$__file{${config.age.secrets.grafana-secret-key.path}}";
         smtp = lib.mkIf cfg.smtp.enable {
           enabled = true;
           host = cfg.smtp.host;
