@@ -39,8 +39,8 @@ modules/users/
 └── luce.nix                       # Luce user definition
 
 secrets/
-├── stalwart-mail-drago-password.age
-└── stalwart-mail-luce-password.age
+├── agent-drago-mail-password.age
+└── agent-luce-mail-password.age
 ```
 
 ## Shared vs Agent-Specific
@@ -112,7 +112,7 @@ This produces `result/nixos.qcow2` (~7GB with full /nix/store).
 
 Agent VMs use agenix for secrets. The flow:
 
-1. **Before Deployment** - Create secret file (e.g., stalwart-mail-luce-password.age)
+1. **Before Deployment** - Create secret file (e.g., agent-luce-mail-password.age)
 2. **First Boot** - VM generates SSH host key
 3. **Extract Key** - Get the host key from `/var/ssh/ssh_host_ed25519_key.pub`
 4. **Update secrets.nix** - Add VM's host key to publicKeys arrays

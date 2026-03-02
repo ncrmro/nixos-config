@@ -32,20 +32,20 @@
   users.users.ncrmro.initialPassword = "password";
 
   # Agenix secrets (deployed after first boot when host key is known)
-  age.secrets.headscale-authkey = {
-    file = "${inputs.agenix-secrets}/secrets/headscale-authkey-drago.age";
+  age.secrets.agent-drago-tailscale-auth-key = {
+    file = "${inputs.agenix-secrets}/secrets/agent-drago-tailscale-auth-key.age";
     owner = "root";
     mode = "0400";
   };
 
-  age.secrets.stalwart-mail-drago-password = {
-    file = "${inputs.agenix-secrets}/secrets/stalwart-mail-drago-password.age";
+  age.secrets.agent-drago-mail-password = {
+    file = "${inputs.agenix-secrets}/secrets/agent-drago-mail-password.age";
     owner = "drago";
     mode = "0400";
   };
 
-  age.secrets.bitwarden-drago-password = {
-    file = "${inputs.agenix-secrets}/secrets/bitwarden-drago-password.age";
+  age.secrets.agent-drago-bitwarden-password = {
+    file = "${inputs.agenix-secrets}/secrets/agent-drago-bitwarden-password.age";
     owner = "drago";
     mode = "0400";
   };
@@ -53,7 +53,7 @@
   # Tailscale auto-connect with headscale authkey
   services.tailscale.authkey = {
     enable = true;
-    secretFile = config.age.secrets.headscale-authkey.path;
+    secretFile = config.age.secrets.agent-drago-tailscale-auth-key.path;
     tags = [ "tag:agent" ];
   };
 

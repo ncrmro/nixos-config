@@ -30,9 +30,10 @@
     gh
 
     # Browsers for web automation
-    google-chrome
+    keystone.google-chrome
     chromium
 
+    # TODO: replace tmux with zellij
     # tmux as backup multiplexer
     tmux
   ];

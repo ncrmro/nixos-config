@@ -32,14 +32,14 @@
   users.users.ncrmro.initialPassword = "password";
 
   # Agenix secrets (deployed after first boot when host key is known)
-  age.secrets.headscale-authkey = {
-    file = "${inputs.agenix-secrets}/secrets/headscale-authkey-luce.age";
+  age.secrets.agent-luce-tailscale-auth-key = {
+    file = "${inputs.agenix-secrets}/secrets/agent-luce-tailscale-auth-key.age";
     owner = "root";
     mode = "0400";
   };
 
-  age.secrets.stalwart-mail-luce-password = {
-    file = "${inputs.agenix-secrets}/secrets/stalwart-mail-luce-password.age";
+  age.secrets.agent-luce-mail-password = {
+    file = "${inputs.agenix-secrets}/secrets/agent-luce-mail-password.age";
     owner = "luce";
     mode = "0400";
   };
@@ -47,7 +47,7 @@
   # Tailscale auto-connect with headscale authkey
   services.tailscale.authkey = {
     enable = true;
-    secretFile = config.age.secrets.headscale-authkey.path;
+    secretFile = config.age.secrets.agent-luce-tailscale-auth-key.path;
     tags = [ "tag:agent" ];
   };
 
