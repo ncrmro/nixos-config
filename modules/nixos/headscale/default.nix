@@ -182,6 +182,11 @@ in
               type = "A";
               value = "100.64.0.6";
             }
+            {
+              name = "harmonia.ncrmro.com";
+              type = "A";
+              value = "100.64.0.6";
+            }
           ];
         };
         derp = {
