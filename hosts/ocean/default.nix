@@ -29,12 +29,11 @@
     ./miniflux.nix
     ./observability
     ../common/optional/alloy-client.nix
-    ../common/optional/virt-manager.nix
     ./immich.nix
+    ../../modules/keystone.nix
+    ../../modules/keystone.server.nix
     ../common/optional/podman.nix
     ./vms.nix
-    inputs.keystone.nixosModules.operating-system
-    inputs.keystone.nixosModules.server
   ];
 
   # Enable Mesa/OpenGL drivers for EGL headless rendering
@@ -93,9 +92,6 @@
     };
   };
 
-  keystone.os.enable = true;
-  keystone.os.storage.enable = false;
-  keystone.os.ssh.enable = false;
   keystone.os.mail = {
     enable = true;
     # Allow Tailscale IPs (agent VMs, phones, etc) - prevents fail2ban blocking
@@ -138,14 +134,11 @@
       };
     };
   };
-  # Keystone server services
-  keystone.server = {
+  # Host-specific server services (enable is in modules/keystone.server.nix)
+  keystone.server.binaryCache = {
     enable = true;
-    binaryCache = {
-      enable = true;
-      signKeyPaths = [ config.age.secrets.harmonia-signing-key.path ];
-      publicKey = "harmonia.ncrmro.com-1:+ch6VQl2xutZ4M6U1uRQdCFb110MloNgRhH0/Dg+ut0=";
-    };
+    signKeyPaths = [ config.age.secrets.harmonia-signing-key.path ];
+    publicKey = "harmonia.ncrmro.com-1:+ch6VQl2xutZ4M6U1uRQdCFb110MloNgRhH0/Dg+ut0=";
   };
 
   # Harmonia binary cache signing key

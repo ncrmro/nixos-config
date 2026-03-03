@@ -10,7 +10,8 @@
   imports = [
     inputs.disko.nixosModules.disko
     ../common/optional/home-manager-base.nix
-    ../common/optional/keystone-desktop.nix
+    ../../modules/keystone.nix
+    ../../modules/keystone.desktop.nix
     ./disk-config.nix
     ../common/optional/zfs.luks.root.nix
     ./hardware-configuration.nix
@@ -23,23 +24,11 @@
     ../common/optional/alloy-client.nix
     ../common/optional/docker-rootless.nix
     ../common/optional/podman.nix
-    ../common/optional/virt-manager.nix
     ../common/optional/agenix.nix
-    inputs.keystone.nixosModules.operating-system
     outputs.nixosModules.bambu-studio
     ./windows11-vm.nix
     ../../modules/nixos/steam.nix
   ];
-
-  keystone.os.enable = true;
-  keystone.os.storage.enable = false; # Disko handles storage separately
-  keystone.os.ssh.enable = false; # SSH already configured independently
-  keystone.os.secureBoot.enable = false; # Lanzaboote configured directly above
-  keystone.os.tpm.enable = false; # TPM managed independently
-  # Desktop module sets mode = "direct-symlink" for Tailscale MagicDNS
-  environment.etc."resolv.conf".source = "/run/systemd/resolve/stub-resolv.conf";
-  # Desktop module needs resolved for resolv.conf
-  keystone.os.services.resolved.enable = true;
 
   keystone.os.agents.drago = {
     fullName = "Drago";

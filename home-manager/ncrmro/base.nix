@@ -31,10 +31,6 @@
     signal-desktop
   ];
 
-  # Keystone desktop includes terminal
-  keystone.desktop.enable = true;
-  keystone.desktop.hyprland.enable = true;
-
   keystone.terminal.ageYubikey = {
     enable = true;
     identities = [
@@ -71,15 +67,7 @@
   programs.fastfetch.enable = true;
 
   programs.git.settings = {
-    user = {
-      name = "Nicholas Romero";
-      email = "ncrmro@gmail.com";
-      signingkey = "~/.ssh/id_ed25519";
-    };
     credential.helper = "store";
-    push.autoSetupRemote = true;
-    gpg.format = "ssh";
-    commit.gpgsign = true;
     includeIf."gitdir:~/code/unsupervised/" = {
       path = "~/code/unsupervised/.gitconfig";
     };

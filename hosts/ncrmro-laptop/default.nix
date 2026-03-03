@@ -8,10 +8,11 @@
 }@args:
 {
   imports = [
-    inputs.lanzaboote.nixosModules.lanzaboote
+    # lanzaboote provided by keystone operating-system module
     # inputs.omarchy-nix.nixosModules.default
     ../common/optional/home-manager-base.nix
-    ../common/optional/keystone-desktop.nix
+    ../../modules/keystone.nix
+    ../../modules/keystone.desktop.nix
     # outputs.nixosModules.omarchy-config
     ./disk-config.nix
     ../common/optional/zfs.luks.root.nix
@@ -19,7 +20,6 @@
     ../common/global
     # ../common/optional/podman.nix
     ../common/optional/docker-rootless.nix
-    ../common/optional/virt-manager.nix
     # ../common/optional/docker-root.nix
     ../common/optional/tailscale.node.nix
     ../common/optional/eternal-terminal.nix

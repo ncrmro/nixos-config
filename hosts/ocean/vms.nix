@@ -35,9 +35,7 @@ let
   );
 in
 {
-  imports = [
-    ../common/optional/libvirt-server.nix
-  ];
+  # libvirt-server.nix replaced by keystone.os.hypervisor
 
   # Systemd service to ensure ZFS parent dataset and zvols exist
   systemd.services.ensure-vm-zvols = {
