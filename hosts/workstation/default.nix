@@ -33,6 +33,7 @@
   keystone.os.agents.drago = {
     fullName = "Drago";
     email = "drago@ncrmro.com";
+    space.repo = "git@git.ncrmro.com:drago/agent-space.git";
   };
 
   # Agenix secrets for agent-drago (decrypted on workstation host)
