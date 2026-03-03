@@ -1249,11 +1249,11 @@
         "omarchy": "omarchy"
       },
       "locked": {
-        "lastModified": 1772544416,
-        "narHash": "sha256-n7dmdTje/x4j7bk22Pb1KbKX7fKapke/uktGWBqtsFc=",
+        "lastModified": 1772559971,
+        "narHash": "sha256-7t5dTjXUb9xWlcP0fxynF0aPVjHH6Uush771dvvPEGI=",
         "owner": "ncrmro",
         "repo": "keystone",
-        "rev": "77414496d2e39582e59f3c3eab7443094e3c50e9",
+        "rev": "9332b6ab06d5d5be84f1d57fe602cf4de17fdb34",
         "type": "github"
       },
       "original": {
