@@ -141,7 +141,6 @@
   # Keystone server services
   keystone.server = {
     enable = true;
-    domain = "ncrmro.com";
     binaryCache = {
       enable = true;
       signKeyPaths = [ config.age.secrets.harmonia-signing-key.path ];
