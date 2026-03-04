@@ -276,6 +276,24 @@
       # Development shells
       devShells.x86_64-linux.default = nixpkgs.legacyPackages.x86_64-linux.mkShell {
         packages = [ nixpkgs.legacyPackages.x86_64-linux.nixfmt ];
+        shellHook = ''
+          build() {
+            local hosts=(mox maia ncrmro-laptop devbox mercury catalystPrimary ocean ncrmro-workstation)
+            local failed=()
+            for host in "''${hosts[@]}"; do
+              echo "Building $host..."
+              if ! nix build ".#nixosConfigurations.$host.config.system.build.toplevel" --no-link 2>&1; then
+                failed+=("$host")
+              fi
+            done
+            if [ ''${#failed[@]} -eq 0 ]; then
+              echo "All hosts built successfully."
+            else
+              echo "Failed: ''${failed[*]}"
+              return 1
+            fi
+          }
+        '';
       };
 
       devShells.aarch64-darwin.default = nixpkgs.legacyPackages.aarch64-darwin.mkShell {
