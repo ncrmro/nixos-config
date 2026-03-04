@@ -134,12 +134,21 @@
       };
     };
   };
-  # Host-specific server services (enable is in modules/keystone.server.nix)
-  keystone.server.services.attic = {
+  # Keystone server ACME (wildcard cert via Cloudflare DNS-01)
+  keystone.server.acme = {
     enable = true;
-    environmentFile = config.age.secrets.attic-server-token-key.path;
-    # publicKey = null; -- set after creating the cache with atticd-atticadm
+    extraDomainNames = [ "*.home.ncrmro.com" ];
   };
+
+  # Cloudflare API token for ACME DNS-01 challenge
+  age.secrets.cloudflare-api-token = {
+    file = "${inputs.agenix-secrets}/secrets/cloudflare-api-token.age";
+    owner = "acme";
+    group = "acme";
+  };
+
+  # Host-specific server services (enable is in modules/keystone.server.nix)
+  keystone.server.services.attic.enable = true;
 
   # Attic server token signing key
   age.secrets.attic-server-token-key = {

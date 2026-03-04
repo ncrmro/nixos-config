@@ -1,4 +1,6 @@
-{ config, inputs, ... }:
+# Manual vhosts for non-keystone services.
+# ACME, base nginx, and firewall are managed by keystone.server.acme + keystone nginx module.
+{ ... }:
 let
   k8sIngressHttp = "127.0.0.1:8080";
   # Allow/deny config for Tailscale-only services
@@ -17,42 +19,6 @@ let
   '';
 in
 {
-  age.secrets.cloudflare-api-token = {
-    file = "${inputs.agenix-secrets}/secrets/cloudflare-api-token.age";
-    owner = "acme";
-    group = "acme";
-  };
-
-  security.acme = {
-    acceptTerms = true;
-    defaults.email = "admin@ncrmro.com";
-  };
-
-  security.acme.certs."wildcard-ncrmro-com" = {
-    domain = "*.ncrmro.com";
-    extraDomainNames = [
-      "*.home.ncrmro.com"
-      "ncrmro.com"
-    ];
-    dnsProvider = "cloudflare";
-    environmentFile = config.age.secrets.cloudflare-api-token.path;
-    group = "nginx";
-    extraLegoFlags = [ "--dns.resolvers=1.1.1.1:53" ];
-  };
-
-  services.nginx = {
-    enable = true;
-    recommendedProxySettings = true;
-    recommendedTlsSettings = true;
-    recommendedOptimisation = true;
-    recommendedGzipSettings = true;
-  };
-
-  networking.firewall.allowedTCPPorts = [
-    80
-    443
-  ];
-
   # Jellyfin - PUBLIC (no access restriction)
   services.nginx.virtualHosts."jellyfin.ncrmro.com" = {
     forceSSL = true;

@@ -48,11 +48,8 @@
     mode = "0400";
   };
 
-  # Attic push configuration
-  keystone.binaryCache.push = {
-    enable = true;
-    tokenFile = config.age.secrets.attic-push-token.path;
-  };
+  # Attic push configuration (tokenFile defaults to /run/agenix/attic-push-token)
+  keystone.binaryCache.push.enable = true;
 
   # Attic push token
   age.secrets.attic-push-token = {
