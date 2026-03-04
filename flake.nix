@@ -17,31 +17,14 @@
 
     lanzaboote.follows = "keystone/lanzaboote";
 
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    home-manager.follows = "keystone/home-manager";
 
-    omarchy-nix = {
-      url = "git+https://github.com/ncrmro/omarchy-nix.git?ref=feat/submodule-omarchy-arch";
-      #url = "git+file:///home/ncrmro/code/omarchy/omarchy-nix/";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
+    # Additional tools (follows keystone)
+    nixos-hardware.follows = "keystone/nixos-hardware";
+    nix-index-database.follows = "keystone/nix-index-database";
 
-    # Additional tools
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-    nix-index-database = {
-      url = "github:nix-community/nix-index-database";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # Secret management
-    agenix = {
-      url = "github:ryantm/agenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
+    # Secret management (follows keystone)
+    agenix.follows = "keystone/agenix";
 
     # Private secrets repository (requires Tailscale connection to git.ncrmro.com)
     # This is a private repo - builds will fail without Tailscale access
@@ -62,42 +45,17 @@
       inputs.disko.follows = "disko";
     };
 
-    # Omarchy themes (original arch version)
-    omarchy = {
-      url = "github:basecamp/omarchy";
-      flake = false;
-    };
-
-    # Helix editor themes
-    kinda-nvim-hx = {
-      url = "github:strash/kinda_nvim.hx";
-      flake = false;
-    };
-
-    # llama.cpp - latest for MXFP4 support
+    # llama.cpp - latest for MXFP4 support (workstation-specific)
     llama-cpp = {
       url = "github:ggml-org/llama.cpp";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Declarative Flatpak management
-    nix-flatpak.url = "github:gmodena/nix-flatpak";
-
-    # Walker launcher
-    walker = {
-      url = "github:abenz1267/walker";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # Ghostty terminal (latest for SIGUSR2 config reload support)
-    ghostty = {
-      url = "github:ghostty-org/ghostty";
-    };
-
-    # Yazi terminal file manager
-    yazi = {
-      url = "github:sxyazi/yazi";
-    };
+    # Follows keystone for shared desktop/tool inputs
+    nix-flatpak.follows = "keystone/nix-flatpak";
+    walker.follows = "keystone/walker";
+    ghostty.follows = "keystone/ghostty";
+    yazi.follows = "keystone/yazi";
   };
 
   outputs =
@@ -108,7 +66,6 @@
       disko,
       home-manager,
       nixos-hardware,
-      nix-index-database,
       agenix,
       ...
     }:
@@ -138,13 +95,13 @@
           pkgs = pkgsForSystem "x86_64-linux";
         in
         {
-          inherit (pkgs)
+          inherit (pkgs.keystone)
             claude-code
-            # codex
+            codex
             gemini-cli
-            mcp-language-server
             zesh
             ;
+          inherit (pkgs) mcp-language-server;
         };
 
       # Import NixOS and Home Manager modules
