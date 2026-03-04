@@ -61,6 +61,12 @@ When developing features intended for upstream Keystone:
 
 **Why both together?** The flake.lock pins the GitHub version while `.submodules/keystone` tracks the local checkout. Both must point to the same commit for consistency. Committing them separately can cause confusion about which version is active.
 
+**NEVER run bare `nix flake update`** when working on keystone or agenix-secrets changes. A full update pulls new nixpkgs and all other inputs, causing massive rebuilds unrelated to your change. Always use targeted updates:
+```bash
+nix flake update keystone              # keystone only
+nix flake update keystone agenix-secrets  # both submodules
+```
+
 **Handling flake.lock Conflicts During Rebase:**
 When rebasing and encountering `flake.lock` conflicts, always accept upstream changes then re-lock:
 ```bash
@@ -111,6 +117,8 @@ git commit -m "chore: update agenix-secrets"
 ```
 
 **Why both together?** The flake.lock pins the Git version while `agenix-secrets/` tracks the local checkout. Both must point to the same commit for consistency. Committing them separately can cause confusion about which version is active.
+
+**NEVER run bare `nix flake update`** — always target specific inputs (e.g., `nix flake update agenix-secrets`) to avoid pulling unrelated nixpkgs changes that trigger massive rebuilds.
 
 **Handling flake.lock Conflicts During Rebase:**
 When rebasing and encountering `flake.lock` conflicts, always accept upstream changes then re-lock:
