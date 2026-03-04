@@ -26,6 +26,8 @@
     # Secret management (follows keystone)
     agenix.follows = "keystone/agenix";
 
+    nix-flatpak.follows = "keystone/nix-flatpak";
+
     # Private secrets repository (requires Tailscale connection to git.ncrmro.com)
     # This is a private repo - builds will fail without Tailscale access
     agenix-secrets = {

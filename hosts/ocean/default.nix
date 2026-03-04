@@ -135,18 +135,15 @@
     };
   };
   # Host-specific server services (enable is in modules/keystone.server.nix)
-  keystone.server.binaryCache = {
+  keystone.server.services.attic = {
     enable = true;
-    signKeyPaths = [ config.age.secrets.harmonia-signing-key.path ];
-    publicKey = "harmonia.ncrmro.com-1:+ch6VQl2xutZ4M6U1uRQdCFb110MloNgRhH0/Dg+ut0=";
+    environmentFile = config.age.secrets.attic-server-token-key.path;
+    # publicKey = null; -- set after creating the cache with atticd-atticadm
   };
 
-  # Harmonia binary cache signing key
-  age.secrets.harmonia-signing-key = {
-    file = "${inputs.agenix-secrets}/secrets/harmonia-signing-key.age";
-    owner = "harmonia";
-    group = "harmonia";
-    mode = "0400";
+  # Attic server token signing key
+  age.secrets.attic-server-token-key = {
+    file = "${inputs.agenix-secrets}/secrets/attic-server-token-key.age";
   };
 
   keystone.os.gitServer = {

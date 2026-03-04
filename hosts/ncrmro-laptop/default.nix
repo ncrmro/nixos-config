@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   outputs,
   modulesPath,
@@ -45,6 +46,17 @@
     file = "${inputs.agenix-secrets}/secrets/cliflux-config.age";
     owner = "ncrmro";
     mode = "0400";
+  };
+
+  # Attic push configuration
+  keystone.binaryCache.push = {
+    enable = true;
+    tokenFile = config.age.secrets.attic-push-token.path;
+  };
+
+  # Attic push token
+  age.secrets.attic-push-token = {
+    file = "${inputs.agenix-secrets}/secrets/attic-push-token.age";
   };
 
   # GitHub agents token

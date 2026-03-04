@@ -23,11 +23,12 @@
     "flakes"
   ];
 
-  # Harmonia binary cache on ocean (Tailscale-only)
+  # Attic binary cache on ocean (Tailscale-only)
   keystone.binaryCache = {
     enable = true;
-    url = "https://harmonia.ncrmro.com";
-    publicKey = "harmonia.ncrmro.com-1:+ch6VQl2xutZ4M6U1uRQdCFb110MloNgRhH0/Dg+ut0=";
+    url = "https://cache.ncrmro.com";
+    # TODO: set after creating the cache with atticd-atticadm
+    publicKey = null;
   };
   time.timeZone = "America/Chicago";
 

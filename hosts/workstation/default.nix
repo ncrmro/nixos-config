@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   outputs,
   modulesPath,
@@ -66,6 +67,17 @@
   keystone.os.services.airplay = {
     enable = true;
     name = "Workstation Speakers";
+  };
+
+  # Attic push configuration
+  keystone.binaryCache.push = {
+    enable = true;
+    tokenFile = config.age.secrets.attic-push-token.path;
+  };
+
+  # Attic push token
+  age.secrets.attic-push-token = {
+    file = "${inputs.agenix-secrets}/secrets/attic-push-token.age";
   };
 
   # Secure Boot configuration (module provided by keystone)
