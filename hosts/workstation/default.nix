@@ -35,6 +35,7 @@
     fullName = "Drago";
     email = "drago@ncrmro.com";
     space.repo = "git@git.ncrmro.com:drago/agent-space.git";
+    ssh.publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID9TbHc93b0RWSekJcUmlDkw0UulfzkbJqdd0ejfuV2C agent-drago";
   };
 
   # Agenix secrets for agent-drago (decrypted on workstation host)
