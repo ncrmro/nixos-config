@@ -35,6 +35,7 @@
     enable = true;
     identities = [
       "AGE-PLUGIN-YUBIKEY-17DDRYQ5ZFMHALWQJTKHAV" # Serial: 36854515, Slot: 1 (yubi-black)
+      "AGE-PLUGIN-YUBIKEY-1G9UNYQ5ZJKDT4CQZ8927Z" # Serial: 36862273, Slot: 1 (yubi-green)
     ];
   };
 
