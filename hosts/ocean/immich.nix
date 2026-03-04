@@ -6,9 +6,15 @@
     mediaLocation = "/ocean/media/photos";
   };
 
-  # Ensure immich owns the media directory on startup
-  # Fixes permission issues when files are created by other processes
-  systemd.services.immich-server.serviceConfig.ExecStartPre = [
-    "+${pkgs.coreutils}/bin/chown -R immich:immich /ocean/media/photos"
-  ];
+  # immich needs media group to traverse /ocean/media/ (770 media:media)
+  users.users.immich.extraGroups = [ "media" ];
+
+  systemd.services.immich-server.serviceConfig = {
+    # Also grant media group inside the systemd sandbox
+    SupplementaryGroups = [ "media" ];
+    # Ensure immich owns the photos directory on startup
+    ExecStartPre = [
+      "+${pkgs.coreutils}/bin/chown -R immich:immich /ocean/media/photos"
+    ];
+  };
 }
