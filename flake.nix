@@ -33,9 +33,6 @@
       flake = false;
     };
 
-    # Hyprland - follows keystone's pinned version
-    hyprland.follows = "keystone/hyprland";
-
     # Keystone - self-sovereign infrastructure platform
     # NEVER CHANGE THIS URL TO A LOCAL PATH. EVER. USE THE GITHUB REPO.
     # For local dev without commits, use: ./bin/dev-keystone <hostname>
@@ -51,11 +48,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Follows keystone for shared desktop/tool inputs
-    nix-flatpak.follows = "keystone/nix-flatpak";
-    walker.follows = "keystone/walker";
-    ghostty.follows = "keystone/ghostty";
-    yazi.follows = "keystone/yazi";
   };
 
   outputs =
