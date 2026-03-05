@@ -179,6 +179,7 @@
           specialArgs = {
             inherit inputs self;
             outputs = self;
+            oceanConfig = self.nixosConfigurations.ocean.config;
           };
         };
         catalystPrimary = nixpkgs.lib.nixosSystem {

@@ -1,4 +1,4 @@
-{ ... }:
+{ inputs, oceanConfig, ... }:
 let
   keys = import ../../modules/users/keys.nix;
 in
@@ -11,6 +11,7 @@ in
     ../common/optional/agenix.nix
     ./adguard-home.nix
     ./nginx.nix
+    inputs.keystone.nixosModules.headscale-dns
   ];
 
   boot.tmp.cleanOnBoot = true;
@@ -39,6 +40,12 @@ in
     enable = true;
     tags = [ "tag:server" ];
     loginServer = "https://mercury.ncrmro.com";
+  };
+
+  # Auto-DNS: import generated DNS records from ocean's keystone services
+  keystone.headscale = {
+    enable = true;
+    dnsRecords = oceanConfig.keystone.server.generatedDNSRecords;
   };
 
   system.stateVersion = "25.05";

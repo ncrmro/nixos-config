@@ -134,6 +134,9 @@
       };
     };
   };
+  # Tailscale IP for auto-DNS record generation (used by keystone dns.nix)
+  keystone.server.tailscaleIP = "100.64.0.6";
+
   # Keystone server ACME (wildcard cert via Cloudflare DNS-01)
   keystone.server.acme = {
     enable = true;
