@@ -2,157 +2,284 @@
 
 This is a NixOS configuration repository using flakes for managing system configurations across multiple hosts. The repository manages both NixOS system configurations and Home Manager user configurations, with a focus on infrastructure-as-code patterns.
 
+## Investigating Issues on Hosts
+
+When debugging service problems, investigate autonomously — run commands directly rather than asking the user to run them for you.
+
+**Step 1: Identify the host**
+```bash
+cat /etc/hostname
+```
+Always check this first — available services differ per host (see Host Inventory below).
+
+**Step 2: Use systemctl and journalctl liberally**
+```bash
+systemctl status <service>                         # Current state + recent logs
+systemctl list-units --failed                      # All failed units
+journalctl -u <service> --since "10 min ago"       # Recent logs
+journalctl -u <service> -p err --since today       # Errors only
+journalctl -u <service> --no-pager | tail -100     # Last 100 lines
+```
+
+**Step 3: sudo is not available**
+
+`sudo` commands will fail. When investigation requires elevated privileges (reading root-owned logs, restarting services, checking firewall rules), write a short script to `/tmp` that dumps the output to a temp file, then ask the user to run it:
+
+```bash
+# Write a dump script the user can execute
+cat > /tmp/debug-service.sh << 'EOF'
+#!/bin/bash
+sudo journalctl -u stalwart --since "1 hour ago" > /tmp/stalwart-logs.txt
+sudo systemctl show stalwart --property=ActiveState,SubState,MainPID > /tmp/stalwart-status.txt
+sudo ss -tlnp | grep -E ':(25|465|993|587) ' > /tmp/stalwart-ports.txt
+echo "Done. Files written to /tmp/stalwart-*.txt"
+EOF
+chmod +x /tmp/debug-service.sh
+```
+
+The user runs the script once, then you read `/tmp/stalwart-logs.txt` etc. directly. This avoids repeated back-and-forth copy-pasting of command output.
+
+## Keystone: Shared Convention Layer
+
+[Keystone](https://github.com/ncrmro/keystone) is the upstream platform providing reusable NixOS modules that any user could adopt for their own infrastructure. It lives at `.submodules/keystone` as a git submodule and is consumed as a flake input.
+
+**When to put something in keystone vs nixos-config:**
+- **Keystone**: Reusable modules that others could benefit from (server roles, desktop setup, terminal environment, mail, DNS, binary cache, hardware key management)
+- **nixos-config**: Host-specific configuration, secrets, per-user overrides, local-only services
+
+**Keystone modules used in this repo:**
+
+| Module | Import Path | Purpose |
+|--------|-------------|---------|
+| `operating-system` | `keystone.nixosModules.operating-system` | Base OS config, user management, hypervisor |
+| `hardwareKey` | `keystone.nixosModules.hardwareKey` | YubiKey SSH/GPG management |
+| `server` | `keystone.nixosModules.server` | Server infrastructure (ACME, DNS auto-generation, services) |
+| `desktop` | `keystone.nixosModules.desktop` | Desktop environment (Hyprland, GNOME, etc.) |
+| `headscale-dns` | `keystone.nixosModules.headscale-dns` | Auto-import DNS records from server configs |
+| `terminal` | `keystone.homeModules.terminal` | Terminal environment for agents/users |
+
+**Key keystone options used:**
+- `keystone.os.mail` - Stalwart mail server (replaces direct `services.stalwart-mail` config)
+- `keystone.os.gitServer` - Forgejo git server
+- `keystone.server.acme` - Wildcard TLS certs via Cloudflare DNS-01
+- `keystone.server.services.attic` - Attic binary cache server
+- `keystone.server.tailscaleIP` - Tailscale IP for auto-DNS record generation
+- `keystone.server.generatedDNSRecords` - Auto-generated DNS records consumed by mercury
+- `keystone.binaryCache.push` - Attic binary cache push (on workstation/laptop)
+- `keystone.os.agents.<name>` - Agent VM user provisioning (SSH keys, email, space repo)
+- `keystone.os.services.airplay` - AirPlay receiver
+- `keystone.os.services.resolved` - systemd-resolved for Tailscale MagicDNS
+
+**Wrapper modules in this repo** (`modules/`):
+- `modules/keystone.nix` - Imports `operating-system` + `hardwareKey`, configures YubiKeys and ncrmro user
+- `modules/keystone.server.nix` - Imports `server` module, enables it
+- `modules/keystone.desktop.nix` - Imports `desktop` module, configures for ncrmro user
+
+## Clean Git History: Submodule + Flake Update Workflow
+
+This repo has two git submodules that are also flake inputs. Both the submodule directory and `flake.lock` must be committed together to keep them pointing at the same commit.
+
+**Submodules:**
+- `.submodules/keystone` - GitHub: `github:ncrmro/keystone`
+- `agenix-secrets` - Private Forgejo: `git+ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git`
+
+### The Golden Rule
+
+**NEVER run bare `nix flake update`**. A full update pulls new nixpkgs and all other inputs, causing massive rebuilds unrelated to your change. Always target specific inputs:
+
+```bash
+nix flake update keystone                    # keystone only
+nix flake update agenix-secrets              # secrets only
+nix flake update keystone agenix-secrets     # both submodules
+```
+
+### Updating Keystone
+
+```bash
+# 1. Make and test changes locally
+cd .submodules/keystone
+# ... edit files ...
+cd ../..
+./bin/keystone-dev --build   # Verify changes build (no sudo needed)
+
+# 2. Commit and push from submodule
+cd .submodules/keystone
+git add -A && git commit -m "feat(server): description" && git push
+cd ../..
+
+# 3. Update flake input AND stage submodule together in ONE commit
+nix flake update keystone
+git add .submodules/keystone flake.lock
+git commit -m "feat: update keystone (description)"
+```
+
+### Updating Agenix Secrets
+
+```bash
+# 1. Edit secrets in submodule
+cd agenix-secrets
+agenix -e secrets/new-secret.age   # or edit secrets.nix
+git add -A && git commit -m "Add new secret" && git push
+cd ..
+
+# 2. Update flake input AND stage submodule together in ONE commit
+nix flake update agenix-secrets
+git add agenix-secrets flake.lock
+git commit -m "chore: update agenix-secrets"
+```
+
+### Why Both Together?
+
+The `flake.lock` pins the GitHub/Forgejo version while the submodule directory tracks the local checkout. Both must point to the same commit. Committing them separately creates confusion about which version is active and pollutes git history with unnecessary split commits.
+
+### Handling flake.lock Conflicts During Rebase
+
+```bash
+git checkout --theirs flake.lock
+nix flake update keystone   # or agenix-secrets, or both
+git add flake.lock
+git rebase --continue
+```
+
+### Adding External Nix Package Sources
+
+Add as **flake inputs**, NOT git submodules. Choose the appropriate flake:
+- **nixos-config flake.nix**: Packages/modules specific to this configuration
+- **keystone flake.nix**: Packages/modules that should be part of the upstream platform
+
+## Host Inventory
+
+### Servers
+
+| Host | Role | Location | Tailscale IP | Key Services |
+|------|------|----------|--------------|--------------|
+| **ocean** | Homelab server | Home LAN (192.168.1.10) | 100.64.0.6 | See below |
+| **mercury** | VPS | Cloud | 100.64.0.38 | Headscale, DERP, AdGuard, Nginx |
+| **maia** | Legacy server | Home LAN | — | SSH only (minimal config) |
+
+### Desktops/Laptops
+
+| Host | Role | Key Features |
+|------|------|--------------|
+| **ncrmro-workstation** | Primary desktop | AMD GPU, ZFS, Secure Boot, bridge networking for VMs, agent hosting, Attic push |
+| **ncrmro-laptop** | Portable laptop | ZFS, Secure Boot, fingerprint reader, ZFS remote replication to maia |
+| **mox** | Older desktop | Minimal config |
+
+### Agent VMs
+
+| Host | Agent | SSH Port | SPICE Port | Headscale User |
+|------|-------|----------|------------|----------------|
+| **agent-drago** | Primary coding agent | 2230 | 5900 | drago |
+| **agent-luce** | Secondary agent | 2224 | 5901 | luce |
+| **agent-drago-minimal** | Fast-build minimal image | — | — | — |
+| **agent-base** | Base image for cloning | — | — | — |
+
+### Other
+
+| Host | Purpose |
+|------|---------|
+| **test-vm** | Desktop testing VM |
+| **devbox** | Development box |
+| **catalystPrimary** | Catalyst cluster node |
+
+## Services on Ocean
+
+Ocean is the primary homelab server. Services are configured through a mix of keystone modules and local optional modules.
+
+| Service | Config Location | Access URL |
+|---------|----------------|------------|
+| **Stalwart Mail** | `keystone.os.mail` + `hosts/ocean/default.nix` | mail.ncrmro.com (IMAP/SMTP) |
+| **Forgejo** | `keystone.os.gitServer` | git.ncrmro.com |
+| **Attic** (binary cache) | `keystone.server.services.attic` | cache.ncrmro.com |
+| **Grafana** | `hosts/ocean/observability/grafana.nix` | grafana.ncrmro.com |
+| **Prometheus** | `hosts/ocean/observability/prometheus.nix` | prometheus.ncrmro.com |
+| **Loki** | `hosts/ocean/observability/loki.nix` | loki.ncrmro.com |
+| **Vaultwarden** | `hosts/ocean/vaultwarden.nix` | vaultwarden.ncrmro.com |
+| **Home Assistant** | `hosts/common/optional/home-assistant.nix` | homeassistant.ncrmro.com |
+| **AdGuard Home** | `hosts/ocean/adguard-home.nix` | adguard.ncrmro.com |
+| **Servarr** (Sonarr, Radarr, etc.) | `hosts/common/optional/servarr.nix` | Various |
+| **Immich** | `hosts/ocean/immich.nix` | immich.ncrmro.com |
+| **RSSHub** | `hosts/ocean/rsshub.nix` | rsshub.ncrmro.com |
+| **Miniflux** | `hosts/ocean/miniflux.nix` | miniflux.ncrmro.com |
+| **Nginx** | `hosts/ocean/nginx.nix` | Reverse proxy for all services |
+| **SMB Backups** | `hosts/common/optional/smb-backup-shares.nix` | Time Machine + Windows backup |
+| **NFS** | `hosts/ocean/nfs.nix` | ZFS dataset exports |
+| **Alloy** | `hosts/common/optional/alloy-client.nix` | Log/metric shipping to Loki/Prometheus |
+
+All `*.ncrmro.com` domains resolve via Tailscale MagicDNS only. ACME wildcard certs are managed by `keystone.server.acme` via Cloudflare DNS-01.
+
+## Services on Mercury
+
+Mercury is a VPS running headscale and public-facing services.
+
+| Service | Config Location |
+|---------|----------------|
+| **Headscale** | `modules/nixos/headscale/default.nix` |
+| **DERP relay** | Part of headscale config |
+| **AdGuard Home** | `hosts/mercury/adguard-home.nix` |
+| **Nginx** | `hosts/mercury/nginx.nix` |
+| **Alloy** | `hosts/common/optional/alloy-client.nix` |
+
+### Auto-DNS Pipeline
+
+DNS records flow automatically from ocean to mercury:
+1. Ocean's `keystone.server` generates DNS records based on enabled services (`keystone.server.generatedDNSRecords`)
+2. Mercury imports these via `keystone.headscale.dnsRecords = oceanConfig.keystone.server.generatedDNSRecords`
+3. Headscale distributes them to all tailnet clients via MagicDNS
+
+To add a new service with auto-DNS, enable it in ocean's keystone config and rebuild both ocean and mercury.
+
 ## Architecture
-
-### Core Components
-
-- **Flake-based Configuration**: All system configurations are managed through `flake.nix` which defines multiple NixOS systems and Home Manager configurations
-- **Host-specific Configurations**: Each host (mox, maia, ocean, mercury, etc.) has its own configuration in `/hosts/<hostname>/`
-- **Modular Structure**: Common configurations are shared via `/hosts/common/` with optional features that can be imported per-host
-- **Kubernetes Integration**: Several hosts run K3s with NixOS-managed Kubernetes resources
-- **ZFS Storage**: Many systems use ZFS with LUKS encryption and remote replication
-- **Secret Management**: Uses agenix for encrypted secrets management
 
 ### Directory Structure
 
 - `/hosts/` - Host-specific configurations
   - `/common/global/` - Global settings applied to all hosts
   - `/common/optional/` - Optional modules (tailscale, docker, k3s, etc.)
-  - `/common/kubernetes/` - Kubernetes module definitions
+  - `/common/kubernetes/` - Kubernetes module definitions (legacy, not actively used)
 - `/home-manager/` - User-specific Home Manager configurations
+  - `/common/global/` - Shared home config
+  - `/common/features/` - Feature modules (cli, desktop, email, etc.)
+  - `/common/agents/` - Shared agent home config
+  - `/common/optional/` - Optional home modules (MCP, mosh, etc.)
 - `/modules/` - Custom NixOS and user modules
-  - `.submodules/keystone/` - The upstream Keystone repository containing core infrastructure modules
-- `/bin/` - Helper scripts for deployment and management
-- `/docs/` - Documentation for various setup procedures
-- `/kubernetes/` - Raw Kubernetes manifests (legacy)
-- `/agenix-secrets/` - Private submodule containing encrypted agenix secrets
+  - `keystone.nix`, `keystone.server.nix`, `keystone.desktop.nix` - Keystone wrapper modules
+  - `/modules/nixos/` - Local NixOS modules (headscale, steam, bambu-studio)
+  - `/modules/users/` - User definitions and SSH keys
+- `.submodules/keystone/` - Upstream Keystone submodule
+- `/agenix-secrets/` - Private submodule with encrypted secrets
+- `/bin/` - Helper scripts
+- `/overlays/` - Nix overlays (imports keystone overlay + local packages)
+- `/packages/` - Local package definitions (claude-code, codex, gemini-cli, mcp-language-server, zesh)
 
-### Keystone Submodule
+### Flake Input Follows
 
-Located at `.submodules/keystone`, this is a Git submodule tracking the [ncrmro/keystone](https://github.com/ncrmro/keystone) repository. Keystone provides the core infrastructure-as-code building blocks used by this repository.
-
-**Key capabilities:**
-- **Self-Sovereign Infrastructure**: Configurations for bare-metal and cloud environments.
-- **Server Roles**: Gateway, VPN endpoint, DNS, storage, and backup servers.
-- **Client Roles**: Workstations (always-on dev machines) and Interactive Clients (laptops/portables).
-- **Security**: TPM integration, Full Disk Encryption (LUKS), Secure Boot, and Zero-Knowledge architecture.
-- **NixOS Modules**: Reusable modules for servers, clients, disko configurations, secure boot, and more.
-
-**Development Workflow:**
-When developing features intended for upstream Keystone:
-1. Make changes in `.submodules/keystone`.
-2. Test using the local override mechanism:
-   - **Recommended**: Use `bin/keystone-dev --build` to verify changes build correctly without needing `sudo`.
-   - Alternative: `nixos-rebuild switch ... --override-input keystone "path:.submodules/keystone"`
-3. Commit and push changes from the submodule directory:
-   ```bash
-   cd .submodules/keystone
-   git add -A && git commit -m "feat(server): description" && git push
-   cd ../..
-   ```
-4. **IMPORTANT**: Update flake input AND stage submodule together in ONE commit:
-   ```bash
-   nix flake update keystone
-   git add .submodules/keystone flake.lock
-   git commit -m "feat: update keystone with description"
-   # Or amend if updating an existing commit:
-   # git commit --amend
-   ```
-
-**Why both together?** The flake.lock pins the GitHub version while `.submodules/keystone` tracks the local checkout. Both must point to the same commit for consistency. Committing them separately can cause confusion about which version is active.
-
-**NEVER run bare `nix flake update`** when working on keystone or agenix-secrets changes. A full update pulls new nixpkgs and all other inputs, causing massive rebuilds unrelated to your change. Always use targeted updates:
-```bash
-nix flake update keystone              # keystone only
-nix flake update keystone agenix-secrets  # both submodules
-```
-
-**Handling flake.lock Conflicts During Rebase:**
-When rebasing and encountering `flake.lock` conflicts, always accept upstream changes then re-lock:
-```bash
-git checkout --theirs flake.lock
-nix flake update keystone  # or whatever input was updated
-git add flake.lock
-git rebase --continue
-```
-
-**Adding External Nix Package Sources:**
-When adding external Nix package sources (e.g., `numtide/llm-agents.nix` for AI coding tools), add them as **flake inputs**, NOT as git submodules. Choose the appropriate flake based on scope:
-- **nixos-config flake.nix**: For packages/modules specific to this configuration
-- **keystone flake.nix**: For packages/modules that should be part of the upstream Keystone platform
-
-Example flake input:
-```nix
-llm-agents = {
-  url = "github:numtide/llm-agents.nix";
-  inputs.nixpkgs.follows = "nixpkgs";
-};
-```
-
-### Agenix Secrets Flake Input
-
-The `agenix-secrets` input is a private Git repository containing encrypted secrets. It's fetched as a flake input rather than a submodule to ensure secrets are properly included in nix store paths.
-
-**Repository:** `ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git`
-
-**Important:** This repository is only accessible via Tailscale (git.ncrmro.com resolves to a Tailscale IP). Builds will fail without Tailscale connection.
-
-**Contents:**
-- `secrets.nix` - Defines which SSH keys can decrypt which secrets
-- `secrets/` - Directory containing all `.age` encrypted secret files
-
-**Update Workflow:**
-When updating secrets, always commit the submodule and flake.lock together:
-```bash
-# 1. Edit secrets in submodule
-cd agenix-secrets
-agenix -e secrets/new-secret.age  # or edit secrets.nix
-git add -A && git commit -m "Add new secret" && git push
-cd ..
-
-# 2. IMPORTANT: Update flake input AND stage submodule together in ONE commit
-nix flake update agenix-secrets
-git add agenix-secrets flake.lock
-git commit -m "chore: update agenix-secrets"
-```
-
-**Why both together?** The flake.lock pins the Git version while `agenix-secrets/` tracks the local checkout. Both must point to the same commit for consistency. Committing them separately can cause confusion about which version is active.
-
-**NEVER run bare `nix flake update`** — always target specific inputs (e.g., `nix flake update agenix-secrets`) to avoid pulling unrelated nixpkgs changes that trigger massive rebuilds.
-
-**Handling flake.lock Conflicts During Rebase:**
-When rebasing and encountering `flake.lock` conflicts, always accept upstream changes then re-lock:
-```bash
-git checkout --theirs flake.lock
-nix flake update agenix-secrets  # or whatever input was updated
-git add flake.lock
-git rebase --continue
-```
+Many flake inputs follow keystone to keep versions consistent and avoid duplicate downloads:
+- `nixpkgs` follows `keystone/nixpkgs` (nixos-unstable)
+- `home-manager`, `lanzaboote`, `agenix`, `nixos-hardware`, `nix-index-database`, `nix-flatpak` all follow keystone
 
 ## Common Commands
 
 ### Building and Deploying
 
 ```bash
-# Check flake configuration
-nix flake check
-
-# Update flake inputs
-nix flake update
-
 # Deploy to local system
 sudo nixos-rebuild switch --flake .#<hostname>
 
-# Deploy to remote host
+# Deploy to remote host via Tailscale
 ./bin/sync <hostname> <ip_address>
+
+# Update specific hosts (convenience scripts)
+./bin/updateOcean         # Rebuild ocean
+./bin/updateMercury       # Rebuild mercury
+./bin/updateMaia          # Rebuild maia
+./bin/updateWorkstation   # Rebuild workstation
 
 # Verify local keystone changes (without sudo)
 ./bin/keystone-dev --build
 
-# Update specific hosts (convenience scripts)
-./bin/updateMaia       # Update maia host
-./bin/updateOcean      # Update ocean host
-./bin/updateMercury    # Update mercury host
+# Check flake configuration
+nix flake check
 ```
 
 ### Development Workflow
@@ -171,14 +298,131 @@ nix build .#nixosConfigurations.test-vm.config.system.build.vm
 
 ### Home Manager
 
-Home Manager is integrated into NixOS and activated automatically during `nixos-rebuild switch`. **Never run `home-manager switch` directly** - it will cause conflicts with the NixOS-managed home-manager service.
+Home Manager is integrated into NixOS and activated automatically during `nixos-rebuild switch`. **Never run `home-manager switch` directly** - it conflicts with the NixOS-managed home-manager service.
+
+## Agent VMs
+
+Agent VMs are isolated NixOS virtual machines for autonomous AI agents. Each agent has its own identity, credentials, and environment. They run on the workstation host via libvirt/QEMU.
+
+### Agent VM Configuration
+
+Key configuration files:
+- `hosts/common/optional/agent-base.nix` - System-level config (GNOME, SSH, systemd-resolved, browser policies)
+- `hosts/common/optional/agent-minimal.nix` - Minimal SSH-only variant (fast build)
+- `home-manager/common/agents/base.nix` - Shared packages (bat, fd, fzf, jq, btop, gh, browsers, SSH keygen)
+- `home-manager/drago/agent.nix` - Drago-specific config (imports keystone.terminal + agent base)
+- `home-manager/luce/agent.nix` - Luce-specific config
+
+Agent users are provisioned on the workstation host via `keystone.os.agents.<name>` which sets up SSH keys, email, and agent workspace ("space") repos.
+
+### Remote Rebuild and Deploy
+
+Agents auto-connect to headscale on boot. Update via Tailscale:
 
 ```bash
-# CORRECT: Home Manager is applied as part of NixOS rebuild
-sudo nixos-rebuild switch --flake .#<hostname>
+nixos-rebuild switch --flake .#agent-drago --target-host drago@agent-drago --build-host localhost
+nixos-rebuild switch --flake .#agent-luce --target-host luce@agent-luce --build-host localhost
+```
 
-# WRONG: Do not use home-manager directly
-# home-manager switch --flake .#ncrmro@<hostname>  # Don't do this!
+### Building Agent Images
+
+```bash
+# Build base qcow2 image
+nix build .#nixosConfigurations.agent-base.config.system.build.qcow2
+cp result/nixos.qcow2 ~/.agentvms/agent-drago.qcow2
+
+# Define and start VM
+virsh --connect qemu:///session define hosts/agent-drago/vm.xml
+virsh --connect qemu:///session start agent-drago
+```
+
+See [docs/agentvms.md](docs/agentvms.md) for full documentation.
+
+## Headscale ACL Management
+
+ACL configuration is in `modules/nixos/headscale/acl.hujson`. See the file header for deployment instructions.
+
+**IMPORTANT**: After modifying ACLs, you must:
+1. Deploy to mercury: `nixos-rebuild switch --flake .#mercury`
+2. Restart headscale: `sudo systemctl restart headscale`
+3. Restart tailscaled on affected nodes to pick up the new network map
+
+**Applying tags to nodes:**
+```bash
+headscale nodes list -t  # Show current tags
+headscale nodes tag -i <node-id> -t tag:name1,tag:name2
+```
+
+**Key tags:**
+- `tag:agent` - Agent VMs (allows access to ocean services)
+- `tag:server` - Server nodes
+- `tag:ocean-ingress` - Ocean node ingress (ports 80, 443, 2222)
+- `tag:ocean-email` - Ocean node email (ports 993, 465, 25)
+
+## Stalwart Mail Server
+
+Stalwart is configured on ocean via `keystone.os.mail`. The keystone module handles the NixOS service setup; host-specific config (TLS certs, admin auth, allowed IPs) is in `hosts/ocean/default.nix`.
+
+### Service Name
+
+```bash
+systemctl status stalwart
+journalctl -u stalwart --since "10 min ago"
+```
+
+### Stalwart TOML Custom Syntax
+
+Stalwart uses a custom TOML parser with set notation:
+
+| Setting | Stalwart Syntax | Standard TOML (WRONG) |
+|---------|----------------|----------------------|
+| IP allowlist | `allowed-ip = { "10.0.0.0/8" }` | `allowed-ip = ["10.0.0.0/8"]` |
+| Multiple values | `{ "a", "b", "c" }` | `["a", "b", "c"]` |
+
+### Debugging IP Blocking
+
+If Himalaya/IMAP clients get "TLS handshake EOF" errors:
+1. Check Stalwart logs: `journalctl -u stalwart --since "10 min ago" | grep -i block`
+2. Look for `security.ip-blocked` messages
+3. Tailscale IPs are allowlisted via `keystone.os.mail.allowedIps`
+4. Clear existing blocks via admin UI or API:
+   ```bash
+   curl -X DELETE -u admin:$(sudo cat /run/agenix/stalwart-admin-password) \
+     "http://localhost:8082/api/blocked?ip=100.64.0.7"
+   ```
+
+## Himalaya Email Client
+
+Himalaya is configured via a shared module at `home-manager/common/features/cli/himalaya.nix` with per-user overrides.
+
+### Per-User Configuration
+
+- Drago: `home-manager/drago/himalaya.nix`
+- ncrmro: `home-manager/ncrmro/base.nix`
+
+### Stalwart Folder Names
+
+The module auto-maps Himalaya defaults to Stalwart names:
+
+| Himalaya Default | Stalwart Name |
+|------------------|---------------|
+| Sent | Sent Items |
+| Drafts | Drafts |
+| Trash | Deleted Items |
+
+### Sending Raw Emails
+
+Always include the `Date:` header (without it, emails show as 1970-01-01):
+
+```bash
+echo "From: user@ncrmro.com
+To: recipient@ncrmro.com
+Subject: Test
+Date: $(date -R)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Body here" | himalaya message send
 ```
 
 ## Configuration Patterns
@@ -198,165 +442,26 @@ Import from `/hosts/common/optional/` in your host's `default.nix`:
 ```nix
 imports = [
   ../common/global
-  ../common/optional/tailscale.nix
+  ../common/optional/tailscale.node.nix
   ../common/optional/docker-rootless.nix
 ];
 ```
 
 ### Kubernetes Resources
 
-For hosts running K3s, Kubernetes resources can be managed through NixOS modules in `/hosts/common/kubernetes/`. These modules use the `services.k3s.autoDeployCharts` for Helm chart deployments and raw manifest application.
-
-#### Important: Helm Chart Hash Values
-
-When using `services.k3s.autoDeployCharts`, the initial `hash` value should always be an empty string `""`, not `"sha256-PLACEHOLDER"` or similar placeholders. This allows Nix to fetch the chart and emit the proper hash on first deployment.
-
-```nix
-services.k3s.autoDeployCharts = {
-  example-chart = {
-    name = "example";
-    repo = "https://charts.example.com";
-    version = "1.0.0";
-    hash = ""; # Use empty string for initial deployment
-    targetNamespace = "default";
-    values = { /* chart values */ };
-  };
-};
-```
-
-After the first deployment attempt, Nix will provide the correct hash which should then be updated in the configuration.
-
-## Agent VMs
-
-Agent VMs are isolated NixOS virtual machines for autonomous AI agents. Each agent has its own identity, credentials, and environment.
-
-### Available Agents
-
-| Agent | Purpose | SSH Port | SPICE Port | Headscale User |
-|-------|---------|----------|------------|----------------|
-| drago | Primary coding agent | 2230 | 5900 | drago |
-| luce | Secondary agent | 2224 | 5901 | luce |
-
-### Agent VM Configuration
-
-Key configuration files:
-- `hosts/common/optional/agent-base.nix` - System-level config (GNOME, SSH, DNS, browser policies)
-- `home-manager/common/agents/base.nix` - User packages (Claude Code, Gemini CLI, browsers)
-- `home-manager/drago/agent.nix` - Agent-specific overrides
-
-### DNS Resolution (Tailscale MagicDNS)
-
-Agent VMs require systemd-resolved for Tailscale MagicDNS to work. Without this, internal DNS names (grafana.ncrmro.com, git.ncrmro.com) won't resolve.
-
-Configuration in `hosts/common/optional/agent-base.nix`:
-```nix
-networking.networkmanager.dns = "systemd-resolved";
-services.resolved = {
-  enable = true;
-  settings.Resolve = {
-    DNSSEC = "allow-downgrade";
-    FallbackDNS = [ "1.1.1.1" "8.8.8.8" ];
-  };
-};
-```
-
-### Browser Extension Policies
-
-Chrome/Chromium extensions are auto-installed via system policy in `agent-base.nix`:
-```nix
-programs.chromium = {
-  enable = true;
-  extraOpts = {
-    ExtensionInstallForcelist = [
-      "nngceckbapebfimnlniiiahkandclblb;https://clients2.google.com/service/update2/crx" # Bitwarden
-      "hpbjkfadkecgpnpjnfflahhdcfboimek;https://clients2.google.com/service/update2/crx" # Claude
-    ];
-  };
-};
-```
-
-### Remote Rebuild and Deploy
-
-Agents auto-connect to headscale on boot. Update agents by building locally and deploying remotely via Tailscale:
-
-```bash
-# Build and deploy via Tailscale (recommended)
-nix build .#nixosConfigurations.agent-drago.config.system.build.toplevel --print-out-paths
-nix copy --to ssh://drago@agent-drago /nix/store/<hash>-nixos-system-agent-drago-...
-ssh drago@agent-drago "sudo /nix/store/<hash>-nixos-system-agent-drago-.../bin/switch-to-configuration switch"
-
-# Alternative: nixos-rebuild via Tailscale
-nixos-rebuild switch --flake .#agent-drago --target-host drago@agent-drago --build-host localhost
-nixos-rebuild switch --flake .#agent-luce --target-host luce@agent-luce --build-host localhost
-```
-
-### Building Agent Images
-
-```bash
-# Build base qcow2 image
-nix build .#nixosConfigurations.agent-base.config.system.build.qcow2
-cp result/nixos.qcow2 ~/.agentvms/agent-drago.qcow2
-
-# Define and start VM
-virsh --connect qemu:///session define hosts/agent-drago/vm.xml
-virsh --connect qemu:///session start agent-drago
-```
-
-See [docs/agentvms.md](docs/agentvms.md) for full documentation.
-
-## Headscale DNS
-
-Internal DNS for Tailscale-only services is managed via Headscale extra records in `modules/nixos/headscale/default.nix`. These records resolve `*.ncrmro.com` subdomains to Tailscale IPs for clients on the tailnet.
-
-**Configuration location:** `modules/nixos/headscale/default.nix` → `settings.dns.extra_records`
-
-**Adding a new DNS record:**
-
-1. Add an entry to the `extra_records` list:
-   ```nix
-   {
-     name = "myservice.ncrmro.com";
-     type = "A";
-     value = "100.64.0.6"; # ocean's Tailscale IP
-   }
-   ```
-2. Add an nginx virtual host in the target host's nginx config (e.g., `hosts/ocean/nginx.nix`)
-3. Rebuild mercury to apply DNS: `./bin/updateMercury`
-4. Rebuild the target host to apply nginx: `./bin/updateOcean`
-
-**Key Tailscale IPs:**
-- `100.64.0.6` — ocean (homelab server, most services)
-- `100.64.0.38` — mercury (headscale/DERP server, AdGuard)
-
-## Headscale ACL Management
-
-ACL configuration is in `modules/nixos/headscale/acl.hujson`. See the file header for deployment instructions.
-
-**IMPORTANT**: After modifying ACLs, you must:
-1. Deploy to mercury: `nixos-rebuild switch --flake .#mercury`
-2. Restart headscale: `sudo systemctl restart headscale`
-3. Restart tailscaled on affected nodes to pick up the new network map
-
-**Applying tags to nodes:**
-```bash
-headscale nodes list -t  # Show current tags
-headscale nodes tag -i <node-id> -t tag:name1,tag:name2
-```
-
-**Agent-relevant tags:**
-- `tag:agent` - Applied to agent VMs (allows access to ocean services)
-- `tag:ocean-ingress` - Ocean node ingress (ports 80, 443, 2222)
-- `tag:ocean-email` - Ocean node email (ports 993, 465, 25)
+Kubernetes modules exist in `/hosts/common/kubernetes/` for K3s deployments using `services.k3s.autoDeployCharts`. When using chart hashes, start with `hash = "";` (empty string) and update after the first build provides the correct hash.
 
 ## Key Technologies
 
-- **NixOS 25.05**: Primary stable channel
+- **NixOS unstable** (nixpkgs follows keystone)
+- **Keystone**: Self-sovereign infrastructure platform (upstream modules)
 - **Disko**: Declarative disk partitioning
 - **Lanzaboote**: Secure Boot support
-- **K3s**: Lightweight Kubernetes
 - **ZFS**: Advanced filesystem with snapshots and replication
 - **Tailscale/Headscale**: Mesh VPN networking
 - **Agenix**: Secret management
+- **Attic**: Nix binary cache (server on ocean, push from workstation/laptop)
+- **Alloy**: Grafana Alloy for log/metric shipping
 
 ## Important Notes
 
@@ -364,163 +469,4 @@ headscale nodes tag -i <node-id> -t tag:name1,tag:name2
 - Host-specific secrets are in `/agenix-secrets/secrets/` and require appropriate age keys
 - ZFS systems require `networking.hostId` to be set uniquely per host
 - Secure Boot systems use TPM for automatic disk unlock
-
-## Stalwart Mail Server
-
-### Service Name
-
-The NixOS service is `stalwart.service` (not `stalwart-mail.service`):
-```bash
-systemctl status stalwart
-journalctl -u stalwart --since "10 min ago"
-```
-
-### Stalwart TOML Custom Syntax
-
-Stalwart uses a custom TOML parser with glob/set notation. Key differences from standard TOML:
-
-| Setting | Stalwart Syntax | Standard TOML (WRONG) |
-|---------|----------------|----------------------|
-| IP allowlist | `allowed-ip = { "10.0.0.0/8" }` | `allowed-ip = ["10.0.0.0/8"]` |
-| Multiple values | `{ "a", "b", "c" }` | `["a", "b", "c"]` |
-
-### Configuring `server.allowed-ip` in NixOS
-
-The `server.allowed-ip` setting whitelists IPs from Stalwart's automatic fail2ban-style blocking. Stalwart's default syntax uses set notation `{ "ip" }` which NixOS can't generate, but there's an alternative **table syntax**:
-
-```nix
-services.stalwart-mail.settings = {
-  # Table syntax - NixOS generates [server.allowed-ip] section
-  server."allowed-ip" = {
-    "100.64.0.0/10" = "";      # Tailscale IPv4 CGNAT range
-    "fd7a:115c:a1e0::/48" = ""; # Tailscale IPv6 range
-  };
-};
-```
-
-This generates valid TOML that Stalwart accepts:
-```toml
-[server.allowed-ip]
-"100.64.0.0/10" = ""
-"fd7a:115c:a1e0::/48" = ""
-```
-
-**Important**: This prevents future blocking only. To clear existing blocked IPs, use the Stalwart admin UI (Settings → Allowed IP addresses) or API:
-```bash
-curl -X DELETE -u admin:$(sudo cat /run/agenix/stalwart-admin-password) \
-  "http://localhost:8082/api/blocked?ip=100.64.0.7"
-```
-
-### Debugging IP Blocking
-
-If Himalaya/IMAP clients get "TLS handshake EOF" errors:
-1. Check Stalwart logs: `journalctl -u stalwart --since "10 min ago" | grep -i block`
-2. Look for `security.ip-blocked` messages
-3. Verify `server.allowed-ip` is set correctly (curly braces, singular key name)
-4. Clear any existing blocks via UI or API
-
-## Himalaya Email Client
-
-Himalaya is configured via a shared module with per-user overrides.
-
-### Sending Raw Emails
-
-When using `himalaya message send` with raw email format, always include the `Date:` header:
-
-```bash
-echo "From: user@ncrmro.com
-To: recipient@ncrmro.com
-Subject: Test
-Date: $(date -R)
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-
-Body here" | himalaya message send
-```
-
-**Important**: Without `Date: $(date -R)`, emails show as 1970-01-01 (Unix epoch).
-
-### Module Location
-
-- Module definition: `home-manager/common/features/cli/himalaya.nix`
-- Defines `programs.himalaya-stalwart` options: `accountName`, `email`, `displayName`, `login`, `passwordCommand`, `host`
-
-### Per-User Configuration
-
-- Drago: `home-manager/drago/himalaya.nix` - enables module with drago account settings
-- ncrmro: `home-manager/ncrmro/base.nix` - enables module with ncrmro account settings
-
-### Stalwart Folder Names
-
-Stalwart uses different folder names than Himalaya defaults. The module configures these automatically:
-
-| Himalaya Default | Stalwart Name   |
-|------------------|-----------------|
-| Sent             | Sent Items      |
-| Drafts           | Drafts          |
-| Trash            | Deleted Items   |
-
-### Adding a New Himalaya User
-
-1. Create agenix secret in `agenix-secrets/`:
-   ```bash
-   cd agenix-secrets
-   # Add entry to secrets.nix first, then:
-   agenix -e secrets/stalwart-mail-USERNAME-password.age
-   git add -A && git commit -m "Add USERNAME mail password" && git push
-   cd ..
-   # Update flake AND stage submodule together
-   nix flake update agenix-secrets
-   git add agenix-secrets flake.lock
-   git commit -m "chore: add USERNAME mail secret"
-   ```
-
-2. Import the himalaya module and enable it:
-   ```nix
-   imports = [ ../common/features/cli/himalaya.nix ];
-
-   programs.himalaya-stalwart = {
-     enable = true;
-     accountName = "username";
-     email = "user@ncrmro.com";
-     displayName = "Display Name";
-     login = "username";
-     passwordCommand = "cat /run/agenix/stalwart-mail-username-password";
-   };
-   ```
-
-3. Add agenix secret decryption in host config (`hosts/HOSTNAME/default.nix`):
-   ```nix
-   age.secrets.stalwart-mail-username-password = {
-     file = ../../agenix-secrets/secrets/stalwart-mail-username-password.age;
-     owner = "username";
-     mode = "0400";
-   };
-   ```
-
-### Agenix Secrets Update Workflow
-
-When updating secrets (e.g., mail passwords):
-
-1. Edit secret in submodule:
-   ```bash
-   cd agenix-secrets
-   agenix -e secrets/secret-name.age
-   git add -A && git commit -m "Update secret" && git push
-   cd ..
-   ```
-
-2. **IMPORTANT**: Update flake input AND stage submodule together in ONE commit:
-   ```bash
-   nix flake update agenix-secrets
-   git add agenix-secrets flake.lock
-   git commit -m "chore: update agenix-secrets"
-   ```
-
-3. Rebuild and deploy:
-   ```bash
-   nix build .#nixosConfigurations.<host>.config.system.build.toplevel --print-out-paths
-   # Then copy and activate on target host
-   ```
-
-**Why both together?** The flake.lock pins the Git version while `agenix-secrets/` tracks the local checkout. Both must point to the same commit for consistency.
+- `agenix-secrets` is only accessible via Tailscale (git.ncrmro.com resolves to a Tailscale IP)
