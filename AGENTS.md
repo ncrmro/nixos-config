@@ -258,6 +258,23 @@ Many flake inputs follow keystone to keep versions consistent and avoid duplicat
 - `nixpkgs` follows `keystone/nixpkgs` (nixos-unstable)
 - `home-manager`, `lanzaboote`, `agenix`, `nixos-hardware`, `nix-index-database`, `nix-flatpak` all follow keystone
 
+## Host Infrastructure
+
+| Host | Role | Tailscale IP | Key Services |
+|------|------|-------------|--------------|
+| **ocean** | Homelab server | `100.64.0.6` | Forgejo (git), Stalwart mail, Immich, Vaultwarden, Grafana, Prometheus, Loki, Miniflux, Attic, AdGuard, Home Assistant, SMB backups |
+| **mercury** | VPN/DNS server | `100.64.0.38` | Headscale, DERP relay, AdGuard |
+| **ncrmro-workstation** | Dev workstation | — | OS agents (agent-drago), desktop environment |
+| **maia** | Laptop | — | Desktop environment |
+
+**Ocean hosts most infrastructure services.** When debugging connectivity to services like Forgejo (`git.ncrmro.com:2222`), Stalwart mail, or Grafana, the target host is ocean. All services are accessible via Tailscale only (except Headscale on mercury which is public).
+
+**Key ocean service endpoints:**
+- Forgejo SSH: `git.ncrmro.com:2222` (via `keystone.os.gitServer`)
+- Forgejo HTTP: `git.ncrmro.com` (nginx reverse proxy, port 3001)
+- Stalwart mail: `mail.ncrmro.com` (IMAP 993, SMTP 465)
+- Stalwart admin: port 8082
+
 ## Common Commands
 
 ### Building and Deploying
