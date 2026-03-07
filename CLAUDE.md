@@ -20,8 +20,8 @@ This is a NixOS configuration repository using flakes for managing system config
   - `/common/optional/` - Optional modules (tailscale, docker, k3s, etc.)
   - `/common/kubernetes/` - Kubernetes module definitions
 - `/home-manager/` - User-specific Home Manager configurations
-- `/modules/` - Custom NixOS and user modules
-  - `/modules/keystone/` - Development modules being prototyped here before migration to [ncrmro/keystone](https://github.com/ncrmro/keystone)
+- `/modules/` - Custom NixOS and user modules (keystone wrappers, local NixOS modules, user definitions)
+  - `.submodules/keystone/` - Upstream [ncrmro/keystone](https://github.com/ncrmro/keystone) submodule
 - `/bin/` - Helper scripts for deployment and management
 - `/docs/` - Documentation for various setup procedures
 - `/kubernetes/` - Raw Kubernetes manifests (legacy)
@@ -145,7 +145,7 @@ After the first deployment attempt, Nix will provide the correct hash which shou
 
 ## Key Technologies
 
-- **NixOS 25.05**: Primary stable channel
+- **NixOS unstable**: nixpkgs follows keystone's nixpkgs (nixos-unstable)
 - **Disko**: Declarative disk partitioning
 - **Lanzaboote**: Secure Boot support
 - **K3s**: Lightweight Kubernetes

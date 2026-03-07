@@ -134,6 +134,9 @@
       };
     };
   };
+
+  # Restart stalwart after ACME cert renewal so it picks up the new cert
+  security.acme.certs."wildcard-ncrmro-com".reloadServices = [ "stalwart.service" ];
   # Tailscale IP for auto-DNS record generation (used by keystone dns.nix)
   keystone.server.tailscaleIP = "100.64.0.6";
 
