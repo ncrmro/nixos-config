@@ -29,7 +29,7 @@
     url = "https://cache.ncrmro.com";
     # TODO: standardize keystone repo location (e.g. ~/.keystone) so
     # atticd-init can auto-update this value instead of manual copy-paste
-    publicKey = "main:h+K1xpIQGl4v5fNjZ+SYJ1ldwSKj9R7rvQqqsk1VwQg=";
+    publicKey = "main:H852yjGdbbRIOQcnKm3uZOpZWRFmQoQ5p4I7VDz7kAI=";
   };
   time.timeZone = "America/Chicago";
 
