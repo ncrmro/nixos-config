@@ -101,6 +101,7 @@ cd .submodules/keystone
 # ... edit files ...
 cd ../..
 ./bin/keystone-dev --build   # Verify changes build (no sudo needed)
+./bin/keystone-dev           # Deploy immediately (nixos-rebuild switch with local keystone)
 
 # 2. Commit and push from submodule
 cd .submodules/keystone
@@ -112,6 +113,13 @@ nix flake update keystone
 git add .submodules/keystone flake.lock
 git commit -m "feat: update keystone (description)"
 ```
+
+**`keystone-dev` modes:**
+- `./bin/keystone-dev` — `nixos-rebuild switch` with local keystone (deploys immediately, no commit needed)
+- `./bin/keystone-dev --build` — build only, no switch (verify changes compile)
+- `./bin/keystone-dev --boot` — `nixos-rebuild boot` (applies on next reboot, for critical changes like dbus)
+
+**When the user says they ran `keystone-dev` or `nix flake update`**: treat the deployment as complete. Immediately proceed with verification (check logs, test services, confirm behavior) rather than waiting or asking the user to confirm it finished.
 
 ### Updating Agenix Secrets
 
@@ -479,6 +487,23 @@ Kubernetes modules exist in `/hosts/common/kubernetes/` for K3s deployments usin
 - **Agenix**: Secret management
 - **Attic**: Nix binary cache (server on ocean, push from workstation/laptop)
 - **Alloy**: Grafana Alloy for log/metric shipping
+
+## Security Decision Documentation
+
+Security-critical code (sudoers rules, agent isolation, credential handling) requires inline documentation explaining the threat model.
+
+### File-Level Documentation
+Every non-trivial file starts with a header block explaining what the module does, its
+security model, and usage examples. For Nix files, use a `#` comment block at top of file
+(see `modules/os/agents.nix` in keystone as exemplar).
+
+### Inline Comments
+- **Why, not what** — code should be self-documenting; comments explain *why* a choice was made
+- **SECURITY:** prefix — security-critical design decision; name the specific threat being mitigated
+- **CRITICAL:** prefix — cross-module invariant that breaks silently if violated
+- **TODO:** prefix — known gap with consequences explained, not just "fix later"
+
+For security decisions, always name the specific attack vector being mitigated.
 
 ## Important Notes
 
