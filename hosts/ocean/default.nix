@@ -56,21 +56,6 @@
         deny all;
       '';
     };
-    grafana = {
-      enable = true;
-      nginxExtraConfig = ''
-        allow 100.64.0.0/10;
-        allow fd7a:115c:a1e0::/48;
-        deny all;
-      '';
-      smtp = {
-        enable = true;
-        host = "mail.ncrmro.com:587";
-        from = "grafana@ncrmro.com";
-        user = "grafana";
-        passwordFile = config.age.secrets.grafana-smtp-password.path;
-      };
-    };
   };
 
   # Grafana SMTP password for alerting

@@ -1,152 +1,109 @@
 {
   config,
-  lib,
   pkgs,
   inputs,
   ...
 }:
-let
-  cfg = config.my.observability.grafana;
-in
 {
-  options.my.observability.grafana = {
-    enable = lib.mkEnableOption "Grafana dashboard service";
-    nginxExtraConfig = lib.mkOption {
-      type = lib.types.lines;
-      default = "";
-      description = "Extra configuration for the Nginx virtual host";
-    };
+  keystone.server.services.grafana.enable = true;
+
+  age.secrets.grafana-secret-key = {
+    file = "${inputs.agenix-secrets}/secrets/grafana-secret-key.age";
+    owner = "grafana";
+    mode = "0400";
+  };
+
+  services.grafana.settings = {
+    security.secret_key = "$__file{${config.age.secrets.grafana-secret-key.path}}";
     smtp = {
-      enable = lib.mkEnableOption "SMTP for Grafana alerting";
-      host = lib.mkOption {
-        type = lib.types.str;
-        example = "localhost:587";
-        description = "SMTP server host:port";
-      };
-      from = lib.mkOption {
-        type = lib.types.str;
-        example = "alerts@ncrmro.com";
-        description = "From address for alert emails";
-      };
-      user = lib.mkOption {
-        type = lib.types.str;
-        example = "alerts@ncrmro.com";
-        description = "SMTP auth username";
-      };
-      passwordFile = lib.mkOption {
-        type = lib.types.path;
-        example = "/run/agenix/grafana-smtp-password";
-        description = "Path to file containing SMTP password";
-      };
+      enabled = true;
+      host = "mail.ncrmro.com:587";
+      from_address = "grafana@ncrmro.com";
+      user = "grafana";
+      password = "$__file{${config.age.secrets.grafana-smtp-password.path}}";
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    age.secrets.grafana-secret-key = {
-      file = "${inputs.agenix-secrets}/secrets/grafana-secret-key.age";
-      owner = "grafana";
-      mode = "0400";
-    };
-
-    services.grafana = {
-      enable = true;
-      settings = {
-        server = {
-          domain = "grafana.ncrmro.com";
-          http_port = 3002;
-          http_addr = "127.0.0.1";
-          root_url = "https://grafana.ncrmro.com/";
-        };
-        security.secret_key = "$__file{${config.age.secrets.grafana-secret-key.path}}";
-        smtp = lib.mkIf cfg.smtp.enable {
-          enabled = true;
-          host = cfg.smtp.host;
-          from_address = cfg.smtp.from;
-          user = cfg.smtp.user;
-          password = "$__file{${cfg.smtp.passwordFile}}";
-        };
-      };
-
-      provision.enable = true;
-
-      provision.dashboards.settings.providers = [
+  services.grafana.provision.dashboards.settings.providers = [
+    {
+      name = "nixos-dashboards";
+      options.path = pkgs.linkFarm "grafana-dashboards" [
         {
-          name = "nixos-dashboards";
-          options.path = pkgs.linkFarm "grafana-dashboards" [
-            {
-              name = "node-exporter-full.json";
-              path = pkgs.fetchurl {
-                url = "https://grafana.com/api/dashboards/1860/revisions/37/download";
-                hash = "sha256-1DE1aaanRHHeCOMWDGdOS1wBXxOF84UXAjJzT5Ek6mM=";
-              };
-            }
-          ];
+          name = "node-exporter-full.json";
+          path = pkgs.fetchurl {
+            url = "https://grafana.com/api/dashboards/1860/revisions/37/download";
+            hash = "sha256-1DE1aaanRHHeCOMWDGdOS1wBXxOF84UXAjJzT5Ek6mM=";
+          };
         }
       ];
+    }
+  ];
 
-      provision.datasources.settings.datasources = [
-        {
-          name = "Prometheus";
-          type = "prometheus";
-          uid = "prometheus";
-          url = "http://127.0.0.1:${toString config.services.prometheus.port}";
-        }
-        {
-          name = "Loki";
-          type = "loki";
-          uid = "loki";
-          url = "http://127.0.0.1:${toString config.services.loki.configuration.server.http_listen_port}";
-        }
-      ];
+  services.grafana.provision.datasources.settings.deleteDatasources = [
+    {
+      name = "Prometheus";
+      orgId = 1;
+    }
+    {
+      name = "Loki";
+      orgId = 1;
+    }
+  ];
+  services.grafana.provision.datasources.settings.datasources = [
+    {
+      name = "Prometheus";
+      type = "prometheus";
+      uid = "prometheus";
+      url = "http://127.0.0.1:${toString config.services.prometheus.port}";
+    }
+    {
+      name = "Loki";
+      type = "loki";
+      uid = "loki";
+      url = "http://127.0.0.1:${toString config.services.loki.configuration.server.http_listen_port}";
+    }
+  ];
+
+  # Grafana API token for MCP server
+  age.secrets.grafana-api-token = {
+    file = "${inputs.agenix-secrets}/secrets/grafana-api-token.age";
+    owner = "root";
+    mode = "0400";
+  };
+
+  # MCP server for Grafana
+  systemd.services.mcp-grafana = {
+    description = "MCP server for Grafana";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "grafana.service" ];
+    serviceConfig = {
+      Restart = "on-failure";
+      DynamicUser = true;
+      LoadCredential = "grafana-token:${config.age.secrets.grafana-api-token.path}";
     };
+    script = ''
+      export GRAFANA_URL="http://127.0.0.1:${toString config.services.grafana.settings.server.http_port}"
+      export GRAFANA_SERVICE_ACCOUNT_TOKEN="$(cat $CREDENTIALS_DIRECTORY/grafana-token)"
+      exec ${pkgs.mcp-grafana}/bin/mcp-grafana -transport sse -address 127.0.0.1:8090
+    '';
+  };
 
-    services.nginx.virtualHosts."grafana.ncrmro.com" = {
-      forceSSL = true;
-      useACMEHost = "wildcard-ncrmro-com";
-      extraConfig = cfg.nginxExtraConfig;
-      locations."/" = {
-        proxyPass = "http://127.0.0.1:${toString config.services.grafana.settings.server.http_port}";
-        proxyWebsockets = true;
-      };
-    };
-
-    # Grafana API token for MCP server
-    age.secrets.grafana-api-token = {
-      file = "${inputs.agenix-secrets}/secrets/grafana-api-token.age";
-      owner = "root";
-      mode = "0400";
-    };
-
-    # MCP server for Grafana
-    systemd.services.mcp-grafana = {
-      description = "MCP server for Grafana";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "grafana.service" ];
-      serviceConfig = {
-        Restart = "on-failure";
-        DynamicUser = true;
-        LoadCredential = "grafana-token:${config.age.secrets.grafana-api-token.path}";
-      };
-      script = ''
-        export GRAFANA_URL="http://127.0.0.1:${toString config.services.grafana.settings.server.http_port}"
-        export GRAFANA_SERVICE_ACCOUNT_TOKEN="$(cat $CREDENTIALS_DIRECTORY/grafana-token)"
-        exec ${pkgs.mcp-grafana}/bin/mcp-grafana -transport sse -address 127.0.0.1:8090
+  services.nginx.virtualHosts."mcp-grafana.ncrmro.com" = {
+    forceSSL = true;
+    useACMEHost = "wildcard-ncrmro-com";
+    extraConfig = ''
+      allow 100.64.0.0/10;
+      allow fd7a:115c:a1e0::/48;
+      deny all;
+    '';
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:8090";
+      proxyWebsockets = true;
+      extraConfig = ''
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 86400s;
       '';
-    };
-
-    services.nginx.virtualHosts."mcp-grafana.ncrmro.com" = {
-      forceSSL = true;
-      useACMEHost = "wildcard-ncrmro-com";
-      extraConfig = cfg.nginxExtraConfig;
-      locations."/" = {
-        proxyPass = "http://127.0.0.1:8090";
-        proxyWebsockets = true;
-        extraConfig = ''
-          proxy_buffering off;
-          proxy_cache off;
-          proxy_read_timeout 86400s;
-        '';
-      };
     };
   };
 }

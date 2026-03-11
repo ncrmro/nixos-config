@@ -72,6 +72,20 @@ sudo nixos-rebuild switch --flake .#<hostname>
 ./bin/updateMercury    # Update mercury host
 ```
 
+### Committing and Pushing Submodule Changes
+
+When asked to commit and push changes that include submodule modifications (e.g. `.submodules/keystone`):
+
+1. Commit and push each modified submodule first
+2. Update the flake lock for both submodule inputs (`nix flake update keystone agenix-secrets`)
+3. Commit the submodule pointer(s) + `flake.lock` together in nixos-config
+4. Push nixos-config
+
+Before pushing, always build the workstation host to verify:
+`nixos-rebuild build --flake .#ncrmro-workstation`
+
+The tree must be clean when done — never leave uncommitted submodule pointers or flake.lock changes.
+
 ### Development Workflow
 
 ```bash
