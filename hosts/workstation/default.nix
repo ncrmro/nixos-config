@@ -95,6 +95,13 @@
     mode = "0400";
   };
 
+  # SSH key passphrase (auto-loaded into ssh-agent at login)
+  age.secrets.ncrmro-workstation-ssh-passphrase = {
+    file = "${inputs.agenix-secrets}/secrets/ncrmro-workstation-ssh-passphrase.age";
+    owner = "ncrmro";
+    mode = "0400";
+  };
+
   # Cliflux config (Miniflux CLI client)
   age.secrets.cliflux-config = {
     file = "${inputs.agenix-secrets}/secrets/cliflux-config.age";

@@ -52,6 +52,7 @@ in
       authorizedKeys = keys.ncrmro;
       hardwareKeys = [ "yubi-black" ];
       terminal.enable = true;
+      sshAutoLoad.enable = true;
     };
   };
 }
