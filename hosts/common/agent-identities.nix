@@ -20,13 +20,13 @@
       mail.provision = true; # provision Stalwart account on server host (ocean)
       git.provision = true; # provision Forgejo account on server host (ocean)
     };
-    # luce = {
-    #   host = "ocean";
-    #   fullName = "Luce";
-    #   email = "luce@ncrmro.com";
-    #   ssh.publicKey = "ssh-ed25519 AAAA...";
-    #   mail.provision = true;
-    #   git.provision = true;
-    # };
+    luce = {
+      host = "ocean";
+      fullName = "Luce";
+      email = "luce@ncrmro.com";
+      ssh.publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN+jItdMeX71E3PxfxP+LH2yFXKHxrpPqeJpoRHkLecg agent-luce";
+      mail.provision = true;
+      git.provision = true;
+    };
   };
 }

@@ -113,6 +113,23 @@
     mode = "0400";
   };
 
+  # Agent luce secrets (luce.host = "ocean", so all secrets live here)
+  age.secrets.agent-luce-mail-password = {
+    file = "${inputs.agenix-secrets}/secrets/agent-luce-mail-password.age";
+    owner = "agent-luce";
+    mode = "0400";
+  };
+  age.secrets.agent-luce-ssh-key = {
+    file = "${inputs.agenix-secrets}/secrets/agent-luce-ssh-key.age";
+    owner = "agent-luce";
+    mode = "0400";
+  };
+  age.secrets.agent-luce-ssh-passphrase = {
+    file = "${inputs.agenix-secrets}/secrets/agent-luce-ssh-passphrase.age";
+    owner = "agent-luce";
+    mode = "0400";
+  };
+
   # Configure Stalwart TLS and admin auth
   services.stalwart-mail = {
     settings = {
