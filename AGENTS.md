@@ -1,6 +1,8 @@
+@.submodules/keystone/AGENTS.md
+
 ## Repository Overview
 
-This is a NixOS configuration repository using flakes for managing system configurations across multiple hosts. The repository manages both NixOS system configurations and Home Manager user configurations, with a focus on infrastructure-as-code patterns.
+NixOS configuration repository using flakes for managing system configurations across multiple hosts. Manages both NixOS system configurations and Home Manager user configurations.
 
 ## Investigating Issues on Hosts
 
@@ -46,29 +48,6 @@ The user runs the script once, then you read `/tmp/stalwart-logs.txt` etc. direc
 **When to put something in keystone vs nixos-config:**
 - **Keystone**: Reusable modules that others could benefit from (server roles, desktop setup, terminal environment, mail, DNS, binary cache, hardware key management)
 - **nixos-config**: Host-specific configuration, secrets, per-user overrides, local-only services
-
-**Keystone modules used in this repo:**
-
-| Module | Import Path | Purpose |
-|--------|-------------|---------|
-| `operating-system` | `keystone.nixosModules.operating-system` | Base OS config, user management, hypervisor |
-| `hardwareKey` | `keystone.nixosModules.hardwareKey` | YubiKey SSH/GPG management |
-| `server` | `keystone.nixosModules.server` | Server infrastructure (ACME, DNS auto-generation, services) |
-| `desktop` | `keystone.nixosModules.desktop` | Desktop environment (Hyprland, GNOME, etc.) |
-| `headscale-dns` | `keystone.nixosModules.headscale-dns` | Auto-import DNS records from server configs |
-| `terminal` | `keystone.homeModules.terminal` | Terminal environment for agents/users |
-
-**Key keystone options used:**
-- `keystone.os.mail` - Stalwart mail server (replaces direct `services.stalwart-mail` config)
-- `keystone.os.gitServer` - Forgejo git server
-- `keystone.server.acme` - Wildcard TLS certs via Cloudflare DNS-01
-- `keystone.server.services.attic` - Attic binary cache server
-- `keystone.server.tailscaleIP` - Tailscale IP for auto-DNS record generation
-- `keystone.server.generatedDNSRecords` - Auto-generated DNS records consumed by mercury
-- `keystone.binaryCache.push` - Attic binary cache push (on workstation/laptop)
-- `keystone.os.agents.<name>` - Agent VM user provisioning (SSH keys, email, space repo)
-- `keystone.os.services.airplay` - AirPlay receiver
-- `keystone.os.services.resolved` - systemd-resolved for Tailscale MagicDNS
 
 **Wrapper modules in this repo** (`modules/`):
 - `modules/keystone.nix` - Imports `operating-system` + `hardwareKey`, configures YubiKeys and ncrmro user
@@ -233,6 +212,12 @@ Ocean is the primary homelab server. Services are configured through a mix of ke
 
 All `*.ncrmro.com` domains resolve via Tailscale MagicDNS only. ACME wildcard certs are managed by `keystone.server.acme` via Cloudflare DNS-01.
 
+**Key ocean service endpoints:**
+- Forgejo SSH: `git.ncrmro.com:2222` (via `keystone.os.gitServer`)
+- Forgejo HTTP: `git.ncrmro.com` (nginx reverse proxy, port 3001)
+- Stalwart mail: `mail.ncrmro.com` (IMAP 993, SMTP 465)
+- Stalwart admin: port 8082
+
 ## Services on Mercury
 
 Mercury is a VPS running headscale and public-facing services.
@@ -283,23 +268,6 @@ Many flake inputs follow keystone to keep versions consistent and avoid duplicat
 - `nixpkgs` follows `keystone/nixpkgs` (nixos-unstable)
 - `home-manager`, `lanzaboote`, `agenix`, `nixos-hardware`, `nix-index-database`, `nix-flatpak` all follow keystone
 
-## Host Infrastructure
-
-| Host | Role | Tailscale IP | Key Services |
-|------|------|-------------|--------------|
-| **ocean** | Homelab server | `100.64.0.6` | Forgejo (git), Stalwart mail, Immich, Vaultwarden, Grafana, Prometheus, Loki, Miniflux, Attic, AdGuard, Home Assistant, SMB backups |
-| **mercury** | VPN/DNS server | `100.64.0.38` | Headscale, DERP relay, AdGuard |
-| **ncrmro-workstation** | Dev workstation | — | OS agents (agent-drago), desktop environment |
-| **maia** | Laptop | — | Desktop environment |
-
-**Ocean hosts most infrastructure services.** When debugging connectivity to services like Forgejo (`git.ncrmro.com:2222`), Stalwart mail, or Grafana, the target host is ocean. All services are accessible via Tailscale only (except Headscale on mercury which is public).
-
-**Key ocean service endpoints:**
-- Forgejo SSH: `git.ncrmro.com:2222` (via `keystone.os.gitServer`)
-- Forgejo HTTP: `git.ncrmro.com` (nginx reverse proxy, port 3001)
-- Stalwart mail: `mail.ncrmro.com` (IMAP 993, SMTP 465)
-- Stalwart admin: port 8082
-
 ## Common Commands
 
 ### Building and Deploying
@@ -344,18 +312,12 @@ Home Manager is integrated into NixOS and activated automatically during `nixos-
 
 ## OS Agents
 
-OS agents are user accounts on the host provisioned via `keystone.os.agents.<name>`. Each agent has its own identity, credentials, SSH keys, email, and workspace ("space") repos.
+OS agents are user accounts on the host provisioned via `keystone.os.agents.<name>`. Each agent has its own identity, credentials, SSH keys, email, and workspace ("space") repos. See keystone AGENTS.md "Agent Provisioning" for full option reference.
 
-### Environment
+### nixos-config Specific Paths
 
-Agents receive the **full `keystone.terminal` environment** through home-manager — the same shell (zsh, starship), editor (helix), multiplexer (zellij), and git config as human keystone users. This is managed by the home-manager block in `agents.nix`, which imports `keystone.terminal`.
-
-For mail-capable agents, `keystone.terminal.mail` should be enabled in the home-manager block, providing both the `himalaya` binary and config. See the keystone `AGENTS.md` "Agent Environment Architecture" section for details.
-
-### Key Configuration
-
-- `keystone.os.agents.<name>` in keystone's `modules/os/agents.nix` — provisions the user account, SSH keys, mail credentials, and workspace
-- Agent-specific home-manager configs in `home-manager/<name>/agent.nix`
+- Agent-specific home-manager configs: `home-manager/<name>/agent.nix`
+- Shared agent home config: `home-manager/common/agents/`
 
 ### Legacy: Agent VMs
 
@@ -476,35 +438,6 @@ imports = [
 ### Kubernetes Resources
 
 Kubernetes modules exist in `/hosts/common/kubernetes/` for K3s deployments using `services.k3s.autoDeployCharts`. When using chart hashes, start with `hash = "";` (empty string) and update after the first build provides the correct hash.
-
-## Key Technologies
-
-- **NixOS unstable** (nixpkgs follows keystone)
-- **Keystone**: Self-sovereign infrastructure platform (upstream modules)
-- **Disko**: Declarative disk partitioning
-- **Lanzaboote**: Secure Boot support
-- **ZFS**: Advanced filesystem with snapshots and replication
-- **Tailscale/Headscale**: Mesh VPN networking
-- **Agenix**: Secret management
-- **Attic**: Nix binary cache (server on ocean, push from workstation/laptop)
-- **Alloy**: Grafana Alloy for log/metric shipping
-
-## Security Decision Documentation
-
-Security-critical code (sudoers rules, agent isolation, credential handling) requires inline documentation explaining the threat model.
-
-### File-Level Documentation
-Every non-trivial file starts with a header block explaining what the module does, its
-security model, and usage examples. For Nix files, use a `#` comment block at top of file
-(see `modules/os/agents.nix` in keystone as exemplar).
-
-### Inline Comments
-- **Why, not what** — code should be self-documenting; comments explain *why* a choice was made
-- **SECURITY:** prefix — security-critical design decision; name the specific threat being mitigated
-- **CRITICAL:** prefix — cross-module invariant that breaks silently if violated
-- **TODO:** prefix — known gap with consequences explained, not just "fix later"
-
-For security decisions, always name the specific attack vector being mitigated.
 
 ## Important Notes
 
