@@ -38,7 +38,6 @@ in
 
     users.ncrmro = {
       fullName = "Nicholas Romero";
-      email = "ncrmro@gmail.com";
       extraGroups = [
         "wheel"
         "media"

@@ -35,7 +35,7 @@
   keystone.terminal = {
     enable = true;
     git = {
-      userName = lib.mkForce "Nicholas Romero";
+      userName = "Nicholas Romero";
       userEmail = "ncrmro@gmail.com";
     };
     sandbox = {
@@ -48,8 +48,8 @@
   programs.git = {
     enable = true;
     settings.user = {
-      name = lib.mkForce "Nicholas Romero";
-      email = lib.mkForce "ncrmro@gmail.com";
+      name = "Nicholas Romero";
+      email = "ncrmro@gmail.com";
     };
     # settings = {
     #   credential.helper = "store";
