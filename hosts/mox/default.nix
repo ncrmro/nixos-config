@@ -15,7 +15,6 @@
     ../../modules/users/ncrmro.nix
     # ../common/optional/hyprland-desktop.nix  # TODO: Missing file
     # ../common/optional/thunar.nix  # TODO: Missing file
-    ../common/optional/virt-manager.nix
 
     # <home-manager/nixos>
     # ./home.nix

@@ -61,6 +61,7 @@ in
 
         limits_config = {
           retention_period = "90d";
+          allow_structured_metadata = true;
         };
       };
     };
