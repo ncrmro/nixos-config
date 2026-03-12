@@ -136,6 +136,23 @@ git add agenix-secrets flake.lock
 git commit -m "chore: update agenix-secrets"
 ```
 
+### hwrekey — Automated Secrets Rekeying
+
+After modifying `secrets.nix` (adding/removing key recipients), use `hwrekey` to re-encrypt all `.age` files and update the parent flake:
+
+```bash
+cd agenix-secrets
+hwrekey
+```
+
+This runs the full workflow:
+1. `agenix --rekey` using YubiKey identity (touch prompt, no SSH password)
+2. `git add -A && git commit && git push` in the secrets submodule
+3. `nix flake update agenix-secrets` in the parent repo
+4. `git add agenix-secrets flake.lock && git commit` in the parent repo
+
+The script is provided by `keystone.terminal.ageYubikey` and configured via `secretsFlakeInput = "agenix-secrets"` in home-manager. Without `secretsFlakeInput`, it only runs `agenix --rekey`.
+
 ### Why Both Together?
 
 The `flake.lock` pins the GitHub/Forgejo version while the submodule directory tracks the local checkout. Both must point to the same commit. Committing them separately creates confusion about which version is active and pollutes git history with unnecessary split commits.
