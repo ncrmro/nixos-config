@@ -34,9 +34,16 @@
   keystone.terminal.ageYubikey = {
     enable = true;
     identities = [
-      "AGE-PLUGIN-YUBIKEY-17DDRYQ5ZFMHALWQJTKHAV" # Serial: 36854515, Slot: 1 (yubi-black)
-      "AGE-PLUGIN-YUBIKEY-1G9UNYQ5ZJKDT4CQZ8927Z" # Serial: 36862273, Slot: 1 (yubi-green)
+      {
+        serial = "36854515";
+        identity = "AGE-PLUGIN-YUBIKEY-17DDRYQ5ZFMHALWQJTKHAV";
+      } # yubi-black
+      {
+        serial = "36862273";
+        identity = "AGE-PLUGIN-YUBIKEY-1G9UNYQ5ZJKDT4CQZ8927Z";
+      } # yubi-green
     ];
+    secretsFlakeInput = "agenix-secrets";
   };
 
   # CRITICAL: exec-once MUST go in extraConfig, NOT in settings.
