@@ -34,6 +34,7 @@
     ../../modules/keystone.server.nix
     ../common/optional/podman.nix
     ./vms.nix
+    ../common/agent-identities.nix
   ];
 
   # Enable Mesa/OpenGL drivers for EGL headless rendering
@@ -102,6 +103,13 @@
   age.secrets.stalwart-mail-ncrmro-password = {
     file = "${inputs.agenix-secrets}/secrets/stalwart-mail-ncrmro-password.age";
     owner = "ncrmro";
+    mode = "0400";
+  };
+
+  # Agent mail password for Stalwart provisioning (plaintext, used to create account)
+  # NOTE: This secret must also be re-encrypted for ocean's host key in agenix-secrets.
+  age.secrets.agent-drago-mail-password = {
+    file = "${inputs.agenix-secrets}/secrets/agent-drago-mail-password.age";
     mode = "0400";
   };
 

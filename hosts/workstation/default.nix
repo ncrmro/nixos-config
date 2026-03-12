@@ -29,23 +29,12 @@
     outputs.nixosModules.bambu-studio
     ./windows11-vm.nix
     ../../modules/nixos/steam.nix
+    ../common/agent-identities.nix
   ];
-
-  keystone.os.agents.drago = {
-    fullName = "Drago";
-    email = "drago@ncrmro.com";
-    notes.repo = "ssh://forgejo@git.ncrmro.com:2222/drago/agent-space.git";
-    ssh.publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID9TbHc93b0RWSekJcUmlDkw0UulfzkbJqdd0ejfuV2C agent-drago";
-  };
 
   # Agenix secrets for agent-drago (decrypted on workstation host)
   age.secrets.agent-drago-mail-password = {
     file = "${inputs.agenix-secrets}/secrets/agent-drago-mail-password.age";
-    owner = "agent-drago";
-    mode = "0400";
-  };
-  age.secrets.agent-drago-bitwarden-password = {
-    file = "${inputs.agenix-secrets}/secrets/agent-drago-bitwarden-password.age";
     owner = "agent-drago";
     mode = "0400";
   };
@@ -64,6 +53,13 @@
     owner = "agent-drago";
     mode = "0400";
   };
+  age.secrets.agent-drago-bitwarden-password = {
+    file = "${inputs.agenix-secrets}/secrets/agent-drago-bitwarden-password.age";
+    owner = "agent-drago";
+    mode = "0400";
+  };
+
+  keystone.os.hypervisor.connections = [ "qemu+ssh://ncrmro@ocean/session" ];
 
   keystone.os.services.airplay = {
     enable = true;
