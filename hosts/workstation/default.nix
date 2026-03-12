@@ -60,6 +60,10 @@
   };
 
   keystone.os.hypervisor.connections = [ "qemu+ssh://ncrmro@ocean/session" ];
+  keystone.os.hypervisor.allowedBridges = [
+    "virbr0"
+    "br0"
+  ];
 
   keystone.os.services.airplay = {
     enable = true;
