@@ -206,47 +206,6 @@
             outputs = self;
           };
         };
-
-        # Agent VMs - standalone qcow2 images
-        # Base image with both users (for cloning)
-        agent-base = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [ ./hosts/agent-base ];
-          specialArgs = {
-            inherit inputs self;
-            outputs = self;
-          };
-        };
-
-        agent-drago = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [ ./hosts/agent-drago ];
-          specialArgs = {
-            inherit inputs self;
-            outputs = self;
-          };
-        };
-
-        agent-luce = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [ ./hosts/agent-luce ];
-          specialArgs = {
-            inherit inputs self;
-            outputs = self;
-          };
-        };
-
-        # Minimal agent images - fast build, add full config post-boot
-        # Build: nix build .#nixosConfigurations.agent-drago-minimal.config.system.build.qcow2
-        # Copy:  cp result/nixos.qcow2 ~/.agentvms/agent-drago.qcow2
-        agent-drago-minimal = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [ ./hosts/agent-drago-minimal ];
-          specialArgs = {
-            inherit inputs self;
-            outputs = self;
-          };
-        };
       };
 
       # Home Manager configurations

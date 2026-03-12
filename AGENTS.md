@@ -325,43 +325,27 @@ nix build .#nixosConfigurations.test-vm.config.system.build.vm
 
 Home Manager is integrated into NixOS and activated automatically during `nixos-rebuild switch`. **Never run `home-manager switch` directly** - it conflicts with the NixOS-managed home-manager service.
 
-## Agent VMs
+## OS Agents
 
-Agent VMs are isolated NixOS virtual machines for autonomous AI agents. Each agent has its own identity, credentials, and environment. They run on the workstation host via libvirt/QEMU.
+OS agents are user accounts on the host provisioned via `keystone.os.agents.<name>`. Each agent has its own identity, credentials, SSH keys, email, and workspace ("space") repos.
 
-### Agent VM Configuration
+### Environment
 
-Key configuration files:
-- `hosts/common/optional/agent-base.nix` - System-level config (GNOME, SSH, systemd-resolved, browser policies)
-- `hosts/common/optional/agent-minimal.nix` - Minimal SSH-only variant (fast build)
-- `home-manager/common/agents/base.nix` - Shared packages (bat, fd, fzf, jq, btop, gh, browsers, SSH keygen)
-- `home-manager/drago/agent.nix` - Drago-specific config (imports keystone.terminal + agent base)
-- `home-manager/luce/agent.nix` - Luce-specific config
+Agents receive the **full `keystone.terminal` environment** through home-manager — the same shell (zsh, starship), editor (helix), multiplexer (zellij), and git config as human keystone users. This is managed by the home-manager block in `agents.nix`, which imports `keystone.terminal`.
 
-Agent users are provisioned on the workstation host via `keystone.os.agents.<name>` which sets up SSH keys, email, and agent workspace ("space") repos.
+For mail-capable agents, `keystone.terminal.mail` should be enabled in the home-manager block, providing both the `himalaya` binary and config. See the keystone `AGENTS.md` "Agent Environment Architecture" section for details.
 
-### Remote Rebuild and Deploy
+### Key Configuration
 
-Agents auto-connect to headscale on boot. Update via Tailscale:
+- `keystone.os.agents.<name>` in keystone's `modules/os/agents.nix` — provisions the user account, SSH keys, mail credentials, and workspace
+- Agent-specific home-manager configs in `home-manager/<name>/agent.nix`
 
-```bash
-nixos-rebuild switch --flake .#agent-drago --target-host drago@agent-drago --build-host localhost
-nixos-rebuild switch --flake .#agent-luce --target-host luce@agent-luce --build-host localhost
-```
+### Legacy: Agent VMs
 
-### Building Agent Images
-
-```bash
-# Build base qcow2 image
-nix build .#nixosConfigurations.agent-base.config.system.build.qcow2
-cp result/nixos.qcow2 ~/.agentvms/agent-drago.qcow2
-
-# Define and start VM
-virsh --connect qemu:///session define hosts/agent-drago/vm.xml
-virsh --connect qemu:///session start agent-drago
-```
-
-See [docs/agentvms.md](docs/agentvms.md) for full documentation.
+Previously, agents ran as isolated NixOS VMs via libvirt/QEMU. This approach is superseded by OS agent user accounts but legacy VM configs may still exist:
+- `hosts/common/optional/agent-base.nix` - Legacy VM system-level config
+- `hosts/common/optional/agent-minimal.nix` - Legacy minimal SSH-only VM variant
+- See [docs/agentvms.md](docs/agentvms.md) for legacy VM documentation.
 
 ## Headscale ACL Management
 

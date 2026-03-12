@@ -17,9 +17,7 @@
     PKG_CONFIG_PATH = "${pkgs.libvirt}/lib/pkgconfig:$PKG_CONFIG_PATH";
   };
 
-  home.file.".config/libvirt/libvirt.conf".text = ''
-    uri_default = "qemu:///system"
-  '';
+  # uri_default is now managed by keystone.os.hypervisor (via home-manager dconf/xdg)
 
   # Configure libvirt to use our consistent firmware paths
   # These paths are created by systemd tmpfiles in the system configuration

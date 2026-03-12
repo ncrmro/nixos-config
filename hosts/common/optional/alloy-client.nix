@@ -105,11 +105,13 @@ in
 
           ${staticLabels}
 
-          // Extract log level from journal priority
+          // Extract log level and agent-relevant fields from journal
           stage.json {
             expressions = {
               priority = "PRIORITY",
               unit = "_SYSTEMD_UNIT",
+              user_unit = "_SYSTEMD_USER_UNIT",
+              syslog_identifier = "SYSLOG_IDENTIFIER",
               message = "MESSAGE",
             }
           }
@@ -120,10 +122,31 @@ in
             template = "{{ if eq . \"0\" }}emergency{{ else if eq . \"1\" }}alert{{ else if eq . \"2\" }}critical{{ else if eq . \"3\" }}error{{ else if eq . \"4\" }}warning{{ else if eq . \"5\" }}notice{{ else if eq . \"6\" }}info{{ else }}debug{{ end }}"
           }
 
+          // Extract agent name from syslog identifier (agent-task-loop-drago -> drago)
+          stage.regex {
+            source = "syslog_identifier"
+            expression = "^agent-(?:task-loop|scheduler|sync-agent-notes)-(?P<agent_name>.+)$"
+          }
+
+          // Extract step and task from structured log tags
+          stage.regex {
+            source = "message"
+            expression = "\\[step=(?P<agent_step>[a-z]+)\\](?:\\[task=(?P<agent_task>[^\\]]+)\\])?"
+          }
+
           stage.labels {
             values = {
               level = "priority",
               unit = "unit",
+              user_unit = "user_unit",
+              agent = "agent_name",
+              agent_step = "agent_step",
+            }
+          }
+
+          stage.structured_metadata {
+            values = {
+              task = "agent_task",
             }
           }
 
