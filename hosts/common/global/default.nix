@@ -10,9 +10,11 @@
     ./openssh.nix
     inputs.keystone.nixosModules.binaryCacheClient
     inputs.keystone.nixosModules.domain
+    inputs.keystone.nixosModules.mail
   ];
 
   keystone.domain = "ncrmro.com";
+  keystone.mail.host = "ocean";
 
   # Apply custom overlays
   nixpkgs.overlays = import ../../../overlays { inherit inputs; };

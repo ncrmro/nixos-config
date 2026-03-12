@@ -78,8 +78,8 @@
     };
   };
 
+  # keystone.mail.host = "ocean" (set in agent-identities.nix) auto-enables Stalwart here.
   keystone.os.mail = {
-    enable = true;
     # Allow Tailscale IPs (agent VMs, phones, etc) - prevents fail2ban blocking
     allowedIps = [
       "100.64.0.0/10" # Tailscale IPv4 CGNAT
