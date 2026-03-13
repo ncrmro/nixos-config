@@ -27,7 +27,6 @@
     ../common/optional/nfs-client.nix
     ../common/optional/monitoring-client.nix
     ../common/optional/alloy-client.nix
-    ../common/optional/iphone-tether.nix
     ../common/optional/agenix.nix
     ./zfs.remote-replication.nix
     ../../modules/nixos/steam.nix
@@ -81,6 +80,9 @@
   #   enable = true;
   #   settings.default_session.user = "ncrmro";
   # };
+
+  # iOS USB tethering/hotspot
+  keystone.os.iphoneTether.enable = true;
 
   services.hardware.bolt.enable = true;
   services.fwupd.enable = true;
