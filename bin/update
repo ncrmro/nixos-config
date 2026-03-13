@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+# bin/update — Deploy a NixOS configuration (switch or boot).
+#
+# Usage: bin/update [--dev] [--boot] [<HOST>]
+#
+# ## RFC 2119 Functional Requirements
+#
+# 1. The script MUST accept an optional <HOST> positional argument
+#    matching a nixosConfigurations key in flake.nix.
+# 2. The script MUST default <HOST> to the flake config name matching
+#    the current machine's hostname when no argument is provided.
+# 3. The script MUST validate <HOST> exists in hosts.nix.
+# 4. The script MUST support a --dev flag that adds --override-input
+#    for both keystone and agenix-secrets local submodule paths.
+# 5. The script MUST support a --boot flag to use nixos-rebuild boot
+#    instead of switch (for critical changes like dbus).
+# 6. When <HOST> matches the current machine's hostname, the script
+#    MUST deploy locally using sudo nixos-rebuild.
+# 7. When <HOST> does NOT match the current machine, the script MUST
+#    deploy remotely using --target-host with the sshTarget from
+#    hosts.nix.
+# 8. For remote hosts with buildOnRemote=true, the script MUST also
+#    pass --build-host to compile on the target machine.
+# 9. For hosts with a non-null fallbackIP, the script MUST attempt
+#    sshTarget first with a 3-second SSH connect timeout, falling
+#    back to fallbackIP on failure.
+# 10. The script MUST reject remote deploy to hosts with sshTarget=null
+#     (local-only hosts) and exit non-zero.
+# 11. When --boot is used, the script MUST print a notice that a reboot
+#     is required to apply changes.
+# 12. The script SHOULD print the resolved connection method and mode
+#     before deploying.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "$SCRIPT_DIR")" && pwd -P)"
+HOSTS_NIX="$REPO_ROOT/hosts.nix"
+
+DEV=false
+MODE="switch"
+HOST=""
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --dev) DEV=true; shift ;;
+    --boot) MODE="boot"; shift ;;
+    -*) echo "Error: Unknown option '$1'" >&2; exit 1 ;;
+    *) HOST="$1"; shift ;;
+  esac
+done
+
+# --- Resolve HOST (same logic as bin/build) ---
+if [[ -z "$HOST" ]]; then
+  CURRENT=$(hostname)
+  HOST=$(nix eval -f "$HOSTS_NIX" --raw \
+    --apply "hosts: let m = builtins.filter (k: (builtins.getAttr k hosts).hostname == \"$CURRENT\") (builtins.attrNames hosts); in if m == [] then \"\" else builtins.head m")
+  if [[ -z "$HOST" ]]; then
+    echo "Error: No hosts.nix entry with hostname '$CURRENT'." >&2
+    exit 1
+  fi
+fi
+
+# --- Validate HOST ---
+if ! nix eval -f "$HOSTS_NIX" "$HOST" --json >/dev/null 2>&1; then
+  echo "Error: Unknown host '$HOST'." >&2
+  echo "Known hosts:" >&2
+  nix eval -f "$HOSTS_NIX" --apply 'h: builtins.concatStringsSep "\n  " (builtins.attrNames h)' --raw >&2
+  echo >&2
+  exit 1
+fi
+
+# --- Read host config ---
+HOST_JSON=$(nix eval -f "$HOSTS_NIX" "$HOST" --json)
+SSH_TARGET=$(echo "$HOST_JSON" | jq -r '.sshTarget // empty')
+FALLBACK_IP=$(echo "$HOST_JSON" | jq -r '.fallbackIP // empty')
+BUILD_ON_REMOTE=$(echo "$HOST_JSON" | jq -r '.buildOnRemote')
+HOST_HOSTNAME=$(echo "$HOST_JSON" | jq -r '.hostname')
+
+# --- Build --dev override args ---
+OVERRIDE_ARGS=()
+if [[ "$DEV" == true ]]; then
+  KEYSTONE_PATH="$REPO_ROOT/.submodules/keystone"
+  SECRETS_PATH="$REPO_ROOT/agenix-secrets"
+  [[ -d "$KEYSTONE_PATH" ]] || { echo "Error: Missing $KEYSTONE_PATH" >&2; exit 1; }
+  [[ -d "$SECRETS_PATH" ]] || { echo "Error: Missing $SECRETS_PATH" >&2; exit 1; }
+  OVERRIDE_ARGS+=(--override-input keystone "path:$KEYSTONE_PATH")
+  OVERRIDE_ARGS+=(--override-input agenix-secrets "path:$SECRETS_PATH")
+  echo "Dev mode: using local keystone + agenix-secrets"
+fi
+
+# --- Deploy ---
+CURRENT_HOSTNAME=$(hostname)
+if [[ "$HOST_HOSTNAME" == "$CURRENT_HOSTNAME" ]]; then
+  # LOCAL deploy
+  echo "Deploying $HOST locally ($MODE)..."
+  sudo nixos-rebuild "$MODE" --flake "$REPO_ROOT#$HOST" "${OVERRIDE_ARGS[@]}"
+else
+  # REMOTE deploy
+  if [[ -z "$SSH_TARGET" ]]; then
+    echo "Error: $HOST has no sshTarget (local-only host). Cannot deploy remotely." >&2
+    exit 1
+  fi
+
+  RESOLVED="$SSH_TARGET"
+  if [[ -n "$FALLBACK_IP" ]]; then
+    if ssh -o ConnectTimeout=3 -o BatchMode=yes "root@${SSH_TARGET}" true 2>/dev/null; then
+      echo "Using Tailscale: $SSH_TARGET"
+    else
+      RESOLVED="$FALLBACK_IP"
+      echo "Tailscale unavailable, using LAN: $FALLBACK_IP"
+    fi
+  fi
+
+  REMOTE_ARGS=(--target-host "root@$RESOLVED")
+  if [[ "$BUILD_ON_REMOTE" == "true" ]]; then
+    REMOTE_ARGS+=(--build-host "root@$RESOLVED")
+  fi
+
+  echo "Deploying $HOST to root@$RESOLVED ($MODE)..."
+  nixos-rebuild "$MODE" --flake "$REPO_ROOT#$HOST" "${REMOTE_ARGS[@]}" "${OVERRIDE_ARGS[@]}"
+fi
+
+[[ "$MODE" == "boot" ]] && echo "Reboot required to apply changes."
+echo "Update complete for $HOST"

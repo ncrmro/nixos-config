@@ -53,23 +53,24 @@ git submodule update --remote agenix-secrets
 
 ### Building and Deploying
 
+Host connection details are defined in `hosts.nix` (single source of truth) and
+consumed by both the `keystone.hosts` NixOS module and the deploy scripts.
+
 ```bash
 # Check flake configuration
 nix flake check
 
-# Update flake inputs
-nix flake update
+# Build a host config (no deploy, no sudo)
+bin/build [--dev] [<HOST>]          # defaults to current hostname
+bin/build ocean                     # build ocean config
+bin/build --dev                     # build with local keystone + agenix-secrets
 
-# Deploy to local system
-sudo nixos-rebuild switch --flake .#<hostname>
-
-# Deploy to remote host
-./bin/sync <hostname> <ip_address>
-
-# Update specific hosts (convenience scripts)
-./bin/updateMaia       # Update maia host
-./bin/updateOcean      # Update ocean host
-./bin/updateMercury    # Update mercury host
+# Deploy to a host (switch or boot)
+bin/update [--dev] [--boot] [<HOST>]  # defaults to current hostname
+bin/update ocean                      # deploy to ocean (Tailscale, LAN fallback)
+bin/update mercury                    # deploy to mercury (direct IP)
+bin/update --dev                      # deploy with local submodule overrides
+bin/update --boot                     # nixos-rebuild boot (reboot required)
 ```
 
 ### Committing and Pushing Submodule Changes

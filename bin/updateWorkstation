@@ -1,2 +1,0 @@
-WORKSTATION_HOST="ncrmro-workstation.mercury"
-nixos-rebuild switch --flake .#ncrmro-workstation --build-host "root@$WORKSTATION_HOST" --target-host "root@$WORKSTATION_HOST"

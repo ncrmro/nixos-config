@@ -1,6 +1,0 @@
-#!/bin/bash
-set -e
-
-/home/ncrmro/.nix-profile/bin/alejandra .
-rsync --recursive --verbose --delete --exclude .git ./ root@192.168.1.118:/etc/nixos/flake/
-ssh ncrmro@192.168.1.118 home-manager switch --flake /etc/nixos/flake/#ncrmro@mox

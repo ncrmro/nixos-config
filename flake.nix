@@ -251,15 +251,6 @@
             fi
           }
 
-          build-iso() {
-            echo "Building installer ISO with auto-collected SSH keys..."
-            nix build .#installer-iso "$@"
-            local iso
-            iso=$(find result/iso -name '*.iso' 2>/dev/null | head -1)
-            if [ -n "$iso" ]; then
-              echo "ISO: $iso ($(du -h "$iso" | cut -f1))"
-            fi
-          }
         '';
       };
 
