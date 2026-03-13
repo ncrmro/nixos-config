@@ -42,13 +42,6 @@
     mode = "0400";
   };
 
-  # SSH key passphrase (auto-loaded into ssh-agent at login)
-  age.secrets.ncrmro-laptop-ssh-passphrase = {
-    file = "${inputs.agenix-secrets}/secrets/ncrmro-laptop-ssh-passphrase.age";
-    owner = "ncrmro";
-    mode = "0400";
-  };
-
   # Cliflux config (Miniflux CLI client)
   age.secrets.cliflux-config = {
     file = "${inputs.agenix-secrets}/secrets/cliflux-config.age";
@@ -96,8 +89,6 @@
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = [
-    # For debugging and troubleshooting Secure Boot.
-    pkgs.sbctl
     pkgs.nfs-utils
     pkgs.nvtopPackages.amd
     # inputs.alejandra.defaultPackage."x86_64-linux"
@@ -107,16 +98,6 @@
 
   hardware.keyboard.uhk.enable = true;
 
-  # Lanzaboote currently replaces the systemd-boot module.
-  # This setting is usually set to true in configuration.nix
-  # generated at installation time. So we force it to false
-  # for now.
-  boot.loader.systemd-boot.enable = lib.mkForce false;
-
-  boot.lanzaboote = {
-    enable = true;
-    pkiBundle = "/var/lib/sbctl";
-  };
   systemd.services.fprintd = {
     wantedBy = [ "multi-user.target" ];
     serviceConfig.Type = "simple";

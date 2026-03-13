@@ -19,7 +19,6 @@
     ../common/global
     ../common/optional/tailscale.node.nix
     ../common/optional/eternal-terminal.nix
-    # ../common/optional/secureboot.nix # Conflict with keystone
     ../common/optional/nfs-client.nix
     ../common/optional/monitoring-client.nix
     ../common/optional/alloy-client.nix
@@ -78,13 +77,6 @@
     file = "${inputs.agenix-secrets}/secrets/attic-push-token.age";
   };
 
-  # Secure Boot configuration (module provided by keystone)
-  boot.loader.systemd-boot.enable = lib.mkForce false;
-  boot.lanzaboote = {
-    enable = true;
-    pkiBundle = "/var/lib/sbctl";
-  };
-
   programs.bambu-studio.enable = true;
 
   users.users.ncrmro.extraGroups = [
@@ -95,13 +87,6 @@
   # Stalwart mail user password for himalaya
   age.secrets.stalwart-mail-ncrmro-password = {
     file = "${inputs.agenix-secrets}/secrets/stalwart-mail-ncrmro-password.age";
-    owner = "ncrmro";
-    mode = "0400";
-  };
-
-  # SSH key passphrase (auto-loaded into ssh-agent at login)
-  age.secrets.ncrmro-workstation-ssh-passphrase = {
-    file = "${inputs.agenix-secrets}/secrets/ncrmro-workstation-ssh-passphrase.age";
     owner = "ncrmro";
     mode = "0400";
   };

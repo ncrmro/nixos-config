@@ -1,37 +1,30 @@
-# Edit this configuration file to define what should be installed on
-# your system. Help is available in the configuration.nix(5) man page, on
-# https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
+# Maia - Legacy home server
+#
+# Secure Boot via keystone operating-system module (Lanzaboote + sbctl).
+# User management via keystone.nix (ncrmro user + root keys via hardwareKey).
+# Disko partitioning provided by keystone operating-system module.
 {
-  config,
-  lib,
   pkgs,
-  inputs,
   ...
 }:
 {
   imports = [
-    inputs.disko.nixosModules.disko
-    # Include the results of the hardware scan.
     ./hardware-configuration.nix
     ./disk-config.nix
     ../common/optional/zfs.luks.root.nix
-    # ./zpool.lake.nix
     ./zpool.lake.noblock.nix
     ./zfs.users.nix
     ../common/global
-    ../common/optional/secureboot.nix
     ../common/optional/tailscale.node.nix
     ../common/optional/agenix.nix
     ../common/optional/alloy-client.nix
     ../common/optional/monitoring-client.nix
-    ../../modules/users/ncrmro.nix
-    ../../modules/users/root.nix
+    ../../modules/keystone.nix
   ];
 
   boot.initrd.systemd.emergencyAccess = false;
 
   environment.systemPackages = [
-    pkgs.sbctl
     pkgs.htop
     pkgs.usbutils
     pkgs.bottom

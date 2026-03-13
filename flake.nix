@@ -96,6 +96,9 @@
             zesh
             ;
           inherit (pkgs) mcp-language-server;
+
+          # Installer ISO — keys auto-collected from keystone.os.users (wheel) + hardware root keys
+          installer-iso = self.nixosConfigurations.ncrmro-workstation.config.keystone.os.installer.isoImage;
         };
 
       # Import NixOS and Home Manager modules
@@ -245,6 +248,16 @@
             else
               echo "Failed: ''${failed[*]}"
               return 1
+            fi
+          }
+
+          build-iso() {
+            echo "Building installer ISO with auto-collected SSH keys..."
+            nix build .#installer-iso "$@"
+            local iso
+            iso=$(find result/iso -name '*.iso' 2>/dev/null | head -1)
+            if [ -n "$iso" ]; then
+              echo "ISO: $iso ($(du -h "$iso" | cut -f1))"
             fi
           }
         '';

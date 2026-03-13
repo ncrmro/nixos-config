@@ -30,10 +30,9 @@ in
 
   keystone.os = {
     enable = true;
+    secretsBasePath = inputs.agenix-secrets;
     storage.enable = false; # All hosts use disko
     ssh.enable = false; # SSH configured independently
-    secureBoot.enable = false; # Lanzaboote per-host
-    tpm.enable = false; # TPM per-host
     hypervisor.enable = true;
 
     users.ncrmro = {
