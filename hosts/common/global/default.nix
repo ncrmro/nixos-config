@@ -10,12 +10,15 @@
     ./openssh.nix
     inputs.keystone.nixosModules.binaryCacheClient
     inputs.keystone.nixosModules.domain
-    inputs.keystone.nixosModules.mail
+    inputs.keystone.nixosModules.services
     inputs.keystone.nixosModules.hosts
   ];
 
   keystone.domain = "ncrmro.com";
-  keystone.mail.host = "ocean";
+  keystone.services = {
+    mail.host = "ocean";
+    git.host = "ocean";
+  };
   keystone.hosts = import ../../../hosts.nix;
 
   # Apply custom overlays

@@ -78,7 +78,7 @@
     };
   };
 
-  # keystone.mail.host = "ocean" (set in agent-identities.nix) auto-enables Stalwart here.
+  # keystone.services.mail.host = "ocean" (set in global/default.nix) auto-enables Stalwart here.
   keystone.os.mail = {
     # Allow Tailscale IPs (agent VMs, phones, etc) - prevents fail2ban blocking
     allowedIps = [
@@ -171,8 +171,8 @@
     file = "${inputs.agenix-secrets}/secrets/attic-server-token-key.age";
   };
 
+  # keystone.services.git.host = "ocean" (set in global/default.nix) auto-enables Forgejo here.
   keystone.os.gitServer = {
-    enable = true;
     domain = "git.ncrmro.com";
     httpPort = 3001;
     adminUsers = [ "ncrmro" ];
