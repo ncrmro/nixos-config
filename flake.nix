@@ -98,7 +98,7 @@
           inherit (pkgs) mcp-language-server;
 
           # Installer ISO — keys auto-collected from keystone.os.users (wheel) + hardware root keys
-          installer-iso = self.nixosConfigurations.ncrmro-workstation.config.keystone.os.installer.isoImage;
+          iso = self.nixosConfigurations.ncrmro-workstation.config.keystone.os.installer.isoImage;
         };
 
       # Import NixOS and Home Manager modules
