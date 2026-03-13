@@ -37,6 +37,7 @@
     git = {
       userName = "Nicholas Romero";
       userEmail = "ncrmro@gmail.com";
+      forgejo.enable = true;
     };
     sandbox = {
       enable = true;
