@@ -122,10 +122,10 @@ in
             template = "{{ if eq . \"0\" }}emergency{{ else if eq . \"1\" }}alert{{ else if eq . \"2\" }}critical{{ else if eq . \"3\" }}error{{ else if eq . \"4\" }}warning{{ else if eq . \"5\" }}notice{{ else if eq . \"6\" }}info{{ else }}debug{{ end }}"
           }
 
-          // Extract agent name from syslog identifier (agent-task-loop-drago -> drago)
+          // Extract agent name from syslog identifier (agent-drago-task-loop -> drago)
           stage.regex {
             source = "syslog_identifier"
-            expression = "^agent-(?:task-loop|scheduler|sync-agent-notes)-(?P<agent_name>.+)$"
+            expression = "^agent-(?P<agent_name>[^-]+)-(?:task-loop|scheduler|notes-sync)$"
           }
 
           // Extract step and task from structured log tags
