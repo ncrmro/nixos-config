@@ -54,24 +54,28 @@ git submodule update --remote agenix-secrets
 ### Building and Deploying
 
 Host connection details are defined in `hosts.nix` (single source of truth) and
-consumed by both the `keystone.hosts` NixOS module and the deploy scripts.
+consumed by both the `keystone.hosts` NixOS module and the `ks` CLI.
 
 ```bash
 # Check flake configuration
 nix flake check
 
 # Build a host config (no deploy, no sudo)
-bin/build [--dev] [<HOST>]          # defaults to current hostname
-bin/build ocean                     # build ocean config
-bin/build --dev                     # build with local keystone + agenix-secrets
+ks build [--dev] [<HOST>]          # defaults to current hostname
+ks build ocean                     # build ocean config
+ks build --dev                     # build with local keystone + agenix-secrets
 
 # Deploy to a host (switch or boot)
-bin/update [--dev] [--boot] [<HOST>]  # defaults to current hostname
-bin/update ocean                      # deploy to ocean (Tailscale, LAN fallback)
-bin/update mercury                    # deploy to mercury (direct IP)
-bin/update --dev                      # deploy with local submodule overrides
-bin/update --boot                     # nixos-rebuild boot (reboot required)
+ks update [--dev] [--boot] [<HOST>]  # defaults to current hostname
+ks update ocean                      # deploy to ocean (Tailscale, LAN fallback)
+ks update mercury                    # deploy to mercury (direct IP)
+ks update --dev                      # deploy with local submodule overrides
+ks update --boot                     # nixos-rebuild boot (reboot required)
 ```
+
+`ks` is installed globally via `keystone.terminal`. It discovers the repo via
+`$NIXOS_CONFIG_DIR`, the git root of the current directory, or `~/nixos-config`.
+The `bin/build` and `bin/update` shims delegate to `ks` for backwards compatibility.
 
 ### Committing and Pushing Submodule Changes
 

@@ -1,4 +1,4 @@
-# hosts.nix — Host registry for bin/build and bin/update.
+# hosts.nix — Host registry for `ks build` and `ks update`.
 #
 # This file is the single source of truth for host identity and connection details.
 # - NixOS modules: imported via hosts/common/global/default.nix
@@ -14,8 +14,8 @@
 #   their deploy, avoiding expensive local compilation.
 #
 #   Recommended order:
-#     bin/build ncrmro-workstation && bin/build ocean
-#     bin/update ncrmro-laptop && bin/update maia
+#     ks build ncrmro-workstation && ks build ocean
+#     ks update ncrmro-laptop && ks update maia
 {
   ocean = {
     hostname = "ocean";
