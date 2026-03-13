@@ -175,6 +175,7 @@
     enable = true;
     domain = "git.ncrmro.com";
     httpPort = 3001;
+    adminUsers = [ "ncrmro" ];
     ssh = {
       openFirewall = true;
       tailscaleOnly = true;
