@@ -24,7 +24,7 @@
       host = "ocean";
       fullName = "Luce";
       email = "luce@ncrmro.com";
-      ssh.publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN+jItdMeX71E3PxfxP+LH2yFXKHxrpPqeJpoRHkLecg agent-luce";
+      ssh.publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIm+ClDj0CiLcYO3rxsQgRx7P0v3/bSw1QuCNdk87btp agent-luce";
       mail.provision = true;
       git.provision = true;
     };
