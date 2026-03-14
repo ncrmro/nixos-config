@@ -33,7 +33,10 @@
     outputs.nixosModules.bambu-studio
   ];
 
-  keystone.os.hypervisor.connections = [ "qemu+ssh://ncrmro@ocean/session" ];
+  keystone.os.hypervisor.connections = [
+    "qemu+ssh://ncrmro@ocean/session"
+    "qemu+ssh://ncrmro@ncrmro-workstation/session"
+  ];
 
   # Stalwart mail user password for himalaya
   age.secrets.stalwart-mail-ncrmro-password = {
