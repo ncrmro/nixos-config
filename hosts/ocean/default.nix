@@ -15,7 +15,6 @@
     ./zfs.users.nix
     ./zfs.local-replication.nix
     ../common/global
-    ../common/optional/tailscale.node.nix
 
     ../common/optional/agenix.nix
     ./adguard-home.nix
@@ -192,8 +191,13 @@
     TERM = "xterm-256color"; # Or your preferred terminal type
   };
 
-  services.tailscale.node = {
-    enable = true;
+  keystone.os.tailscale = {
+    tags = [
+      "tag:k8s-cluster"
+      "tag:k8s-master"
+      "tag:ocean-email"
+      "tag:ocean-ingress"
+    ];
   };
 
   # Configure SMB backup shares

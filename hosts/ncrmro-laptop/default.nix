@@ -22,7 +22,6 @@
     # ../common/optional/podman.nix
     ../common/optional/docker-rootless.nix
     # ../common/optional/docker-root.nix
-    ../common/optional/tailscale.node.nix
     ../common/optional/eternal-terminal.nix
     ../common/optional/nfs-client.nix
     ../common/optional/monitoring-client.nix
@@ -120,11 +119,6 @@
       environment = "home";
       device_type = "laptop";
     };
-  };
-
-  # Configure Tailscale node (no tags for client machine)
-  services.tailscale.node = {
-    enable = true;
   };
 
   networking.hostName = "ncrmro-laptop";

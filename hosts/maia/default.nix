@@ -15,7 +15,6 @@
     ./zpool.lake.noblock.nix
     ./zfs.users.nix
     ../common/global
-    ../common/optional/tailscale.node.nix
     ../common/optional/agenix.nix
     ../common/optional/alloy-client.nix
     ../common/optional/monitoring-client.nix
@@ -33,12 +32,6 @@
 
   environment.variables = {
     TERM = "xterm-256color"; # Or your preferred terminal type
-  };
-
-  # Configure Tailscale node
-  services.tailscale.node = {
-    enable = true;
-    tags = [ "tag:server" ];
   };
 
   # Ship logs and metrics to ocean via Alloy

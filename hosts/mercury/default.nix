@@ -7,7 +7,6 @@ in
     ./hardware-configuration.nix
     ../../modules/nixos/headscale
     ../common/optional/alloy-client.nix
-    ../common/optional/tailscale.node.nix
     ../common/optional/agenix.nix
     ./adguard-home.nix
     ./nginx.nix
@@ -33,13 +32,6 @@ in
       device_type = "vps";
       service = "headscale";
     };
-  };
-
-  # Configure Tailscale node
-  services.tailscale.node = {
-    enable = true;
-    tags = [ "tag:server" ];
-    loginServer = "https://mercury.ncrmro.com";
   };
 
   # Auto-DNS: import generated DNS records from ocean's keystone services

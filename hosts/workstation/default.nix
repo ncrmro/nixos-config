@@ -16,7 +16,6 @@
     ../common/optional/zfs.luks.root.nix
     ./hardware-configuration.nix
     ../common/global
-    ../common/optional/tailscale.node.nix
     ../common/optional/eternal-terminal.nix
     ../common/optional/nfs-client.nix
     ../common/optional/monitoring-client.nix
@@ -126,11 +125,6 @@
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
-  };
-
-  # Configure Tailscale node (no tags for client machine)
-  services.tailscale.node = {
-    enable = true;
   };
 
   services.openssh.settings.PermitRootLogin = "yes";
