@@ -4,18 +4,6 @@
   inputs = {
     # Main package sources
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    # Tools and modules
-    microvm = {
-      url = "github:astro/microvm.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    disko = {
-      url = "github:nix-community/disko";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    lanzaboote.follows = "keystone/lanzaboote";
 
     home-manager.follows = "keystone/home-manager";
 
@@ -26,13 +14,18 @@
     # Secret management (follows keystone)
     agenix.follows = "keystone/agenix";
 
-    nix-flatpak.follows = "keystone/nix-flatpak";
-
     # Private secrets repository (requires Tailscale connection to git.ncrmro.com)
     # This is a private repo - builds will fail without Tailscale access
     agenix-secrets = {
       url = "git+ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git";
       flake = false;
+    };
+
+    # llm-agents - AI coding agent packages (claude-code, gemini-cli, codex)
+    # Declared here so it can be updated independently of keystone.
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Keystone - self-sovereign infrastructure platform
@@ -41,7 +34,7 @@
     keystone = {
       url = "github:ncrmro/keystone";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.disko.follows = "disko";
+      inputs.llm-agents.follows = "llm-agents";
     };
 
     # llama.cpp - latest for MXFP4 support (workstation-specific)
@@ -56,8 +49,6 @@
     inputs@{
       self,
       nixpkgs,
-      microvm,
-      disko,
       home-manager,
       nixos-hardware,
       agenix,

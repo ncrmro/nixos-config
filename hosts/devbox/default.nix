@@ -8,7 +8,6 @@
 }@args:
 {
   imports = [
-    inputs.disko.nixosModules.disko
     ./disko-config.nix
     ./hardware-configuration.nix
     ../common/global

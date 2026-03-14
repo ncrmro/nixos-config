@@ -9,7 +9,6 @@
 }@args:
 {
   imports = [
-    inputs.disko.nixosModules.disko
     ../common/optional/home-manager-base.nix
     ../../modules/keystone.nix
     ../../modules/keystone.desktop.nix
