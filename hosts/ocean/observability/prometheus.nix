@@ -35,19 +35,13 @@ in
         };
       };
 
+      # Ocean's node exporter is already scraped by Alloy (with host/cluster labels)
+      # via remote-write. Only scrape non-Alloy targets here to avoid duplicate series
+      # that cause alert evaluation errors (duplicate empty-label frames).
       scrapeConfigs = [
         {
-          job_name = "node";
+          job_name = "iot";
           static_configs = [
-            {
-              targets = [
-                "127.0.0.1:${toString config.services.prometheus.exporters.node.port}"
-              ];
-              labels = {
-                instance = config.networking.hostName;
-                environment = "home";
-              };
-            }
             {
               targets = [ "192.168.1.140:80" ];
               labels = {
