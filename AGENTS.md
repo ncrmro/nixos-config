@@ -43,7 +43,7 @@ The user runs the script once, then you read `/tmp/stalwart-logs.txt` etc. direc
 
 ## Keystone: Shared Convention Layer
 
-[Keystone](https://github.com/ncrmro/keystone) is the upstream platform providing reusable NixOS modules that any user could adopt for their own infrastructure. It lives at `.submodules/keystone` as a git submodule and is consumed as a flake input.
+[Keystone](https://github.com/ncrmro/keystone) is the upstream platform providing reusable NixOS modules that any user could adopt for their own infrastructure. It lives at `.submodules/keystone` as a gitignored local clone and is consumed as a flake input (`github:ncrmro/keystone`).
 
 **When to put something in keystone vs nixos-config:**
 - **Keystone**: Reusable modules that others could benefit from (server roles, desktop setup, terminal environment, mail, DNS, binary cache, hardware key management)
@@ -54,13 +54,19 @@ The user runs the script once, then you read `/tmp/stalwart-logs.txt` etc. direc
 - `modules/keystone.server.nix` - Imports `server` module, enables it
 - `modules/keystone.desktop.nix` - Imports `desktop` module, configures for ncrmro user
 
-## Clean Git History: Submodule + Flake Update Workflow
+## Clean Git History: Flake Update Workflow
 
-This repo has two git submodules that are also flake inputs. Both the submodule directory and `flake.lock` must be committed together to keep them pointing at the same commit.
+Both `.submodules/keystone` and `agenix-secrets/` are **gitignored local clones** — not git submodules. They exist locally for development but are not tracked by the parent repo. The authoritative version pins are in `flake.lock`.
 
-**Submodules:**
+**Local clones:**
 - `.submodules/keystone` - GitHub: `github:ncrmro/keystone`
 - `agenix-secrets` - Private Forgejo: `git+ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git`
+
+**Setup after fresh clone:**
+```bash
+git clone git@github.com:ncrmro/keystone.git .submodules/keystone
+git clone ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git agenix-secrets
+```
 
 ### The Golden Rule
 
@@ -69,7 +75,7 @@ This repo has two git submodules that are also flake inputs. Both the submodule 
 ```bash
 nix flake update keystone                    # keystone only
 nix flake update agenix-secrets              # secrets only
-nix flake update keystone agenix-secrets     # both submodules
+nix flake update keystone agenix-secrets     # both
 ```
 
 ### Updating Keystone
@@ -82,14 +88,14 @@ cd ../..
 ./bin/keystone-dev --build   # Verify changes build (no sudo needed)
 ./bin/keystone-dev           # Deploy immediately (nixos-rebuild switch with local keystone)
 
-# 2. Commit and push from submodule
+# 2. Commit and push from local clone
 cd .submodules/keystone
 git add -A && git commit -m "feat(server): description" && git push
 cd ../..
 
-# 3. Update flake input AND stage submodule together in ONE commit
+# 3. Update flake lock and commit
 nix flake update keystone
-git add .submodules/keystone flake.lock
+git add flake.lock
 git commit -m "feat: update keystone (description)"
 ```
 
@@ -103,15 +109,15 @@ git commit -m "feat: update keystone (description)"
 ### Updating Agenix Secrets
 
 ```bash
-# 1. Edit secrets in submodule
+# 1. Edit secrets in local clone
 cd agenix-secrets
 agenix -e secrets/new-secret.age   # or edit secrets.nix
 git add -A && git commit -m "Add new secret" && git push
 cd ..
 
-# 2. Update flake input AND stage submodule together in ONE commit
+# 2. Update flake lock and commit
 nix flake update agenix-secrets
-git add agenix-secrets flake.lock
+git add flake.lock
 git commit -m "chore: update agenix-secrets"
 ```
 
@@ -126,15 +132,11 @@ hwrekey
 
 This runs the full workflow:
 1. `agenix --rekey` using YubiKey identity (touch prompt, no SSH password)
-2. `git add -A && git commit && git push` in the secrets submodule
+2. `git add -A && git commit && git push` in the agenix-secrets clone
 3. `nix flake update agenix-secrets` in the parent repo
-4. `git add agenix-secrets flake.lock && git commit` in the parent repo
+4. `git add flake.lock && git commit` in the parent repo
 
 The script is provided by `keystone.terminal.ageYubikey` and configured via `secretsFlakeInput = "agenix-secrets"` in home-manager. Without `secretsFlakeInput`, it only runs `agenix --rekey`.
-
-### Why Both Together?
-
-The `flake.lock` pins the GitHub/Forgejo version while the submodule directory tracks the local checkout. Both must point to the same commit. Committing them separately creates confusion about which version is active and pollutes git history with unnecessary split commits.
 
 ### Handling flake.lock Conflicts During Rebase
 
@@ -147,7 +149,7 @@ git rebase --continue
 
 ### Adding External Nix Package Sources
 
-Add as **flake inputs**, NOT git submodules. Choose the appropriate flake:
+Add as **flake inputs**. Choose the appropriate flake:
 - **nixos-config flake.nix**: Packages/modules specific to this configuration
 - **keystone flake.nix**: Packages/modules that should be part of the upstream platform
 
@@ -256,8 +258,8 @@ To add a new service with auto-DNS, enable it in ocean's keystone config and reb
   - `keystone.nix`, `keystone.server.nix`, `keystone.desktop.nix` - Keystone wrapper modules
   - `/modules/nixos/` - Local NixOS modules (headscale, steam, bambu-studio)
   - `/modules/users/` - User definitions and SSH keys
-- `.submodules/keystone/` - Upstream Keystone submodule
-- `/agenix-secrets/` - Private submodule with encrypted secrets
+- `.submodules/keystone/` - Local Keystone clone (gitignored)
+- `/agenix-secrets/` - Local agenix secrets clone (gitignored)
 - `/bin/` - Helper scripts
 - `/overlays/` - Nix overlays (imports keystone overlay + local packages)
 - `/packages/` - Local package definitions (claude-code, codex, gemini-cli, mcp-language-server, zesh)

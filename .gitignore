@@ -6,3 +6,5 @@ result-desktop-vm
 *GGUF
 .direnv
 .repos/
+.submodules/
+agenix-secrets/

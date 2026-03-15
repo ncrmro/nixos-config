@@ -21,33 +21,25 @@ This is a NixOS configuration repository using flakes for managing system config
   - `/common/kubernetes/` - Kubernetes module definitions
 - `/home-manager/` - User-specific Home Manager configurations
 - `/modules/` - Custom NixOS and user modules (keystone wrappers, local NixOS modules, user definitions)
-  - `.submodules/keystone/` - Upstream [ncrmro/keystone](https://github.com/ncrmro/keystone) submodule
+- `.submodules/keystone/` - Local clone of [ncrmro/keystone](https://github.com/ncrmro/keystone) (gitignored)
 - `/bin/` - Helper scripts for deployment and management
 - `/docs/` - Documentation for various setup procedures
 - `/kubernetes/` - Raw Kubernetes manifests (legacy)
-- `/agenix-secrets/` - Private submodule containing encrypted agenix secrets
+- `/agenix-secrets/` - Local clone of private agenix secrets repo (gitignored)
 
-### Agenix Secrets Submodule
+### Local Repo Clones
 
-Located at `agenix-secrets/`, this is a Git submodule tracking a private repository. Secrets are stored separately to allow publishing nixos-config publicly while keeping encrypted secrets private.
+Both `.submodules/keystone/` and `agenix-secrets/` are **gitignored local clones**, not git submodules. They exist locally for development but are not tracked by the parent repo. The authoritative version pins are in `flake.lock`.
 
-**Repository:** `ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git`
+**Setup after fresh clone:**
+```bash
+git clone git@github.com:ncrmro/keystone.git .submodules/keystone
+git clone ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git agenix-secrets
+```
 
-**Contents:**
+**Agenix secrets contents:**
 - `secrets.nix` - Defines which SSH keys can decrypt which secrets
 - `secrets/` - Directory containing all `.age` encrypted secret files
-
-**Working with the submodule:**
-```bash
-# Clone with submodules
-git clone --recurse-submodules <repo-url>
-
-# Initialize after cloning
-git submodule update --init --recursive
-
-# Update to latest commit
-git submodule update --remote agenix-secrets
-```
 
 ## Common Commands
 
@@ -77,19 +69,17 @@ ks update --boot                     # nixos-rebuild boot (reboot required)
 `$NIXOS_CONFIG_DIR`, the git root of the current directory, or `~/nixos-config`.
 The `bin/build` and `bin/update` shims delegate to `ks` for backwards compatibility.
 
-### Committing and Pushing Submodule Changes
+### Committing and Pushing Keystone / Agenix Changes
 
-When asked to commit and push changes that include submodule modifications (e.g. `.submodules/keystone`):
+When changes span keystone or agenix-secrets:
 
-1. Commit and push each modified submodule first
-2. Update the flake lock for both submodule inputs (`nix flake update keystone agenix-secrets`)
-3. Commit the submodule pointer(s) + `flake.lock` together in nixos-config
+1. Commit and push from the local clone (`cd .submodules/keystone && git push` or `cd agenix-secrets && git push`)
+2. Update the flake lock for the changed inputs: `nix flake update keystone` (or `agenix-secrets`, or both)
+3. Commit `flake.lock` in nixos-config
 4. Push nixos-config
 
 Before pushing, always build the workstation host to verify:
-`nixos-rebuild build --flake .#ncrmro-workstation`
-
-The tree must be clean when done — never leave uncommitted submodule pointers or flake.lock changes.
+`ks build` or `nixos-rebuild build --flake .#ncrmro-workstation`
 
 ### Development Workflow
 
