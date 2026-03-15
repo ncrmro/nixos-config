@@ -162,6 +162,29 @@
         "type": "github"
       }
     },
+    "calendula": {
+      "inputs": {
+        "fenix": "fenix",
+        "nixpkgs": [
+          "keystone",
+          "nixpkgs"
+        ],
+        "pimalaya": "pimalaya"
+      },
+      "locked": {
+        "lastModified": 1767901234,
+        "narHash": "sha256-kTWHHeVnwcUmjhfvQr4/f8x3XJZ7PidwbProjr1BhEk=",
+        "owner": "pimalaya",
+        "repo": "calendula",
+        "rev": "bf94ba029f6be6440f2946da0a0a07bf4bde7952",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pimalaya",
+        "repo": "calendula",
+        "type": "github"
+      }
+    },
     "crane": {
       "locked": {
         "lastModified": 1771796463,
@@ -273,10 +296,34 @@
       "inputs": {
         "nixpkgs": [
           "keystone",
-          "himalaya",
+          "calendula",
           "nixpkgs"
         ],
         "rust-analyzer-src": "rust-analyzer-src"
+      },
+      "locked": {
+        "lastModified": 1759301100,
+        "narHash": "sha256-hmiTEoVAqLnn80UkreCNunnRKPucKvcg5T4/CELEtbw=",
+        "owner": "nix-community",
+        "repo": "fenix",
+        "rev": "0956bc5d1df2ea800010172c6bc4470d9a22cb81",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "ref": "monthly",
+        "repo": "fenix",
+        "type": "github"
+      }
+    },
+    "fenix_2": {
+      "inputs": {
+        "nixpkgs": [
+          "keystone",
+          "himalaya",
+          "nixpkgs"
+        ],
+        "rust-analyzer-src": "rust-analyzer-src_2"
       },
       "locked": {
         "lastModified": 1767250179,
@@ -509,12 +556,12 @@
     },
     "himalaya": {
       "inputs": {
-        "fenix": "fenix",
+        "fenix": "fenix_2",
         "nixpkgs": [
           "keystone",
           "nixpkgs"
         ],
-        "pimalaya": "pimalaya"
+        "pimalaya": "pimalaya_2"
       },
       "locked": {
         "lastModified": 1771669262,
@@ -943,6 +990,7 @@
       "inputs": {
         "agenix": "agenix",
         "browser-previews": "browser-previews",
+        "calendula": "calendula",
         "deepwork": "deepwork",
         "disko": "disko",
         "ghostty": "ghostty",
@@ -965,11 +1013,11 @@
         "yazi": "yazi"
       },
       "locked": {
-        "lastModified": 1773559768,
-        "narHash": "sha256-ECE19Gz4RRFtxQM7rG7ibSyRlKfZ0dcP5HHULyKHq/Q=",
+        "lastModified": 1773586403,
+        "narHash": "sha256-I7dSIPG741rQFxCxseGUuTiWL62ty5V4lsuk0imahz8=",
         "owner": "ncrmro",
         "repo": "keystone",
-        "rev": "870b4b8d3eec9ce0bb2353975cd471684b1e804d",
+        "rev": "7da3f241e3cfaa0413ff2999f30de23628237942",
         "type": "github"
       },
       "original": {
@@ -1225,6 +1273,22 @@
     "pimalaya": {
       "flake": false,
       "locked": {
+        "lastModified": 1767900157,
+        "narHash": "sha256-odSDfA4npCXhO/PimEbRe15KY+NPkCtTKLeiIBX1alc=",
+        "owner": "pimalaya",
+        "repo": "nix",
+        "rev": "a6ca8acb17d2dcd9312c53f8e07fb510769c28e1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pimalaya",
+        "repo": "nix",
+        "type": "github"
+      }
+    },
+    "pimalaya_2": {
+      "flake": false,
+      "locked": {
         "lastModified": 1770914484,
         "narHash": "sha256-kPxdpg98/EVQKLkUdiFEYWWWI1uTLWfIewyCmb4ZfpE=",
         "owner": "pimalaya",
@@ -1358,6 +1422,23 @@
       }
     },
     "rust-analyzer-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1759245522,
+        "narHash": "sha256-H4Hx/EuMJ9qi1WzPV4UG2bbZiDCdREtrtDvYcHr0kmk=",
+        "owner": "rust-lang",
+        "repo": "rust-analyzer",
+        "rev": "a6bc4a4bbe6a65b71cbf76a0cf528c47a8d9f97f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rust-lang",
+        "ref": "nightly",
+        "repo": "rust-analyzer",
+        "type": "github"
+      }
+    },
+    "rust-analyzer-src_2": {
       "flake": false,
       "locked": {
         "lastModified": 1767191410,

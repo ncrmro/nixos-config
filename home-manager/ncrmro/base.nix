@@ -89,4 +89,6 @@
     host = "mail.ncrmro.com";
     passwordCommand = "cat /run/agenix/stalwart-mail-ncrmro-password";
   };
+
+  keystone.terminal.calendar.enable = true;
 }
