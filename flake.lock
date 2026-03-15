@@ -30,11 +30,11 @@
     "agenix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1773377709,
-        "narHash": "sha256-Xq+4RZfwGN8maNlgVpoVNUPL+JqXeoCnCf6waA4mXoE=",
+        "lastModified": 1773551168,
+        "narHash": "sha256-EgSrdkdP3LeJgmgszZogkMcDruVfV5MBK/hEe6jHuoc=",
         "ref": "refs/heads/main",
-        "rev": "968aa1574028caf6cfa0d9c98d0e89875e05e606",
-        "revCount": 33,
+        "rev": "dd5642ceecd731eea8536efc6e3d1d1f25e3d4d1",
+        "revCount": 34,
         "type": "git",
         "url": "ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git"
       },
@@ -965,11 +965,11 @@
         "yazi": "yazi"
       },
       "locked": {
-        "lastModified": 1773546137,
-        "narHash": "sha256-uVS8MAWPns8UDZnz+UOMgu4OW59z2qvM57zTcE+Kc6E=",
+        "lastModified": 1773551666,
+        "narHash": "sha256-ppAPznE8OQHKGCM8j967EIcUb1mFswtEhN5Ycb39CUA=",
         "owner": "ncrmro",
         "repo": "keystone",
-        "rev": "2aa76a632d6bcad87a90188e67485c6a5688932f",
+        "rev": "44dd12b300961a28b093201106ddaa3895bdfe90",
         "type": "github"
       },
       "original": {
