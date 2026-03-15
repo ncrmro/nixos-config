@@ -5,3 +5,4 @@ result-desktop-vm
 *.qcow2
 *GGUF
 .direnv
+.repos/

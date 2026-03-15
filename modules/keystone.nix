@@ -30,7 +30,6 @@ in
 
   keystone.os = {
     enable = lib.mkDefault true;
-    secretsBasePath = inputs.agenix-secrets;
     storage.enable = lib.mkDefault false; # All hosts use disko
     ssh.enable = lib.mkDefault false; # SSH configured independently
     hypervisor.enable = lib.mkDefault true;
@@ -54,4 +53,6 @@ in
       sshAutoLoad.enable = lib.mkDefault true;
     };
   };
+
+  keystone.secrets.repo = inputs.agenix-secrets;
 }
