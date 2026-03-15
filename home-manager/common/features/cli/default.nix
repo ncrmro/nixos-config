@@ -158,8 +158,6 @@
     k = "kubectl";
     # Session management
     ztab = "zellij action rename-tab";
-    # AI Tools
-    opencode = "/home/ncrmro/.opencode/bin/opencode";
   };
 
   programs.git.settings.alias = {
