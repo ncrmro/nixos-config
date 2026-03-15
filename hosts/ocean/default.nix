@@ -127,6 +127,11 @@
     owner = "agent-luce";
     mode = "0400";
   };
+  age.secrets.agent-luce-bitwarden-password = {
+    file = "${inputs.agenix-secrets}/secrets/agent-luce-bitwarden-password.age";
+    owner = "agent-luce";
+    mode = "0400";
+  };
 
   # Configure Stalwart TLS and admin auth
   services.stalwart-mail = {
