@@ -1013,11 +1013,11 @@
         "yazi": "yazi"
       },
       "locked": {
-        "lastModified": 1773589921,
-        "narHash": "sha256-57tVoPHxdE5khzU34Gw8jfISnDincOWdlZXntTg0xhA=",
+        "lastModified": 1773590021,
+        "narHash": "sha256-1fTZ8lHYMb5BasgUxYAHBr0m9PqG7XED09KcHGfYbLU=",
         "owner": "ncrmro",
         "repo": "keystone",
-        "rev": "a6cf8dc24d56e48d42ac6c6519d3d33979e6dce1",
+        "rev": "4f845a92e712ebcad3a404cb481fba3b6d747e60",
         "type": "github"
       },
       "original": {
