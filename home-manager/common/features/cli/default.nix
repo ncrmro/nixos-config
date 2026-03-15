@@ -1,7 +1,6 @@
 {
   lib,
   pkgs,
-  inputs,
   ...
 }:
 {
@@ -125,8 +124,6 @@
     # Socat - Multipurpose relay for bidirectional data transfer
     # https://www.dest-unreach.org/socat/
     socat
-
-    # secret management
 
     # OpenSSL - Cryptography and SSL/TLS toolkit
     # https://www.openssl.org/
