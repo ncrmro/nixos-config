@@ -20,8 +20,13 @@ set -e
 
 echo "Running nixfmt formatter on staged Nix files..."
 
-if ! command -v nixfmt &> /dev/null; then
-    echo "Error: nixfmt is not installed"
+# Prefer nixfmt from PATH, fall back to nix run
+if command -v nixfmt &> /dev/null; then
+    NIXFMT_CMD="nixfmt"
+elif command -v nix &> /dev/null; then
+    NIXFMT_CMD="nix run nixpkgs#nixfmt-rfc-style --"
+else
+    echo "Error: nixfmt is not installed and nix is not available"
     echo "Install it with: nix-env -iA nixpkgs.nixfmt-rfc-style"
     exit 1
 fi
@@ -37,18 +42,10 @@ fi
 echo "Formatting staged .nix files:"
 echo "$STAGED_NIX_FILES"
 
-# Format each staged file
-echo "$STAGED_NIX_FILES" | while IFS= read -r file; do
-    if [ -f "$file" ]; then
-        nixfmt "$file"
-        if [ $? -ne 0 ]; then
-            echo "nixfmt formatting failed for $file"
-            exit 1
-        fi
-        # Re-stage the formatted file
-        git add "$file"
-    fi
-done
+# Format all staged files at once and re-stage them
+mapfile -t FILES <<< "$STAGED_NIX_FILES"
+$NIXFMT_CMD "${FILES[@]}"
+git add "${FILES[@]}"
 
 echo "nixfmt formatting complete"
 EOF
