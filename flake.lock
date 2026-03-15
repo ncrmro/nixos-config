@@ -965,11 +965,11 @@
         "yazi": "yazi"
       },
       "locked": {
-        "lastModified": 1773557311,
-        "narHash": "sha256-kNBdJzmwA5a4DYlKfAVNP1ow1CWpnPcq74XDxt8BjQY=",
+        "lastModified": 1773558973,
+        "narHash": "sha256-PxsEv9TAuWiNgTNlysfNB9+jLYtwPB71BWbu3UiXMi8=",
         "owner": "ncrmro",
         "repo": "keystone",
-        "rev": "9ebca38c4011f0e262c8c65ecc007ab092ee4395",
+        "rev": "7935f425d6a031f69bbabaf828f326516d6e01d7",
         "type": "github"
       },
       "original": {
