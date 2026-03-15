@@ -10,7 +10,6 @@
     ./base.nix
     ../common/features/desktop/obs.nix
     ../common/features/desktop/openscad.nix
-    ../common/features/ollama.nix
   ];
 
   wayland.windowManager.hyprland.settings = {
@@ -30,6 +29,12 @@
       "9, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:false"
       "11, monitor:desc:LG Electronics LG Ultra HD 0x00044217, persistent:false"
     ];
+  };
+
+  keystone.terminal.ai.ollama = {
+    enable = true;
+    host = "http://ncrmro-workstation:11434";
+    defaultModel = "qwen3:32b";
   };
 
   programs.zsh = {

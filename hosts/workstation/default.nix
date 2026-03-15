@@ -66,6 +66,13 @@
     name = "Workstation Speakers";
   };
 
+  keystone.os.services.ollama = {
+    enable = true;
+    acceleration = "vulkan";
+    environmentVariables.OLLAMA_CONTEXT_LENGTH = "64000";
+    models = [ "qwen3:32b" ];
+  };
+
   # Attic push configuration (tokenFile defaults to /run/agenix/attic-push-token)
   keystone.binaryCache.push.enable = true;
 
