@@ -943,11 +943,11 @@
         "yazi": "yazi"
       },
       "locked": {
-        "lastModified": 1773532293,
-        "narHash": "sha256-at2Pdw5rVKn+GBAptFMmxn6NyvsCIsar7bc2xADc++8=",
+        "lastModified": 1773539462,
+        "narHash": "sha256-eLSDRrNTVWAOHGKu9zTAEuqe53XB3ADUcRiY67rKijA=",
         "owner": "ncrmro",
         "repo": "keystone",
-        "rev": "d717f5b37d1d8287b5be82bc8cb8d1151883a66b",
+        "rev": "31e49aec935f261cd8d0311648ecc41983834ae3",
         "type": "github"
       },
       "original": {
@@ -1250,10 +1250,6 @@
     },
     "root": {
       "inputs": {
-        "agenix": [
-          "keystone",
-          "agenix"
-        ],
         "agenix-secrets": "agenix-secrets",
         "home-manager": [
           "keystone",
@@ -1262,10 +1258,6 @@
         "keystone": "keystone",
         "llama-cpp": "llama-cpp",
         "llm-agents": "llm-agents",
-        "nix-index-database": [
-          "keystone",
-          "nix-index-database"
-        ],
         "nixos-hardware": [
           "keystone",
           "nixos-hardware"

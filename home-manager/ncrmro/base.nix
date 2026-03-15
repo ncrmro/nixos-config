@@ -17,7 +17,6 @@
     ../common/optional/mcp/github-mcp.nix
     ../common/optional/mcp/kubernetes.nix
     # ../common/optional/mcp/mcp-language-server.nix # GitHub 502, uses rev="main"
-    inputs.nix-index-database.homeModules.nix-index
   ];
 
   home.packages = with pkgs; [

@@ -26,7 +26,6 @@
     ../common/optional/nfs-client.nix
     ../common/optional/monitoring-client.nix
     ../common/optional/alloy-client.nix
-    ../common/optional/agenix.nix
     ./zfs.remote-replication.nix
     ../../modules/nixos/steam.nix
     outputs.nixosModules.bambu-studio

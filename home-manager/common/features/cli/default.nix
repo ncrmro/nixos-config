@@ -128,10 +128,6 @@
 
     # secret management
 
-    # Agenix - Age-encrypted secrets for NixOS
-    # https://github.com/ryantm/agenix
-    inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
-
     # OpenSSL - Cryptography and SSL/TLS toolkit
     # https://www.openssl.org/
     openssl

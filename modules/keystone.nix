@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, lib, ... }:
 let
   keys = import ./users/keys.nix;
 in
@@ -9,7 +9,7 @@ in
   ];
 
   keystone.hardwareKey = {
-    enable = true;
+    enable = lib.mkDefault true;
     keys.yubi-black = {
       description = "Primary YubiKey 5 NFC (USB-A, black)";
       sshPublicKey = "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAILEOo3uKwbDN1SJemQx8UPVXv0TjKn2VfZSTVFfp3tlcAAAACnNzaDpuY3Jtcm8=";
@@ -23,17 +23,17 @@ in
       "yubi-green"
     ];
     gpgAgent = {
-      enable = false;
-      enableSSHSupport = false;
+      enable = lib.mkDefault false;
+      enableSSHSupport = lib.mkDefault false;
     };
   };
 
   keystone.os = {
-    enable = true;
+    enable = lib.mkDefault true;
     secretsBasePath = inputs.agenix-secrets;
-    storage.enable = false; # All hosts use disko
-    ssh.enable = false; # SSH configured independently
-    hypervisor.enable = true;
+    storage.enable = lib.mkDefault false; # All hosts use disko
+    ssh.enable = lib.mkDefault false; # SSH configured independently
+    hypervisor.enable = lib.mkDefault true;
 
     users.ncrmro = {
       fullName = "Nicholas Romero";
@@ -50,8 +50,8 @@ in
       ];
       authorizedKeys = keys.ncrmro;
       hardwareKeys = [ "yubi-black" ];
-      terminal.enable = true;
-      sshAutoLoad.enable = true;
+      terminal.enable = lib.mkDefault true;
+      sshAutoLoad.enable = lib.mkDefault true;
     };
   };
 }

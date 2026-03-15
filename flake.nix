@@ -9,10 +9,6 @@
 
     # Additional tools (follows keystone)
     nixos-hardware.follows = "keystone/nixos-hardware";
-    nix-index-database.follows = "keystone/nix-index-database";
-
-    # Secret management (follows keystone)
-    agenix.follows = "keystone/agenix";
 
     # Private secrets repository (requires Tailscale connection to git.ncrmro.com)
     # This is a private repo - builds will fail without Tailscale access
@@ -51,7 +47,6 @@
       nixpkgs,
       home-manager,
       nixos-hardware,
-      agenix,
       ...
     }:
     let

@@ -16,7 +16,6 @@
     ./zfs.local-replication.nix
     ../common/global
 
-    ../common/optional/agenix.nix
     ./adguard-home.nix
     ../common/optional/servarr.nix
     ../common/optional/home-assistant.nix

@@ -15,7 +15,6 @@
     ./zpool.lake.noblock.nix
     ./zfs.users.nix
     ../common/global
-    ../common/optional/agenix.nix
     ../common/optional/alloy-client.nix
     ../common/optional/monitoring-client.nix
     ../../modules/keystone.nix

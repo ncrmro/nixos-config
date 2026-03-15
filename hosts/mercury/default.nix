@@ -1,13 +1,11 @@
 { inputs, oceanConfig, ... }:
-let
-  keys = import ../../modules/users/keys.nix;
-in
 {
   imports = [
     ./hardware-configuration.nix
     ../../modules/nixos/headscale
+    ../common/global
     ../common/optional/alloy-client.nix
-    ../common/optional/agenix.nix
+    ../../modules/keystone.nix
     ./adguard-home.nix
     ./nginx.nix
     inputs.keystone.nixosModules.headscale-dns
@@ -22,8 +20,7 @@ in
     "1.1.1.1"
     "8.8.8.8"
   ];
-  services.openssh.enable = true;
-  users.users.root.openssh.authorizedKeys.keys = keys.root;
+  services.openssh.settings.PermitRootLogin = "yes";
 
   services.alloy-client = {
     enable = true;
@@ -41,4 +38,11 @@ in
   };
 
   system.stateVersion = "25.05";
+
+  # Opt-outs for mercury (VPS environment)
+  keystone.hardwareKey.enable = false;
+  keystone.os.secureBoot.enable = false;
+  keystone.os.tpm.enable = false;
+  keystone.os.hypervisor.enable = false;
+  keystone.os.users.ncrmro.sshAutoLoad.enable = false;
 }
