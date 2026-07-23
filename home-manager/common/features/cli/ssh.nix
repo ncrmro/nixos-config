@@ -1,36 +1,6 @@
+# ssh config migrated to plain dotfiles: ~/repos/ncrmro/dotfiles/packages/ssh/.ssh/config
+# (stowed into place). programs.ssh generation is disabled in
+# common/global/default.nix (mkForce false).
+{ ... }:
 {
-  lib,
-  pkgs,
-  ...
-}:
-{
-  programs.ssh = {
-    enable = true;
-    # Disable deprecated default config
-    enableDefaultConfig = false;
-    matchBlocks = {
-      "unsup-laptop.local" = {
-        user = "nicholas";
-        setEnv = {
-          TERM = "xterm-256color";
-        };
-      };
-      "unsup-air.local" = {
-        setEnv = {
-          TERM = "xterm-256color";
-        };
-      };
-      "unsup-16-pro.local" = {
-        user = "nicholas";
-        setEnv = {
-          TERM = "xterm-256color";
-        };
-      };
-      "ncrmro-laptop-14" = {
-        setEnv = {
-          TERM = "xterm-256color";
-        };
-      };
-    };
-  };
 }

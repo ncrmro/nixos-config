@@ -35,32 +35,14 @@
     secretsFlakeInput = "agenix-secrets";
   };
 
-  # CRITICAL: exec-once MUST go in extraConfig, NOT in settings.
-  # The hyprland HM settings type is a raw freeform valueType — setting
-  # exec-once in settings silently REPLACES keystone's entire exec-once list,
-  # which breaks: lock screen on boot (hyprlock), D-Bus activation environment,
-  # hyprsunset, hyprpolkitagent, and clipboard manager (clipse).
+  # Personal exec-once + windowrules now live in a plain, hot-reloadable file in
+  # ncrmro/dotfiles, sourced LAST so it appends to (not replaces) keystone's
+  # generated config. Edit that file and `hyprctl reload` — no nix rebuild.
+  # Using extraConfig (raw append) preserves keystone's exec-once list; sourcing
+  # a plain file has the same additive semantics as inlining the text here.
   wayland.windowManager.hyprland.extraConfig = ''
-    exec-once = hyprctl dispatch workspace 2
+    source = ${config.dotfiles.repoPath}/packages/hyprland/.config/hypr/hyprland.conf
   '';
-
-  wayland.windowManager.hyprland.settings = {
-    windowrule = lib.mkDefault [
-      # Tag messaging apps
-      "tag +messaging, match:class Signal"
-      "tag +messaging, match:title .*WhatsApp.*"
-      "tag +messaging, match:class discord"
-      "tag +messaging, match:class telegram"
-
-      # Apply rules to all messaging apps
-      "no_screen_share on, match:tag messaging"
-      "workspace special:magic, match:tag messaging"
-      # "tile, match:tag messaging"
-
-      "workspace special:magic, match:title .*YouTube Music.*"
-      # "tile, match:title .*YouTube Music.*"
-    ];
-  };
   programs.fastfetch.enable = true;
 
   home.sessionVariables = {

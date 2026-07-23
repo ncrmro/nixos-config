@@ -6,13 +6,24 @@
   ...
 }:
 {
-  imports = [ ../../../modules/keystone/terminal/agent-assets-dotagents.nix ];
+  imports = [
+    ../../../modules/keystone/terminal/agent-assets-dotagents.nix
+    ../../../modules/home-manager/dotfiles
+  ];
 
   home.username = lib.mkDefault "ncrmro";
   home.homeDirectory = lib.mkDefault "/home/ncrmro";
   home.stateVersion = lib.mkDefault "25.05";
 
   programs.home-manager.enable = true;
+
+  # Plain-text dotfiles (stow) own git + ssh config; nix only provisions the
+  # binaries. Desktop/other features append their own packages (e.g. hyprland).
+  dotfiles.enable = true;
+  dotfiles.packages = [
+    "git"
+    "ssh"
+  ];
 
   home.packages = [ pkgs.lsof ];
 
@@ -39,13 +50,9 @@
     NIXOS_OZONE_WL = "1";
   };
 
-  programs.ssh = {
-    enable = true;
-    # extraConfig = ''
-    #   Host *
-    #     IdentityAgent ~/.1password/agent.sock
-    # '';
-  };
+  # ssh config now lives in ncrmro/dotfiles (packages/ssh/.ssh/config), stowed
+  # into place. Disable HM generation so it does not fight stow for ~/.ssh/config.
+  programs.ssh.enable = lib.mkForce false;
 
   keystone.development = lib.mkDefault true;
   keystone.repos = import ../../../repos.nix;
@@ -69,28 +76,7 @@
     };
   };
 
-  programs.git = {
-    enable = true;
-    settings.user = {
-      name = "Nicholas Romero";
-      email = "ncrmro@gmail.com";
-    };
-    # settings = {
-    #   credential.helper = "store";
-    #   push.autoSetupRemote = true;
-    #   gpg.format = "ssh";
-    #   commit.gpgsign = true;
-    #   user.signingkey = "~/.ssh/id_ed25519";
-    #   lfs.enable = true;
-    #   alias = {
-    #     b = "branch";
-    #     p = "pull";
-    #     co = "checkout";
-    #     c = "commit";
-    #     ci = "commit -a";
-    #     a = "add";
-    #     st = "status -sb";
-    #   };
-    # };
-  };
+  # git config now lives in ncrmro/dotfiles (packages/git/.config/git/config),
+  # stowed into place. Disable HM generation so it does not fight stow.
+  programs.git.enable = lib.mkForce false;
 }

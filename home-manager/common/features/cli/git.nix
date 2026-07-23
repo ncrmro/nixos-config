@@ -1,29 +1,6 @@
+# git config migrated to plain dotfiles: ~/repos/ncrmro/dotfiles/packages/git/.config/git/config
+# (stowed into place; nix only provides the git binary via the `dotfiles` module).
+# programs.git generation is disabled in common/global/default.nix (mkForce false).
+{ ... }:
 {
-  lib,
-  pkgs,
-  ...
-}:
-{
-  programs.git = {
-    enable = true;
-    userName = "Nicholas Romero";
-    userEmail = "ncrmro@gmail.com";
-    extraConfig = {
-      credential.helper = "store";
-      push.autoSetupRemote = true;
-      gpg.format = "ssh";
-      commit.gpgsign = true;
-      user.signingkey = "~/.ssh/id_ed25519";
-      lfs.enable = true;
-      alias = {
-        b = "branch";
-        p = "pull";
-        co = "checkout";
-        c = "commit";
-        ci = "commit -a";
-        a = "add";
-        st = "status -sb";
-      };
-    };
-  };
 }
