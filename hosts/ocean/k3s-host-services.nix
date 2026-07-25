@@ -82,15 +82,6 @@ let
       port = 8222;
       annotations = whitelist tailscaleOnly;
     };
-    vega = {
-      host = "vega.ncrmro.com";
-      port = 17878;
-      annotations = whitelist tailscaleOnly // {
-        "nginx.ingress.kubernetes.io/proxy-buffering" = "off";
-        "nginx.ingress.kubernetes.io/proxy-request-buffering" = "off";
-      };
-    };
-
     # Jellyfin - PUBLIC (no whitelist)
     jellyfin = {
       host = "jellyfin.ncrmro.com";

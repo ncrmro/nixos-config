@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: k8s-apply-link [--dry-run]
+
+Install Link Operator on Ocean and apply the commit-pinned Vega Organization
+and Agent. LINK_OPERATOR_IMAGE and LINK_AGENT_IMAGE must be immutable public
+GHCR digest references.
+EOF
+}
+
+dry_run=false
+case "${1:-}" in
+  "") ;;
+  --dry-run) dry_run=true ;;
+  -h|--help)
+    usage
+    exit 0
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
+if (( $# > 1 )); then
+  usage >&2
+  exit 2
+fi
+
+: "${DEVENV_ROOT:?Run k8s-apply-link from the repository devenv}"
+: "${LINK_OPERATOR_IMAGE:?Set LINK_OPERATOR_IMAGE to ghcr.io/ai-outfitter/link-operator@sha256:...}"
+: "${LINK_AGENT_IMAGE:?Set LINK_AGENT_IMAGE to ghcr.io/ai-outfitter/link-agent@sha256:...}"
+
+if [[ ! "$LINK_OPERATOR_IMAGE" =~ ^ghcr\.io/ai-outfitter/link-operator@sha256:[0-9a-f]{64}$ ]]; then
+  echo "k8s-apply-link: LINK_OPERATOR_IMAGE must be an immutable ai-outfitter GHCR digest" >&2
+  exit 1
+fi
+if [[ ! "$LINK_AGENT_IMAGE" =~ ^ghcr\.io/ai-outfitter/link-agent@sha256:[0-9a-f]{64}$ ]]; then
+  echo "k8s-apply-link: LINK_AGENT_IMAGE must be an immutable ai-outfitter GHCR digest" >&2
+  exit 1
+fi
+
+export KUBECONFIG="${KUBECONFIG:-$HOME/.kube/config.ocean.yml}"
+expected_server="${K8S_EXPECTED_SERVER:-https://100.64.0.6:6443}"
+actual_server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+if [[ "$actual_server" != "$expected_server" ]]; then
+  echo "k8s-apply-link: refusing cluster server '$actual_server'; expected '$expected_server'" >&2
+  exit 1
+fi
+kubectl get --raw=/readyz >/dev/null
+
+if [[ -n "$(git -C "$DEVENV_ROOT" status --short)" ]]; then
+  echo "k8s-apply-link: ks-config must be clean so Vega can pin the exact committed catalog" >&2
+  exit 1
+fi
+ks_revision="$(git -C "$DEVENV_ROOT" rev-parse HEAD)"
+if ! git -C "$DEVENV_ROOT" branch -r --contains "$ks_revision" | grep -Fq 'origin/'; then
+  echo "k8s-apply-link: commit $ks_revision is not present on a known origin branch" >&2
+  exit 1
+fi
+
+temporary="$(mktemp -d)"
+trap 'rm -rf "$temporary"' EXIT
+operator_repository="${LINK_OPERATOR_IMAGE%@sha256:*}"
+operator_digest="sha256:${LINK_OPERATOR_IMAGE#*@sha256:}"
+sed \
+  -e "s#__LINK_OPERATOR_REPOSITORY__#$operator_repository#g" \
+  -e "s#__LINK_OPERATOR_DIGEST__#$operator_digest#g" \
+  -e "s#__LINK_AGENT_IMAGE__#$LINK_AGENT_IMAGE#g" \
+  "$DEVENV_ROOT/k8s-cluster/link-operator/kustomization.yaml" \
+  > "$temporary/kustomization.yaml"
+sed \
+  -e "s#__KS_CONFIG_REVISION__#$ks_revision#g" \
+  "$DEVENV_ROOT/k8s-cluster/link-operator/vega.yaml" \
+  > "$temporary/vega.yaml"
+
+kustomize build "$temporary" > "$temporary/operator.yaml"
+apply_args=(apply --server-side --force-conflicts --field-manager=link-operator)
+if [[ "$dry_run" == true ]]; then
+  if kubectl get namespace link-operator-system >/dev/null 2>&1; then
+    kubectl "${apply_args[@]}" --dry-run=server -f "$temporary/operator.yaml"
+  else
+    # A server-side dry-run does not persist the Namespace document, so the API
+    # rejects later namespaced documents on a first install. Validate the
+    # cluster-scoped portion on the server and the namespaced portion locally.
+    yq eval-all 'select(.kind == "Namespace" or (.metadata.namespace // "") == "")' \
+      "$temporary/operator.yaml" |
+      kubectl "${apply_args[@]}" --dry-run=server -f -
+    yq eval-all 'select(.kind != "Namespace" and (.metadata.namespace // "") != "")' \
+      "$temporary/operator.yaml" |
+      kubectl apply --dry-run=client --validate=false -f -
+  fi
+  if kubectl get crd agents.link.aioutfitter.com >/dev/null 2>&1; then
+    kubectl "${apply_args[@]}" --dry-run=server -f "$temporary/vega.yaml"
+  else
+    echo "k8s-apply-link: operator dry-run passed; Vega CR dry-run requires the CRDs to be installed" >&2
+  fi
+  exit 0
+fi
+
+kubectl "${apply_args[@]}" -f "$temporary/operator.yaml"
+timeout="${K8S_APPLY_TIMEOUT:-10m}"
+kubectl wait --for=condition=established crd/agents.link.aioutfitter.com --timeout="$timeout"
+kubectl wait --for=condition=established crd/organizations.link.aioutfitter.com --timeout="$timeout"
+kubectl -n link-operator-system rollout status deployment/link-operator-controller-manager --timeout="$timeout"
+kubectl "${apply_args[@]}" -f "$temporary/vega.yaml"
+
+echo "Vega resources applied at ks-config revision $ks_revision"
+echo "Apply encrypted channel secrets, seed Pi auth with vega-pi-sync, then rerun this command."

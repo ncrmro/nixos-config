@@ -208,7 +208,7 @@ git -C ~/some-forgejo-clone push --dry-run
 
 ## Troubleshooting
 
-### `bin/ks-dev` fails with "Permission denied (publickey)" while fetching `vega.git`
+### `bin/ks-dev` fails with "Permission denied (publickey)" while fetching a private input
 
 This happens on hosts without `sshAutoLoad` enabled. `nixos-rebuild` runs the flake evaluation under `sudo`, and root has no SSH agent of its own to fetch private flake inputs. Commit `634e917`'s `--preserve-env=SSH_AUTH_SOCK` works only if **you** have an agent for sudo to forward.
 

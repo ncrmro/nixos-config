@@ -34,6 +34,26 @@ in
     ];
   };
 
+  scripts.k8s-apply-link = {
+    description = "Install Link Operator and apply the Vega resident agent on Ocean";
+    exec = ./k8s-cluster/scripts/k8s-apply-link;
+    packages = [
+      pkgs.git
+      pkgs.kubectl
+      pkgs.kustomize
+      pkgs.yq-go
+    ];
+  };
+
+  scripts.vega-pi-sync = {
+    description = "Copy local Pi auth directly into Vega's workspace PVC";
+    exec = ./k8s-cluster/scripts/vega-pi-sync;
+    packages = [
+      pkgs.gnutar
+      pkgs.kubectl
+    ];
+  };
+
   process.manager.implementation = "process-compose";
 
   processes = lib.optionalAttrs (testMicrovmTpm != null) {

@@ -30,3 +30,21 @@ directly to the API; it never writes plaintext Secret YAML to disk.
 The apply commands intentionally do not prune resources that disappear from
 this directory. Remove obsolete resources explicitly after reviewing the live
 object and its dependents.
+
+## Link Operator and Vega
+
+The standalone Vega resident agent has a separate, digest-gated installer
+because its Organization must pin the committed ks-config catalog revision and
+its public controller/agent images:
+
+```bash
+export LINK_OPERATOR_IMAGE=ghcr.io/ai-outfitter/link-operator@sha256:…
+export LINK_AGENT_IMAGE=ghcr.io/ai-outfitter/link-agent@sha256:…
+devenv shell -- k8s-apply-link
+devenv shell -- k8s-apply-secrets
+devenv shell -- vega-pi-sync
+devenv shell -- k8s-apply-link
+```
+
+See [`link-operator/README.md`](link-operator/README.md) for Stalwart and Slack
+credential requirements and verification.

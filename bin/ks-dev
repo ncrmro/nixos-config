@@ -223,7 +223,7 @@ sudo_prefix=()
 if [[ "$mode" != "build" ]] && [[ ${#remote_args[@]} -eq 0 ]]; then
   sudo_prefix=(sudo)
   # Preserve the user's SSH agent so root can fetch private git+ssh
-  # flake inputs (e.g. vega). Without this, root has no key + no agent
+  # private flake inputs. Without this, root has no key + no agent
   # and the fetcher fails with "Permission denied (publickey)".
   if [[ -n "${SSH_AUTH_SOCK:-}" ]]; then
     sudo_prefix+=(--preserve-env=SSH_AUTH_SOCK)

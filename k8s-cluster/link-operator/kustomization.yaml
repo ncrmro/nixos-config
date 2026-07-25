@@ -1,0 +1,18 @@
+resources:
+  - https://github.com/ai-outfitter/link-operator//code/operator/config/default?ref=3533503d274192720f659a77da25bfa30ba0e67a
+
+images:
+  - name: controller
+    newName: __LINK_OPERATOR_REPOSITORY__
+    digest: __LINK_OPERATOR_DIGEST__
+
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: link-operator-controller-manager
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/args/-
+        value: --agent-image=__LINK_AGENT_IMAGE__

@@ -13,7 +13,6 @@ NixOS configuration repository using flakes for managing system configurations a
 |------|-----------------|------|
 | **ncrmro/ks-config** (this repo; previously `ncrmro/nixos-config`) | `main` | Consumer flake; defines every host's full config. |
 | **ncrmro/keystone** | `milestone/M10-V2-os-agents` | Shared NixOS / Home Manager modules + agent tooling. `milestone/M10-V2-os-agents` is canonical for now; keystone's `main` does not satisfy ks-config's current option set. |
-| **ncrmro/vega** | `main` | Personal dashboard + MCP server. Packaged as a NixOS service (`services.vega`); installed on `ocean`. |
 | **ncrmro/plouton** | `main` | FastAPI server + Astro static SPA (forecast/strategy diagnostics). Packaged as a NixOS service (`services.plouton`); installed on `ocean`. |
 | **ncrmro/agenix-secrets** | (default branch) | Private agenix-encrypted secrets. Local checkout at `~/repos/ncrmro/agenix-secrets`, symlinked into ks-config as `./agenix-secrets`. |
 
@@ -23,7 +22,7 @@ The three primary hosts all build from this single ks-config tree and share the 
 
 | Host | Kind | Build | App services |
 |------|------|-------|--------------|
-| **ocean** | server | builds on remote (`buildOnRemote = true`) | `vega-server` (vhost `vega.ncrmro.com`) + `plouton-server` (vhost `plouton.ncrmro.com`) |
+| **ocean** | server | builds on remote (`buildOnRemote = true`) | `plouton-server` (vhost `plouton.ncrmro.com`) |
 | **ncrmro-workstation** | workstation | builds on remote | none |
 | **ncrmro-laptop** | laptop | builds locally then activates remote | none |
 
@@ -36,7 +35,7 @@ Symptom of forgetting this: a vhost on ocean returns `NXDOMAIN` from `dig @100.1
 ### Deploy workflows
 
 - `bin/dev-keystone <host>` (alias of `bin/ks-dev`) — preferred for everyday rebuilds. Discovers a local Keystone checkout (`./keystone`, `../keystone`, `~/repos/ncrmro/keystone`, `~/.keystone/repos/ncrmro/keystone`, in that order) and passes it as `--override-input keystone path:...`. Lets you iterate on Keystone without committing.
-- `sudo nixos-rebuild switch --flake .#<host>` — uses only the locked inputs from `flake.lock`. `keystone` is pinned to `milestone/M10-V2-os-agents` (canonical for now); `vega` and `plouton` are pinned to their `main` branches.
+- `sudo nixos-rebuild switch --flake .#<host>` — uses only the locked inputs from `flake.lock`. `keystone` is pinned to `milestone/M10-V2-os-agents` (canonical for now); `plouton` is pinned to its `main` branch.
 
 If you change Keystone schema (add/rename options), commit + push to `keystone@milestone/M10-V2-os-agents` and then `nix flake update keystone` in ks-config so the locked rev catches up — otherwise non-overridden builds will start failing with "unknown option" errors.
 

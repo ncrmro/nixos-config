@@ -188,11 +188,6 @@ in
               value = "100.64.0.6";
             }
             {
-              name = "vega.ncrmro.com";
-              type = "A";
-              value = "100.64.0.6";
-            }
-            {
               name = "plouton.ncrmro.com";
               type = "A";
               value = "100.64.0.6";
