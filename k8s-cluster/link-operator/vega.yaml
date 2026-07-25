@@ -46,6 +46,24 @@ spec:
     - configMap: vega-pi-ready
       as: env
   setup:
+    - name: catalog-bootstrap
+      script: |
+        set -eu
+        repository="https://github.com/ncrmro/ks-config.git"
+        revision="__KS_CONFIG_REVISION__"
+        cache_key="$(
+          node -e \
+            'process.stdout.write(Buffer.from(`git+${process.argv[1]}#${process.argv[2]}`).toString("base64url"))' \
+            "$repository" "$revision"
+        )"
+        catalog="/workspace/.agents-cache/repos/$cache_key"
+        if [ ! -d "$catalog/.git" ]; then
+          mkdir -p "$catalog"
+          git -C "$catalog" init
+          git -C "$catalog" remote add origin "$repository"
+        fi
+        git -C "$catalog" fetch --depth 1 origin "$revision"
+        git -C "$catalog" checkout --detach --force FETCH_HEAD
     - name: mail-bootstrap
       script: |
         set -eu

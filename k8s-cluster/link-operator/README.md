@@ -43,7 +43,9 @@ devenv shell -- k8s-apply-link
 ```
 
 The final run should converge `Agent/vega` after the email Secret and the
-PVC-backed Pi auth readiness ConfigMap exist.
+PVC-backed Pi auth readiness ConfigMap exist. The Agent's catalog bootstrap
+setup step fetches the exact Organization revision into Outfitter's persistent
+source cache before the runtime starts.
 
 Verify:
 
