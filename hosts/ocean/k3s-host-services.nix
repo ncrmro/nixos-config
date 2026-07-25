@@ -9,6 +9,7 @@ let
   # Headscale VPN (Tailscale CGNAT) ranges — mirrors the old nginx tailscaleOnly block
   tailscaleOnly = "100.64.0.0/10,fd7a:115c:a1e0::/48";
   tailscaleAndLocal = "${tailscaleOnly},192.168.1.0/24,2600:1702:6250:4c80::/64";
+  tailscaleAndPods = "${tailscaleOnly},10.42.0.0/16";
 
   # Address pods use to reach services on the host. Backends must bind
   # 0.0.0.0 (not loopback) — pods cannot reach the host's 127.0.0.1.
@@ -48,6 +49,15 @@ let
       host = "mail.ncrmro.com";
       port = 8082;
       annotations = whitelist tailscaleOnly;
+    };
+    mail-jmap = {
+      host = "mail.ncrmro.com";
+      port = 8082;
+      paths = [
+        "/.well-known/jmap"
+        "/jmap"
+      ];
+      annotations = whitelist tailscaleAndPods;
     };
     mcp-grafana = {
       host = "mcp-grafana.ncrmro.com";
@@ -216,16 +226,14 @@ let
             rules = [
               {
                 host = svc.host;
-                http.paths = [
-                  {
-                    path = "/";
-                    pathType = "Prefix";
-                    backend.service = {
-                      name = "host-${name}";
-                      port.number = svc.port;
-                    };
-                  }
-                ];
+                http.paths = map (path: {
+                  inherit path;
+                  pathType = "Prefix";
+                  backend.service = {
+                    name = "host-${name}";
+                    port.number = svc.port;
+                  };
+                }) (svc.paths or [ "/" ]);
               }
             ];
           };
