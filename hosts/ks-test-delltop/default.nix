@@ -70,6 +70,11 @@
   programs.bambu-studio.enable = true;
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ks-test-delltop.nix;
 
+  # Test host bootstrap credential. Store only the SHA-512 password hash.
+  users.users.ncrmro.hashedPassword =
+    lib.mkForce
+      "$6$.Sxz7EzpE6oYB57Z$vsbqhHUKf/pzFBpdBqmN8JW80ftQ2JD4ZfgMePMNWftm43W5vgsQn9Q8xPtQM8OaqfPfJ1/uIHXH3Odm9JnGB0";
+
   # Hyprland renders on Intel; the RTX A1000 remains available via
   # nvidia-offload for CUDA/graphics workloads.
   keystone.desktop.obs.gpuType = "intel";
