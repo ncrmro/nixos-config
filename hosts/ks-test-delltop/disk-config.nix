@@ -4,7 +4,15 @@
 }:
 {
   # Lanzaboote replaces systemd-boot, so Disko cannot auto-detect EFI tests.
-  disko.tests.efi = true;
+  disko.tests = {
+    efi = true;
+    # VM tests have no enrolled TPM, so exercise the password fallback used
+    # when TPM unlocking is unavailable.
+    bootCommands = ''
+      machine.wait_for_console_text("Please enter passphrase for")
+      machine.send_chars("secretsecret\n")
+    '';
+  };
 
   disko.devices = {
     disk.disk1 = {
@@ -21,74 +29,55 @@
               type = "filesystem";
               format = "vfat";
               mountpoint = "/boot";
+              mountOptions = [ "umask=0077" ];
             };
           };
-          zfs = {
-            end = "-64G";
-            content = {
-              type = "zfs";
-              pool = "rpool";
-            };
-          };
-          encryptedSwap = {
+          crypted = {
             size = "100%";
             content = {
-              type = "swap";
-              randomEncryption = true;
+              type = "luks";
+              name = "crypted";
+              passwordFile = "/tmp/secret.key";
+              settings = {
+                allowDiscards = true;
+                crypttabExtraOpts = [ "tpm2-device=auto" ];
+              };
+              content = {
+                type = "lvm_pv";
+                vg = "pool";
+              };
             };
           };
         };
       };
     };
-    zpool.rpool = {
-      type = "zpool";
-      rootFsOptions = {
-        mountpoint = "none";
-        compression = "zstd";
-        acltype = "posixacl";
-        xattr = "sa";
-        "com.sun:auto-snapshot" = "true";
-      };
-      options.ashift = "12";
-      datasets = {
-        credstore = {
-          type = "zfs_volume";
-          size = "100M";
+
+    lvm_vg.pool = {
+      type = "lvm_vg";
+      lvs = {
+        swap = {
+          # The laptop has 32 GiB RAM. Keep enough headroom for a full
+          # hibernation image while leaving most of the SSD for the root FS.
+          size = "64G";
           content = {
-            type = "luks";
-            name = "credstore";
-            # nixos-anywhere uploads this initial passphrase file. Disko's VM
-            # harness provides the same path with a dummy test key.
-            passwordFile = "/tmp/secret.key";
-            content = {
-              type = "filesystem";
-              format = "ext4";
-            };
+            type = "swap";
+            resumeDevice = true;
+            discardPolicy = "once";
           };
         };
-        crypt = {
-          type = "zfs_fs";
-          options = {
-            mountpoint = "none";
-            encryption = "aes-256-gcm";
-            keyformat = "raw";
-            keylocation = "file:///etc/credstore/zfs-sysroot.mount";
+        root = {
+          # Percentage-sized LVs are created after fixed-sized LVs, so this
+          # receives all space left after the hibernation swap volume.
+          size = "100%";
+          content = {
+            type = "filesystem";
+            format = "ext4";
+            mountpoint = "/";
+            mountOptions = [
+              "defaults"
+              "noatime"
+            ];
           };
-          preCreateHook = "mount -o X-mount.mkdir /dev/mapper/credstore /etc/credstore && head -c 32 /dev/urandom > /etc/credstore/zfs-sysroot.mount";
-          postCreateHook = "umount /etc/credstore && cryptsetup luksClose /dev/mapper/credstore";
-        };
-        "crypt/system" = {
-          type = "zfs_fs";
-          mountpoint = "/";
-        };
-        "crypt/system/nix" = {
-          type = "zfs_fs";
-          mountpoint = "/nix";
-          options."com.sun:auto-snapshot" = "false";
-        };
-        "crypt/system/var" = {
-          type = "zfs_fs";
-          mountpoint = "/var";
         };
       };
     };

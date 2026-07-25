@@ -9,7 +9,6 @@
     ../../modules/keystone/os.nix
     ../../modules/keystone/desktop.nix
     ./disk-config.nix
-    ../common/optional/zfs.luks.root.nix
     ./hardware-configuration.nix
     ../common/optional/eternal-terminal.nix
     ../common/optional/nfs-client.nix
@@ -19,6 +18,21 @@
     ../../modules/nixos/steam.nix
     outputs.nixosModules.bambu-studio
   ];
+
+  # Keep the root and hibernation swap LVs inside one LUKS2 container.
+  # systemd-initrd unlocks it (TPM first, password fallback), activates LVM,
+  # and resumes from the stable swap LV selected by Disko.
+  boot = {
+    kernelPackages = pkgs.linuxPackages_6_12;
+    initrd.systemd = {
+      enable = true;
+      emergencyAccess = lib.mkDefault false;
+    };
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
+  };
 
   keystone.os.iphoneTether.enable = true;
   keystone.os.hypervisor.connections = [
@@ -81,6 +95,15 @@
   networking = {
     hostName = "ks-test-delltop";
     hostId = "817fc626";
+
+    # The hypervisor module excludes enp* interfaces so bridged workstation
+    # NICs can be managed elsewhere. This laptop has no alternate network
+    # daemon, and its USB Ethernet adapter also receives an enp* name.
+    networkmanager.unmanaged = lib.mkForce [
+      "interface-name:virbr*"
+      "interface-name:vnet*"
+      "interface-name:br0"
+    ];
   };
   system.stateVersion = "25.11";
 }

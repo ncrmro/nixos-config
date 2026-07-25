@@ -41,7 +41,7 @@
   # Using extraConfig (raw append) preserves keystone's exec-once list; sourcing
   # a plain file has the same additive semantics as inlining the text here.
   wayland.windowManager.hyprland.extraConfig = ''
-    source = ${config.dotfiles.repoPath}/packages/hyprland/.config/hypr/hyprland.conf
+    source = ${config.dotfiles.repoPath}/packages/hyprland/.config/hypr/ncrmro.conf
   '';
   programs.fastfetch.enable = true;
 
