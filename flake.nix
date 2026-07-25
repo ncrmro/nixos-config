@@ -204,6 +204,15 @@
             modules = [ ./hosts/ncrmro-laptop ];
           };
 
+          ks-test-delltop = {
+            kind = "laptop";
+            stateVersion = "25.11";
+            # Match ncrmro-laptop's ZFS-on-LUKS layout. The physical NVMe is
+            # selected by stable ID in the host's hardware configuration.
+            storage = zfsStorage;
+            modules = [ ./hosts/ks-test-delltop ];
+          };
+
           mercury = {
             # The server-vm kind (UEFI/grub-in-ESP VPS defaults) was
             # milestone-only and never landed on keystone main, so mercury

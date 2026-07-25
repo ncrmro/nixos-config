@@ -55,6 +55,16 @@
     hostPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAdFyolB6Fb6z8r+38nsqDig9II1D400COykJPUs2G18";
     zfs.backups.rpool.targets = [ "maia:lake" ];
   };
+  ks-test-delltop = {
+    hostname = "ks-test-delltop";
+    sshTarget = "192.168.1.64";
+    fallbackIP = "192.168.1.64";
+    role = "client";
+    buildOnRemote = false;
+    # Preserve the existing host identity during nixos-anywhere so known-host
+    # verification and agenix recipients remain valid across the reinstall.
+    hostPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKJ40aEG5aJNIPFHHRI3CJTqdyFOoTi9yjb0GXekKogs";
+  };
   catalystPrimary = {
     hostname = "catalyst-primary";
     sshTarget = "144.202.67.5"; # Vultr VPS, no Tailscale DNS

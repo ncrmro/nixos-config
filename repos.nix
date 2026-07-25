@@ -9,6 +9,9 @@
     # on main, and ks update's local override would otherwise shadow the lock
     # with that checkout and drop milestone-only options.
   };
+  "ncrmro/dotfiles" = {
+    url = "git@github.com:ncrmro/dotfiles.git";
+  };
   "ncrmro/agenix-secrets" = {
     url = "ssh://forgejo@git.ncrmro.com:2222/ncrmro/agenix-secrets.git";
     flakeInput = "agenix-secrets";

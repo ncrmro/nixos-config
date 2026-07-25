@@ -6,6 +6,9 @@
   ...
 }:
 {
+  # Restow the personal Hyprland overlay and provision the tools it invokes.
+  dotfiles.packages = [ "hyprland" ];
+
   # Use Hyprland's master layout on every ks-config desktop host. Keystone
   # supplies the remaining master-layout defaults.
   wayland.windowManager.hyprland.settings.general.layout = "master";
