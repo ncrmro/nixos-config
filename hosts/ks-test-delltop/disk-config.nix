@@ -3,6 +3,9 @@
   ...
 }:
 {
+  # Lanzaboote replaces systemd-boot, so Disko cannot auto-detect EFI tests.
+  disko.tests.efi = true;
+
   disko.devices = {
     disk.disk1 = {
       type = "disk";
@@ -54,6 +57,9 @@
           content = {
             type = "luks";
             name = "credstore";
+            # nixos-anywhere uploads this initial passphrase file. Disko's VM
+            # harness provides the same path with a dummy test key.
+            passwordFile = "/tmp/secret.key";
             content = {
               type = "filesystem";
               format = "ext4";
