@@ -12,10 +12,8 @@ metadata:
   name: vega-runtime
   namespace: agent-vega
 data:
-  OUTFITTER_CHANNELS: jmap,slack
-  SLACK_CHANNEL_IDS: joined
+  OUTFITTER_CHANNELS: jmap
   LINK_MAIL_PROCESSED: Processed
-  LINK_SLACK_DONE_EMOJI: white_check_mark
 ---
 apiVersion: link.aioutfitter.com/v1alpha1
 kind: Organization
@@ -41,8 +39,6 @@ spec:
     harness: pi
   credentials:
     - secret: vega-email
-      as: env
-    - secret: vega-slack
       as: env
     - configMap: vega-runtime
       as: env
