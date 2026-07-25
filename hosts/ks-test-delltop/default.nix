@@ -1,5 +1,4 @@
 {
-  inputs,
   lib,
   outputs,
   pkgs,
@@ -30,42 +29,10 @@
   # Enroll ks-test-delltop-ssh-passphrase.age before enabling auto-load.
   keystone.os.users.ncrmro.sshAutoLoad.enable = lib.mkForce false;
 
-  age.secrets = {
-    stalwart-mail-ncrmro-password = {
-      file = "${inputs.agenix-secrets}/secrets/stalwart-mail-ncrmro-password.age";
-      owner = "ncrmro";
-      mode = "0400";
-    };
-    cliflux-config = {
-      file = "${inputs.agenix-secrets}/secrets/cliflux-config.age";
-      owner = "ncrmro";
-      mode = "0400";
-    };
-    attic-push-token.file = "${inputs.agenix-secrets}/secrets/attic-push-token.age";
-    github-agents-token = {
-      file = "${inputs.agenix-secrets}/secrets/github-agents-token.age";
-      owner = "ncrmro";
-      mode = "0400";
-    };
-    nix-github-token = {
-      file = "${inputs.agenix-secrets}/secrets/nix-github-token.age";
-      owner = "root";
-      mode = "0400";
-    };
-    grafana-api-token = {
-      file = "${inputs.agenix-secrets}/secrets/grafana-api-token.age";
-      owner = "ncrmro";
-      mode = "0400";
-    };
-    ncrmro-immich-api-key = {
-      file = "${inputs.agenix-secrets}/secrets/ncrmro-immich-api-key.age";
-      owner = "ncrmro";
-      mode = "0400";
-    };
-  };
-
-  keystone.binaryCache.push.enable = true;
-  keystone.os.githubTokenNix.enable = true;
+  # Enroll this host's SSH key in agenix-secrets before enabling the
+  # laptop's host-bound secrets and their dependent token services.
+  keystone.binaryCache.push.enable = false;
+  keystone.os.githubTokenNix.enable = false;
 
   programs.bambu-studio.enable = true;
   home-manager.users.ncrmro = import ../../home-manager/ncrmro/ks-test-delltop.nix;
