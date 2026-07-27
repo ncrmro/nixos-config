@@ -175,8 +175,7 @@
           # before evicting clean page-cache. See `keystone.os.zram.*`
           # in modules/os/zram.nix for tunables. Applies to every
           # mkSystemFlake-managed host (maia, ncrmro-laptop, mercury,
-          # ocean, ncrmro-workstation); catalystPrimary is wired
-          # manually below and unaffected.
+          # ocean, ncrmro-workstation).
           (
             { ... }:
             {
@@ -228,14 +227,6 @@
             modules = [ ./hosts/mercury ];
           };
 
-          # catalystPrimary is a non-keystone host (k3s VPS with hardcoded
-          # SSH keys; see hosts/catalystPrimary/default.nix). It does NOT
-          # import any keystone modules and does NOT want mkSystemFlake's
-          # mkServer wrapper to force `keystone.os.enable = true` onto it.
-          # This host is wired manually below the mkSystemFlake call as a
-          # documented exception — see `nixosConfigurations.catalystPrimary`
-          # at the end of the outputs block.
-
           ocean = {
             kind = "server";
             stateVersion = "25.11";
@@ -257,22 +248,6 @@
     in
     fleet
     // {
-      # `catalystPrimary` is wired manually as an exception: it does not use
-      # the keystone OS module (k3s VPS, hardcoded SSH keys), so wrapping it
-      # via mkSystemFlake would force `keystone.os.enable = true` and trip
-      # the storage / fileSystems assertions. Merging into nixosConfigurations
-      # via attribute-set extension keeps it discoverable alongside the rest.
-      nixosConfigurations = fleet.nixosConfigurations // {
-        catalystPrimary = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [ ./hosts/catalystPrimary ];
-          specialArgs = {
-            inherit inputs self;
-            outputs = self;
-          };
-        };
-      };
-
       # Code formatter (official NixOS formatter)
       formatter.x86_64-linux = (pkgsForSystem "x86_64-linux").nixfmt;
       formatter.aarch64-darwin = (pkgsForSystem "aarch64-darwin").nixfmt;
@@ -343,7 +318,7 @@
         packages = [ nixpkgs.legacyPackages.x86_64-linux.nixfmt ];
         shellHook = ''
           build() {
-            local hosts=(maia ncrmro-laptop mercury catalystPrimary ocean ncrmro-workstation)
+            local hosts=(maia ncrmro-laptop mercury ocean ncrmro-workstation)
             local failed=()
             for host in "''${hosts[@]}"; do
               echo "Building $host..."

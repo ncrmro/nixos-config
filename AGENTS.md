@@ -219,7 +219,6 @@ Add as **flake inputs**. Choose the appropriate flake:
 |------|---------|
 | **test-vm** | Desktop testing VM |
 | **devbox** | Development box |
-| **catalystPrimary** | Catalyst cluster node |
 
 ## Services on Ocean
 

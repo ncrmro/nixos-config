@@ -55,11 +55,4 @@
     hostPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAdFyolB6Fb6z8r+38nsqDig9II1D400COykJPUs2G18";
     zfs.backups.rpool.targets = [ "maia:lake" ];
   };
-  catalystPrimary = {
-    hostname = "catalyst-primary";
-    sshTarget = "144.202.67.5"; # Vultr VPS, no Tailscale DNS
-    role = "server";
-    buildOnRemote = false;
-    baremetal = false;
-  };
 }
