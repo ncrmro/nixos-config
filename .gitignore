@@ -14,3 +14,4 @@ result-desktop-vm
 /keystone/
 .deepwork/tmp/
 .claude/
+/TASKS.md
