@@ -31,7 +31,7 @@
     ../../modules/nixos/steam.nix
   ];
 
-  keystone.os.hypervisor.connections = [ "qemu+ssh://ncrmro@ocean/session" ];
+  keystone.os.hypervisor.connections = [ "qemu+ssh://ncrmro@ocean/system" ];
   keystone.os.hypervisor.allowedBridges = [
     "virbr0"
     "br0"
@@ -111,6 +111,7 @@
     lsof
     amdgpu_top
     ddcutil
+    keystone-physical-migration
     lutris
     # llama-cpp from upstream flake with Vulkan support for AMD GPU acceleration
     inputs.llama-cpp.packages.${pkgs.stdenv.hostPlatform.system}.vulkan

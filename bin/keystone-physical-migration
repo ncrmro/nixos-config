@@ -1,0 +1,1110 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2016,SC2029 # jq variables and quoted remote commands are intentional.
+set -euo pipefail
+
+# TODO(upstream-keystone): Move this physical-machine adoption workflow to
+# keystone/modules/os/physical-migration once the experiment has proven out.
+
+readonly program_name=${0##*/}
+readonly default_vm="ncrmro-desktop-windows"
+readonly default_source="/dev/disk/by-id/nvme-Samsung_SSD_980_PRO_2TB_S6B0NJ0RB17772A"
+readonly default_serial="S6B0NJ0RB17772A"
+readonly default_bytes="2000398934016"
+readonly default_destination_host="ocean"
+readonly default_destination_dataset="ocean/physical-migrations"
+readonly default_destination_zvol="ocean/vms/ncrmro-desktop-windows"
+readonly default_uuid="986197ab-e314-4ff8-9703-ae7b8a192663"
+readonly default_mac="52:54:00:ac:4b:9e"
+
+vm=${KEYSTONE_MIGRATION_VM:-$default_vm}
+state_root=${KEYSTONE_MIGRATION_STATE_ROOT:-"${XDG_STATE_HOME:-$HOME/.local/state}/keystone/physical-migration"}
+repo=${KEYSTONE_MIGRATION_REPO:-"$HOME/repos/${USER}/ks-config"}
+worktrees_root=${KEYSTONE_MIGRATION_WORKTREES_ROOT:-"$HOME/repos/${USER}/ks-config.worktrees"}
+
+usage() {
+  cat <<'EOF'
+Adopt a physical disk as a Keystone-managed VM without disabling BitLocker.
+
+Usage:
+  keystone-physical-migration [--vm NAME] [--repo PATH] COMMAND [ARGS]
+
+Lifecycle:
+  init                    Record immutable source/destination identity locally
+  source-ready            Attest clean Windows shutdown and recovery-key access
+  preflight               Prove source identity, SSH, receiver, and free space
+  push [--foreground]     Resumable disk-to-file transfer over SSH
+  resume                  Resume a stopped/failed detached transfer
+  status                  Show local, remote, and detached-job state
+  logs                    Follow the detached transfer journal
+  stop                    Stop the detached transfer (partial file is retained)
+  verify-transfer         Hash source and staged image, then seal the staging file
+  promote [--execute]     Sync enable=false Nix manifest; copy file into final zvol
+  validate                Boot transiently from proposal XML on Ocean
+  console                 Open virt-viewer for BitLocker recovery / first boot
+  rdp [--user USER]       SSH-tunnel RDP without putting a password on argv
+  validate-complete       Record successful RDP after Windows is shut down cleanly
+  publish                 Set enable=true, check, push PR, wait, squash-merge
+  switch                  Deploy the exact squash commit to Ocean and start once
+  manifest-sync           Render the Nix VM manifest into owned proposal worktrees
+
+Receiver-only commands are intentionally undocumented here and reject non-root
+promotion. Run `init --help` for the migration-specific defaults.
+
+Safety:
+  * BitLocker is never suspended or disabled.
+  * The physical source, staged image, and promoted snapshot are never deleted.
+  * Only migration-owned worktrees below ks-config.worktrees are mutated.
+  * Destructive-looking operations print a plan unless their explicit execute
+    command is used.
+EOF
+}
+
+die() {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+note() {
+  printf '%s\n' "$*"
+}
+
+quote_cmd() {
+  printf '%q ' "$@"
+  printf '\n'
+}
+
+validate_name() {
+  [[ $1 =~ ^[a-z0-9][a-z0-9._-]*$ ]] || die "unsafe name: $1"
+}
+
+validate_host() {
+  [[ $1 =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || die "unsafe SSH host: $1"
+}
+
+validate_dataset() {
+  [[ $1 =~ ^[A-Za-z0-9][A-Za-z0-9._:/-]*$ ]] || die "unsafe ZFS dataset: $1"
+}
+
+validate_mountpoint() {
+  [[ $1 =~ ^/[A-Za-z0-9][A-Za-z0-9._/-]*$ ]] || die "unsafe mountpoint: $1"
+}
+
+state_dir() {
+  printf '%s/%s\n' "$state_root" "$vm"
+}
+
+state_file() {
+  printf '%s/migration.json\n' "$(state_dir)"
+}
+
+require_state() {
+  [[ -f $(state_file) ]] || die "no state for $vm; run '$program_name init' first"
+}
+
+state_get() {
+  jq -r "$1 | if . == null then error(\"missing migration state value\") else . end" "$(state_file)"
+}
+
+state_update() {
+  local filter=$1
+  shift
+  local tmp
+  tmp=$(mktemp "$(state_dir)/.migration.json.XXXXXX")
+  jq "$@" "$filter" "$(state_file)" >"$tmp"
+  chmod 0600 "$tmp"
+  mv "$tmp" "$(state_file)"
+}
+
+ssh_host() {
+  state_get '.destination.host'
+}
+
+ssh_target() {
+  printf '%s@%s\n' "$(state_get '.admin')" "$(ssh_host)"
+}
+
+staging_dir() {
+  printf '%s/%s\n' "$(state_get '.destination.mountpoint')" "$vm"
+}
+
+staging_partial() {
+  printf '%s/disk.raw.partial\n' "$(staging_dir)"
+}
+
+staging_image() {
+  printf '%s/disk.raw\n' "$(staging_dir)"
+}
+
+remote_manifest() {
+  printf '%s/migration.json\n' "$(staging_dir)"
+}
+
+libvirt_uri() {
+  printf 'qemu+ssh://%s/system\n' "$(ssh_target)"
+}
+
+parse_global() {
+  local -a rest=()
+  while (($#)); do
+    case "$1" in
+      --vm)
+        (($# >= 2)) || die "--vm requires a value"
+        vm=$2
+        shift 2
+        ;;
+      --repo)
+        (($# >= 2)) || die "--repo requires a value"
+        repo=$2
+        shift 2
+        ;;
+      --worktrees-root)
+        (($# >= 2)) || die "--worktrees-root requires a value"
+        worktrees_root=$2
+        shift 2
+        ;;
+      --help | -h)
+        usage
+        exit 0
+        ;;
+      *)
+        rest+=("$1")
+        shift
+        ;;
+    esac
+  done
+  validate_name "$vm"
+  global_args=("${rest[@]}")
+}
+
+cmd_init() {
+  local source=$default_source
+  local serial=$default_serial
+  local bytes=$default_bytes
+  local host=$default_destination_host
+  local dataset=$default_destination_dataset
+  local zvol=$default_destination_zvol
+  local uuid=$default_uuid
+  local mac=$default_mac
+  local admin=$USER
+  local mountpoint="/ocean/physical-migrations"
+
+  while (($#)); do
+    case "$1" in
+      --source) source=$2; shift 2 ;;
+      --serial) serial=$2; shift 2 ;;
+      --bytes) bytes=$2; shift 2 ;;
+      --host) host=$2; shift 2 ;;
+      --dataset) dataset=$2; shift 2 ;;
+      --mountpoint) mountpoint=$2; shift 2 ;;
+      --zvol) zvol=$2; shift 2 ;;
+      --uuid) uuid=$2; shift 2 ;;
+      --mac) mac=$2; shift 2 ;;
+      --admin) admin=$2; shift 2 ;;
+      --help)
+        cat <<EOF
+Defaults for $default_vm:
+  source:      $default_source
+  serial:      $default_serial
+  bytes:       $default_bytes
+  destination: $default_destination_host:$default_destination_zvol
+
+Override with --source, --serial, --bytes, --host, --dataset, --mountpoint,
+--zvol, --uuid, --mac, or --admin.
+EOF
+        return
+        ;;
+      *) die "unknown init argument: $1" ;;
+    esac
+  done
+
+  validate_host "$host"
+  validate_dataset "$dataset"
+  validate_dataset "$zvol"
+  validate_mountpoint "$mountpoint"
+  [[ $bytes =~ ^[1-9][0-9]*$ ]] || die "--bytes must be a positive integer"
+  [[ $mac =~ ^([[:xdigit:]]{2}:){5}[[:xdigit:]]{2}$ ]] || die "invalid MAC: $mac"
+  [[ $source == /dev/disk/by-id/* ]] || die "source must be a stable /dev/disk/by-id path"
+
+  local dir existing
+  dir=$(state_dir)
+  mkdir -p "$dir"
+  chmod 0700 "$dir"
+  if [[ -f $(state_file) ]]; then
+    existing=$(jq -r '.source.path + "|" + .source.serial + "|" + (.source.bytes|tostring)' "$(state_file)")
+    [[ $existing == "$source|$serial|$bytes" ]] ||
+      die "existing state pins a different source; preserve it and use another --vm"
+    note "Existing migration state retained unchanged: $(state_file)"
+    return
+  fi
+
+  jq -n \
+    --arg vm "$vm" \
+    --arg source "$source" \
+    --arg serial "$serial" \
+    --argjson bytes "$bytes" \
+    --arg host "$host" \
+    --arg admin "$admin" \
+    --arg dataset "$dataset" \
+    --arg mountpoint "$mountpoint" \
+    --arg zvol "$zvol" \
+    --arg uuid "$uuid" \
+    --arg mac "$mac" \
+    --arg now "$(date --iso-8601=seconds)" \
+    '{
+      schema: 1,
+      vm: $vm,
+      createdAt: $now,
+      updatedAt: $now,
+      bitlocker: { policy: "preserve", recoveryRequiredOnFirstBoot: true },
+      sourceReadiness: { cleanWindowsShutdown: false, recoveryKeyAvailable: false },
+      source: { path: $source, serial: $serial, bytes: $bytes, sha256: null },
+      destination: {
+        host: $host,
+        admin: $admin,
+        dataset: $dataset,
+        mountpoint: $mountpoint,
+        zvol: $zvol,
+        volblocksize: "8K"
+      },
+      vmConfig: {
+        uuid: $uuid,
+        mac: $mac,
+        memoryMiB: 16384,
+        vcpus: 8
+      },
+      transfer: { status: "initialized", stagedSha256: null },
+      promotion: { status: "pending", snapshot: null },
+      validation: { status: "pending", rdpVerified: false },
+      git: { enabled: false, proposalBranch: null, pullRequest: null, mergeCommit: null },
+      deployment: { status: "pending", revision: null }
+    }' >"$(state_file)"
+  chmod 0600 "$(state_file)"
+  note "Initialized $(state_file)"
+  note "BitLocker policy: preserve; enter the recovery key in the VM console after migration."
+  note "Next: shut Windows down cleanly, confirm the recovery key is available, then run source-ready."
+}
+
+cmd_source_ready() {
+  require_state
+  local clean_shutdown=false recovery_key=false
+  while (($#)); do
+    case "$1" in
+      --confirm-clean-shutdown) clean_shutdown=true; shift ;;
+      --confirm-recovery-key) recovery_key=true; shift ;;
+      *) die "unknown source-ready argument: $1" ;;
+    esac
+  done
+  "$clean_shutdown" ||
+    die "pass --confirm-clean-shutdown after shutting Windows down normally"
+  "$recovery_key" ||
+    die "pass --confirm-recovery-key after confirming the BitLocker recovery key is available"
+  state_update '
+    .sourceReadiness.cleanWindowsShutdown = true |
+    .sourceReadiness.recoveryKeyAvailable = true |
+    .updatedAt = $now
+  ' --arg now "$(date --iso-8601=seconds)"
+  note "Source readiness recorded. BitLocker remains enabled."
+}
+
+source_device_preflight() {
+  local source serial expected_bytes actual_serial actual_bytes parent
+  source=$(state_get '.source.path')
+  serial=$(state_get '.source.serial')
+  expected_bytes=$(state_get '.source.bytes')
+
+  [[ -L $source ]] || die "stable source link is missing: $source"
+  parent=$(readlink -f "$source")
+  [[ -b $parent ]] || die "source does not resolve to a block device: $source -> $parent"
+  [[ -r $parent ]] || die "source is not readable; grant the admin read access to the pinned by-id device"
+
+  actual_bytes=$(blockdev --getsize64 "$parent")
+  [[ $actual_bytes == "$expected_bytes" ]] ||
+    die "source size mismatch: expected $expected_bytes, got $actual_bytes"
+
+  actual_serial=$(udevadm info --query=property --name="$parent" |
+    awk -F= '$1 == "ID_SERIAL_SHORT" { print $2; exit }')
+  [[ $actual_serial == "$serial" ]] ||
+    die "source serial mismatch: expected $serial, got ${actual_serial:-unknown}"
+
+  if lsblk -nrpo MOUNTPOINTS "$parent" | grep -q '[^[:space:]]'; then
+    lsblk -o NAME,SERIAL,SIZE,FSTYPE,MOUNTPOINTS "$parent" >&2
+    die "the source or one of its partitions is mounted"
+  fi
+
+  if command -v virsh >/dev/null &&
+    virsh --connect qemu:///system list --name 2>/dev/null |
+      while read -r domain; do
+        [[ -z $domain ]] || virsh --connect qemu:///system domblklist "$domain" --details 2>/dev/null
+      done |
+      grep -Fq "$parent"; then
+    die "a running local VM is using the source device"
+  fi
+
+  note "source: OK ($source -> $parent, serial $serial, $expected_bytes bytes)"
+}
+
+receiver_fix_instructions() {
+  local target dataset mountpoint admin
+  target=$(ssh_target)
+  dataset=$(state_get '.destination.dataset')
+  mountpoint=$(state_get '.destination.mountpoint')
+  admin=$(state_get '.admin')
+  cat >&2 <<EOF
+
+Ocean's migration receiver is not ready. Deploy this branch to Ocean, or run:
+
+  ssh -t $target sudo zfs create -o mountpoint=$mountpoint \\
+    -o compression=lz4 -o recordsize=1M -o atime=off -o quota=4T $dataset
+  ssh -t $target sudo install -d -o $admin -g users -m 0770 $mountpoint
+
+The Nix declaration is keystone.os.physicalMigration.receiver.enable = true.
+Do not grant raw zvol write access over SSH; only the staging dataset is
+user-writable. Promotion deliberately goes through sudo on Ocean.
+EOF
+}
+
+cmd_preflight() {
+  require_state
+  [[ $(state_get '.sourceReadiness.cleanWindowsShutdown') == true ]] ||
+    die "clean Windows shutdown is not attested; run source-ready"
+  [[ $(state_get '.sourceReadiness.recoveryKeyAvailable') == true ]] ||
+    die "BitLocker recovery-key availability is not attested; run source-ready"
+  source_device_preflight
+
+  local target bytes
+  target=$(ssh_target)
+  bytes=$(state_get '.source.bytes')
+  note "ssh: checking pinned host '$target'"
+  ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$target" true ||
+    die "SSH failed; establish the host key and agent-backed login before transfer"
+
+  if ! ssh "$target" "$program_name" receiver-preflight --vm "$vm" --bytes "$bytes"; then
+    receiver_fix_instructions
+    return 1
+  fi
+
+  rsync --version | grep -q 'version 3' || die "rsync 3 is required"
+  rsync --help | grep -q -- '--copy-devices' || die "local rsync lacks --copy-devices"
+  ssh "$target" rsync --help | grep -q -- '--write-devices' ||
+    die "remote rsync lacks device-copy support"
+  note "preflight: PASS"
+}
+
+transfer_unit() {
+  printf 'keystone-physical-migration-%s.service\n' "${vm//[^a-zA-Z0-9_.-]/-}"
+}
+
+cmd_push_internal() {
+  require_state
+  cmd_preflight
+  local source target partial bytes
+  source=$(state_get '.source.path')
+  target=$(ssh_target)
+  partial=$(staging_partial)
+  bytes=$(state_get '.source.bytes')
+
+  ssh "$target" "$program_name" receiver-init \
+    --vm "$vm" --bytes "$bytes" \
+    --serial "$(state_get '.source.serial')" \
+    --zvol "$(state_get '.destination.zvol')"
+  state_update '.transfer.status = "copying" | .updatedAt = $now' \
+    --arg now "$(date --iso-8601=seconds)"
+
+  rsync --archive --copy-devices --partial --inplace --sparse --info=progress2 \
+    "$source" "$target:$partial"
+  state_update '.transfer.status = "copied" | .updatedAt = $now' \
+    --arg now "$(date --iso-8601=seconds)"
+  note "Copy complete. Run '$program_name verify-transfer --vm $vm'."
+}
+
+cmd_push() {
+  local foreground=false
+  while (($#)); do
+    case "$1" in
+      --foreground) foreground=true; shift ;;
+      *) die "unknown push argument: $1" ;;
+    esac
+  done
+  require_state
+  case $(state_get '.transfer.status') in
+    verified) die "transfer is already verified and sealed" ;;
+    copied) die "copy is complete; run verify-transfer instead of push/resume" ;;
+  esac
+  if "$foreground"; then
+    cmd_push_internal
+    return
+  fi
+
+  command -v systemd-run >/dev/null || die "systemd-run unavailable; use push --foreground"
+  local unit
+  unit=$(transfer_unit)
+  if systemctl --user --quiet is-active "$unit"; then
+    die "$unit is already active"
+  fi
+
+  local -a env_args=()
+  [[ -n ${SSH_AUTH_SOCK:-} ]] && env_args+=("--setenv=SSH_AUTH_SOCK=$SSH_AUTH_SOCK")
+  systemd-run --user --collect --unit="${unit%.service}" \
+    --property=Restart=on-failure --property=RestartSec=30 \
+    "${env_args[@]}" "$0" --vm "$vm" --repo "$repo" \
+    --worktrees-root "$worktrees_root" _push
+  note "Detached transfer started as $unit"
+  note "Watch with: $program_name --vm $vm logs"
+}
+
+cmd_status() {
+  require_state
+  jq . "$(state_file)"
+  local unit target remote remote_command
+  unit=$(transfer_unit)
+  systemctl --user --no-pager --full status "$unit" 2>/dev/null || true
+  target=$(ssh_target)
+  remote=$(remote_manifest)
+  printf -v remote_command 'test -r %q && jq . %q' "$remote" "$remote"
+  ssh "$target" "$remote_command" 2>/dev/null || true
+}
+
+cmd_logs() {
+  journalctl --user --unit "$(transfer_unit)" --follow --no-pager
+}
+
+cmd_stop() {
+  systemctl --user stop "$(transfer_unit)"
+  state_update '.transfer.status = "stopped" | .updatedAt = $now' \
+    --arg now "$(date --iso-8601=seconds)"
+  note "Stopped. The partial staging file was retained; run resume to continue."
+}
+
+cmd_verify_transfer() {
+  require_state
+  [[ $(state_get '.transfer.status') == copied ]] ||
+    die "transfer is not copied; current status: $(state_get '.transfer.status')"
+  source_device_preflight
+  local source target partial source_hash remote_hash remote_command
+  source=$(state_get '.source.path')
+  target=$(ssh_target)
+  partial=$(staging_partial)
+
+  note "Hashing the physical source (this reads the full disk)..."
+  source_hash=$(sha256sum "$source" | awk '{print $1}')
+  note "Hashing the staged image on Ocean..."
+  printf -v remote_command 'sha256sum %q' "$partial"
+  remote_hash=$(ssh "$target" "$remote_command" | awk '{print $1}')
+  [[ $source_hash == "$remote_hash" ]] ||
+    die "hash mismatch: source=$source_hash staged=$remote_hash; partial file retained"
+
+  ssh "$target" "$program_name" receiver-seal --vm "$vm" --sha256 "$remote_hash"
+  state_update '
+    .source.sha256 = $hash |
+    .transfer.stagedSha256 = $hash |
+    .transfer.status = "verified" |
+    .updatedAt = $now
+  ' --arg hash "$source_hash" --arg now "$(date --iso-8601=seconds)"
+  note "Transfer verified and sealed: $source_hash"
+}
+
+git_dir_for_worktree() {
+  git -C "$1" rev-parse --path-format=absolute --git-dir
+}
+
+owner_file() {
+  printf '%s/keystone-physical-migration-owner.json\n' "$(git_dir_for_worktree "$1")"
+}
+
+write_owner() {
+  local path=$1 role=$2
+  jq -n --arg vm "$vm" --arg role "$role" '{vm:$vm, role:$role}' >"$(owner_file "$path")"
+}
+
+owned_worktree_role() {
+  local path=$1 marker
+  marker=$(owner_file "$path" 2>/dev/null) || return 1
+  [[ -f $marker ]] || return 1
+  [[ $(jq -r '.vm' "$marker") == "$vm" ]] || return 1
+  jq -r '.role' "$marker"
+}
+
+proposal_path() {
+  printf '%s/feat/migrate-%s\n' "$worktrees_root" "$vm"
+}
+
+ensure_proposal_worktree() {
+  [[ -d $repo/.git ]] || die "ks-config primary checkout not found: $repo"
+  local path branch
+  path=$(proposal_path)
+  branch="feat/migrate-$vm"
+  mkdir -p "$(dirname "$path")"
+
+  if [[ -d $path ]]; then
+    [[ $(owned_worktree_role "$path" 2>/dev/null || true) == proposal ]] ||
+      die "refusing unowned worktree path: $path"
+  else
+    git -C "$repo" fetch origin main >&2
+    if git -C "$repo" show-ref --verify --quiet "refs/heads/$branch"; then
+      git -C "$repo" worktree add "$path" "$branch" >&2
+    elif git -C "$repo" show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+      git -C "$repo" worktree add -b "$branch" "$path" "origin/$branch" >&2
+    else
+      git -C "$repo" worktree add -b "$branch" "$path" origin/main >&2
+    fi
+    write_owner "$path" proposal
+  fi
+  state_update '.git.proposalBranch = $branch | .updatedAt = $now' \
+    --arg branch "$branch" --arg now "$(date --iso-8601=seconds)"
+  printf '%s\n' "$path"
+}
+
+render_manifest() {
+  local enable source_sha staged_sha promotion_snapshot
+  enable=$(state_get '.git.enabled')
+  source_sha=$(jq -r '.source.sha256 // ""' "$(state_file)")
+  staged_sha=$(jq -r '.transfer.stagedSha256 // ""' "$(state_file)")
+  promotion_snapshot=$(jq -r '.promotion.snapshot // ""' "$(state_file)")
+  cat <<EOF
+# Generated by keystone-physical-migration. Edit migration state, then run
+# \`keystone-physical-migration --vm $vm manifest-sync\`.
+{
+  name = "$vm";
+  enable = $enable;
+  description = "Windows desktop adopted from a physical BitLocker NVMe";
+  uuid = "$(state_get '.vmConfig.uuid')";
+  memoryMiB = $(state_get '.vmConfig.memoryMiB');
+  vcpus = $(state_get '.vmConfig.vcpus');
+  disk = {
+    device = "/dev/zvol/$(state_get '.destination.zvol')";
+    bytes = $(state_get '.source.bytes');
+    managed = false;
+  };
+  network = {
+    kind = "network";
+    source = "default";
+    mac = "$(state_get '.vmConfig.mac')";
+  };
+  secureBoot = true;
+  tpm = true;
+  autostart = false;
+  startOnFirstEnable = true;
+  migration = {
+    bitlocker = "preserve";
+    sourceById = "$(state_get '.source.path')";
+    sourceSerial = "$(state_get '.source.serial')";
+    sourceBytes = $(state_get '.source.bytes');
+    sourceSha256 = "$source_sha";
+    stagedSha256 = "$staged_sha";
+    promotedSnapshot = "$promotion_snapshot";
+  };
+}
+EOF
+}
+
+sync_one_manifest() {
+  local worktree=$1 target tmp
+  [[ $(owned_worktree_role "$worktree") == proposal ]] ||
+    die "refusing to mutate non-proposal worktree: $worktree"
+  target="$worktree/hosts/ocean/vms/$vm.nix"
+  mkdir -p "$(dirname "$target")"
+  tmp=$(mktemp)
+  render_manifest >"$tmp"
+  install -m 0644 "$tmp" "$target"
+  rm -f "$tmp"
+  note "synced: $target"
+}
+
+cmd_manifest_sync() {
+  require_state
+  local proposal path role count=0
+  proposal=$(ensure_proposal_worktree)
+  while IFS= read -r path; do
+    [[ -n $path ]] || continue
+    role=$(owned_worktree_role "$path" 2>/dev/null || true)
+    if [[ $role == proposal ]]; then
+      sync_one_manifest "$path"
+      ((count += 1))
+    fi
+  done < <(git -C "$repo" worktree list --porcelain | awk '$1 == "worktree" {print $2}')
+  ((count > 0)) || die "no migration-owned proposal worktree found"
+  nix fmt "$proposal/hosts/ocean/vms/$vm.nix"
+}
+
+cmd_promote() {
+  local execute=false
+  while (($#)); do
+    case "$1" in
+      --execute) execute=true; shift ;;
+      *) die "unknown promote argument: $1" ;;
+    esac
+  done
+  require_state
+  [[ $(state_get '.transfer.status') == verified ]] ||
+    die "staged image is not verified"
+  state_update '.git.enabled = false | .updatedAt = $now' \
+    --arg now "$(date --iso-8601=seconds)"
+  cmd_manifest_sync
+
+  local target
+  target=$(ssh_target)
+  if ! "$execute"; then
+    note "Promotion plan (staged image and physical disk are retained):"
+    quote_cmd ssh -t "$target" sudo "$program_name" receiver-promote --vm "$vm"
+    note "Re-run with: $program_name --vm $vm promote --execute"
+    return
+  fi
+  ssh -t "$target" sudo "$program_name" receiver-promote --vm "$vm"
+  local remote snapshot
+  remote=$(remote_manifest)
+  snapshot=$(ssh "$target" jq -er '.promotion.snapshot' "$remote")
+  state_update '
+    .promotion.status = "promoted" |
+    .promotion.snapshot = $snapshot |
+    .updatedAt = $now
+  ' --arg snapshot "$snapshot" --arg now "$(date --iso-8601=seconds)"
+  cmd_manifest_sync
+}
+
+xml_attr() {
+  printf 'path:%s#nixosConfigurations.ocean.config.environment.etc."keystone/libvirt/%s.xml".text\n' \
+    "$(proposal_path)" "$vm"
+}
+
+cmd_validate() {
+  require_state
+  [[ $(state_get '.promotion.status') == promoted ]] ||
+    die "zvol has not been promoted"
+  cmd_manifest_sync
+  local path xml target uri
+  path=$(proposal_path)
+  xml=$(mktemp)
+  target=$(ssh_target)
+  uri=$(libvirt_uri)
+  nix eval --raw "$(xml_attr)" >"$xml"
+
+  if virsh --connect "$uri" domstate "$vm" >/dev/null 2>&1; then
+    die "$vm already exists in libvirt; validation only creates a transient domain"
+  fi
+  scp "$xml" "$target:/tmp/$vm.xml"
+  rm -f "$xml"
+  ssh "$target" virsh --connect qemu:///system create "/tmp/$vm.xml"
+  state_update '.validation.status = "booted-transient" | .updatedAt = $now' \
+    --arg now "$(date --iso-8601=seconds)"
+  cat <<EOF
+Transient VM started on Ocean.
+
+1. Run '$program_name --vm $vm console'.
+2. Enter the BitLocker recovery key in that console. Do not suspend BitLocker.
+3. Once Windows reaches the desktop, run '$program_name --vm $vm rdp'.
+4. Shut Windows down normally, then run validate-complete.
+EOF
+}
+
+cmd_console() {
+  require_state
+  exec virt-viewer --connect "$(libvirt_uri)" --wait "$vm"
+}
+
+discover_guest_ip() {
+  local uri mac target ip
+  uri=$(libvirt_uri)
+  mac=$(state_get '.vmConfig.mac')
+  target=$(ssh_target)
+  ip=$(virsh --connect "$uri" domifaddr "$vm" --source agent 2>/dev/null |
+    awk '/ipv4/ {sub("/.*", "", $4); print $4; exit}')
+  if [[ -z $ip ]]; then
+    ip=$(virsh --connect "$uri" domifaddr "$vm" --source lease 2>/dev/null |
+      awk '/ipv4/ {sub("/.*", "", $4); print $4; exit}')
+  fi
+  if [[ -z $ip ]]; then
+    ip=$(ssh "$target" ip neigh |
+      awk -v mac="$mac" 'tolower($0) ~ tolower(mac) && $1 ~ /^[0-9.]+$/ {print $1; exit}')
+  fi
+  [[ -n $ip ]] || return 1
+  printf '%s\n' "$ip"
+}
+
+cmd_rdp() {
+  require_state
+  local windows_user=$USER confirm=false ip port=13389 target tunnel_pid rdp
+  while (($#)); do
+    case "$1" in
+      --user) windows_user=$2; shift 2 ;;
+      --confirm) confirm=true; shift ;;
+      --port) port=$2; shift 2 ;;
+      *) die "unknown rdp argument: $1" ;;
+    esac
+  done
+  [[ $port =~ ^[0-9]+$ ]] || die "invalid local port"
+  ip=$(discover_guest_ip) ||
+    die "Windows IP not found yet; finish BitLocker recovery in '$program_name console'"
+  target=$(ssh_target)
+
+  ssh -o ExitOnForwardFailure=yes -N -L "$port:$ip:3389" "$target" &
+  tunnel_pid=$!
+  trap 'kill "$tunnel_pid" 2>/dev/null || true' EXIT
+  for _ in {1..40}; do
+    nc -z 127.0.0.1 "$port" 2>/dev/null && break
+    sleep 0.25
+  done
+  nc -z 127.0.0.1 "$port" 2>/dev/null ||
+    die "RDP did not become reachable through Ocean"
+
+  if command -v xfreerdp3 >/dev/null; then
+    rdp=xfreerdp3
+  elif command -v xfreerdp >/dev/null; then
+    rdp=xfreerdp
+  else
+    die "FreeRDP client not found"
+  fi
+  note "Opening RDP through localhost:$port -> $ip:3389. Password is prompted securely."
+  "$rdp" "/v:127.0.0.1:$port" "/u:$windows_user" \
+    /dynamic-resolution /cert:tofu /network:auto +clipboard
+
+  if ! "$confirm" && [[ -t 0 ]]; then
+    read -r -p "Did the Windows desktop work correctly over RDP? [y/N] " answer
+    [[ $answer == y || $answer == Y ]] && confirm=true
+  fi
+  if "$confirm"; then
+    state_update '.validation.rdpVerified = true | .updatedAt = $now' \
+      --arg now "$(date --iso-8601=seconds)"
+    note "RDP verification recorded. Shut Windows down normally before validate-complete."
+  fi
+}
+
+cmd_validate_complete() {
+  require_state
+  [[ $(state_get '.validation.rdpVerified') == true ]] ||
+    die "RDP has not been verified; run rdp and confirm success"
+  local uri status
+  uri=$(libvirt_uri)
+  status=$(virsh --connect "$uri" domstate "$vm" 2>/dev/null || true)
+  [[ -z $status || $status == "shut off" ]] ||
+    die "Windows is still '$status'; shut it down normally from Windows first"
+  state_update '.validation.status = "passed" | .updatedAt = $now' \
+    --arg now "$(date --iso-8601=seconds)"
+  note "Transient boot and RDP validation: PASS"
+}
+
+git_require_only_manifest_changes() {
+  local path=$1 allowed="hosts/ocean/vms/$vm.nix" changed
+  changed=$(git -C "$path" status --porcelain |
+    awk '{print $2}' |
+    grep -vxF "$allowed" || true)
+  [[ -z $changed ]] || die "proposal has unrelated changes:\n$changed"
+}
+
+wait_for_pr() {
+  local path=$1 pr=$2 decision state
+  gh -R ncrmro/ks-config pr ready "$pr" >/dev/null 2>&1 || true
+  gh -R ncrmro/ks-config pr checks "$pr" --watch
+  while true; do
+    state=$(gh -R ncrmro/ks-config pr view "$pr" --json state -q .state)
+    [[ $state == OPEN ]] || die "PR is no longer open: $state"
+    decision=$(gh -R ncrmro/ks-config pr view "$pr" --json reviewDecision -q '.reviewDecision // ""')
+    case "$decision" in
+      APPROVED | "") break ;;
+      CHANGES_REQUESTED) die "PR has requested changes" ;;
+      *) note "Waiting for PR review ($decision)..."; sleep 30 ;;
+    esac
+  done
+  git -C "$path" status --short
+}
+
+cmd_publish() {
+  require_state
+  [[ $(state_get '.validation.status') == passed ]] ||
+    die "validation is not complete"
+  [[ $(state_get '.source.sha256') == "$(state_get '.transfer.stagedSha256')" ]] ||
+    die "source and staged hashes differ"
+
+  local path branch pr merge_commit
+  path=$(ensure_proposal_worktree)
+  branch=$(state_get '.git.proposalBranch')
+  git_require_only_manifest_changes "$path"
+  state_update '.git.enabled = true | .updatedAt = $now' \
+    --arg now "$(date --iso-8601=seconds)"
+  cmd_manifest_sync
+
+  git -C "$path" fetch origin main
+  git -C "$path" rebase --autostash origin/main
+  nix fmt "$path/hosts/ocean/vms/$vm.nix"
+  nix flake check "path:$path"
+  nix eval "path:$path#nixosConfigurations.ocean.config.system.build.toplevel.drvPath" >/dev/null
+  git -C "$path" add "hosts/ocean/vms/$vm.nix"
+  if ! git -C "$path" diff --cached --quiet; then
+    git -C "$path" commit -m "feat(ocean): enable $vm"
+  fi
+  git -C "$path" push --set-upstream origin "$branch"
+
+  pr=$(gh -R ncrmro/ks-config pr view "$branch" --json number -q .number 2>/dev/null || true)
+  if [[ -z $pr ]]; then
+    pr=$(gh -R ncrmro/ks-config pr create --draft \
+      --head "$branch" --base main \
+      --title "feat(ocean): adopt $vm" \
+      --body "Physical-to-zvol adoption. BitLocker remains enabled. Transfer and transient RDP validation are recorded in the generated manifest." |
+      sed -n 's#.*/pull/##p')
+  fi
+  state_update '.git.pullRequest = ($pr|tonumber) | .updatedAt = $now' \
+    --arg pr "$pr" --arg now "$(date --iso-8601=seconds)"
+  wait_for_pr "$path" "$pr"
+  gh -R ncrmro/ks-config pr merge "$pr" --squash --auto --delete-branch=false
+  while [[ $(gh -R ncrmro/ks-config pr view "$pr" --json state -q .state) != MERGED ]]; do
+    note "Waiting for auto-merge..."
+    sleep 30
+  done
+  merge_commit=$(gh -R ncrmro/ks-config pr view "$pr" --json mergeCommit -q .mergeCommit.oid)
+  state_update '.git.mergeCommit = $commit | .updatedAt = $now' \
+    --arg commit "$merge_commit" --arg now "$(date --iso-8601=seconds)"
+  note "Squash-merged as $merge_commit"
+}
+
+deployment_path() {
+  printf '%s/deploy/%s\n' "$worktrees_root" "$vm"
+}
+
+cmd_switch() {
+  require_state
+  local commit path branch manifest_enabled
+  commit=$(state_get '.git.mergeCommit')
+  [[ $commit =~ ^[0-9a-f]{40}$ ]] || die "no recorded squash merge commit"
+  path=$(deployment_path)
+  branch="deploy/$vm"
+  git -C "$repo" fetch origin main
+  [[ $(git -C "$repo" rev-parse origin/main) == "$commit" ]] ||
+    die "origin/main has moved beyond the recorded merge; inspect before deployment"
+
+  if [[ -d $path ]]; then
+    [[ $(owned_worktree_role "$path" 2>/dev/null || true) == deployment ]] ||
+      die "refusing unowned deployment path: $path"
+    git -C "$path" merge-base --is-ancestor "$commit" HEAD ||
+      die "deployment worktree does not contain merge commit"
+  else
+    mkdir -p "$(dirname "$path")"
+    git -C "$repo" branch -f "$branch" "$commit"
+    git -C "$repo" worktree add "$path" "$branch"
+    write_owner "$path" deployment
+  fi
+
+  manifest_enabled=$(nix eval --raw --expr \
+    "let m = import $path/hosts/ocean/vms/$vm.nix; in if m.enable then \"true\" else \"false\"")
+  [[ $manifest_enabled == true ]] || die "merged manifest is not enabled"
+  diff -u <(render_manifest) "$path/hosts/ocean/vms/$vm.nix" ||
+    die "merged manifest differs from the local migration ledger"
+
+  nix flake check "path:$path"
+  "$path/bin/ks-dev" --switch ocean
+  local domain_state
+  domain_state=$(virsh --connect "$(libvirt_uri)" domstate "$vm")
+  if [[ $domain_state == "shut off" ]]; then
+    virsh --connect "$(libvirt_uri)" start "$vm"
+    domain_state=$(virsh --connect "$(libvirt_uri)" domstate "$vm")
+  fi
+  [[ $domain_state == running ]] ||
+    die "Ocean switched, but $vm is '$domain_state' instead of running"
+  state_update '
+    .deployment.status = "switched" |
+    .deployment.revision = $commit |
+    .updatedAt = $now
+  ' --arg commit "$commit" --arg now "$(date --iso-8601=seconds)"
+  note "Ocean switched from exact main commit $commit; $vm is registered."
+}
+
+require_receiver_layout() {
+  local root=${KEYSTONE_MIGRATION_RECEIVER_ROOT:-/ocean/physical-migrations}
+  [[ -d $root && -w $root ]] || die "receiver root is not writable: $root"
+  printf '%s\n' "$root"
+}
+
+receiver_vm_dir() {
+  printf '%s/%s\n' "$(require_receiver_layout)" "$vm"
+}
+
+cmd_receiver_preflight() {
+  local bytes=
+  while (($#)); do
+    case "$1" in
+      --vm) vm=$2; shift 2 ;;
+      --bytes) bytes=$2; shift 2 ;;
+      *) die "unknown receiver-preflight argument: $1" ;;
+    esac
+  done
+  validate_name "$vm"
+  [[ $bytes =~ ^[1-9][0-9]*$ ]] || die "invalid byte count"
+  local root available
+  root=$(require_receiver_layout)
+  available=$(df --output=avail -B1 "$root" | tail -1 | tr -d ' ')
+  ((available >= bytes)) || die "receiver has $available bytes available; $bytes required"
+  note "receiver: OK ($available bytes available at $root)"
+}
+
+cmd_receiver_init() {
+  local bytes='' serial='' zvol=''
+  while (($#)); do
+    case "$1" in
+      --vm) vm=$2; shift 2 ;;
+      --bytes) bytes=$2; shift 2 ;;
+      --serial) serial=$2; shift 2 ;;
+      --zvol) zvol=$2; shift 2 ;;
+      *) die "unknown receiver-init argument: $1" ;;
+    esac
+  done
+  validate_name "$vm"
+  validate_dataset "$zvol"
+  local dir manifest
+  dir=$(receiver_vm_dir)
+  manifest="$dir/migration.json"
+  mkdir -p "$dir"
+  chmod 0770 "$dir"
+  if [[ -f $manifest ]]; then
+    [[ $(jq -r '.source.serial' "$manifest") == "$serial" ]] ||
+      die "receiver manifest pins a different source serial"
+    [[ $(jq -r '.source.bytes' "$manifest") == "$bytes" ]] ||
+      die "receiver manifest pins a different source size"
+    [[ $(jq -r '.promotion.zvol' "$manifest") == "$zvol" ]] ||
+      die "receiver manifest pins a different destination zvol"
+    [[ $(jq -r '.transfer.status' "$manifest") != verified ]] ||
+      die "receiver image is already verified and sealed"
+    return
+  fi
+  jq -n --arg vm "$vm" --arg serial "$serial" --argjson bytes "$bytes" \
+    --arg zvol "$zvol" --arg now "$(date --iso-8601=seconds)" \
+    '{
+      schema: 1, vm: $vm, updatedAt: $now,
+      source: {serial:$serial, bytes:$bytes},
+      transfer: {status:"copying", sha256:null},
+      promotion: {
+        status:"pending",
+        zvol:$zvol,
+        zvolCreatedByMigration:false,
+        snapshot:null
+      }
+    }' >"$manifest"
+  chmod 0660 "$manifest"
+}
+
+cmd_receiver_seal() {
+  local hash=
+  while (($#)); do
+    case "$1" in
+      --vm) vm=$2; shift 2 ;;
+      --sha256) hash=$2; shift 2 ;;
+      *) die "unknown receiver-seal argument: $1" ;;
+    esac
+  done
+  [[ $hash =~ ^[0-9a-f]{64}$ ]] || die "invalid SHA-256"
+  local dir manifest tmp
+  dir=$(receiver_vm_dir)
+  manifest="$dir/migration.json"
+  [[ -f $dir/disk.raw.partial ]] || die "partial image missing"
+  mv "$dir/disk.raw.partial" "$dir/disk.raw"
+  chmod 0440 "$dir/disk.raw"
+  tmp=$(mktemp "$dir/.migration.json.XXXXXX")
+  jq --arg hash "$hash" --arg now "$(date --iso-8601=seconds)" '
+    .transfer.status="verified" | .transfer.sha256=$hash | .updatedAt=$now
+  ' "$manifest" >"$tmp"
+  mv "$tmp" "$manifest"
+  chmod 0660 "$manifest"
+}
+
+cmd_receiver_promote() {
+  [[ $EUID -eq 0 ]] || die "receiver-promote must run through sudo on Ocean"
+  while (($#)); do
+    case "$1" in
+      --vm) vm=$2; shift 2 ;;
+      *) die "unknown receiver-promote argument: $1" ;;
+    esac
+  done
+  validate_name "$vm"
+  local root dir manifest image zvol bytes expected_hash actual_hash snapshot tmp device
+  local manifest_owner created_by_migration
+  root=${KEYSTONE_MIGRATION_RECEIVER_ROOT:-/ocean/physical-migrations}
+  dir="$root/$vm"
+  manifest="$dir/migration.json"
+  image="$dir/disk.raw"
+  [[ -r $manifest && -r $image ]] || die "verified receiver state is missing"
+  [[ $(jq -r '.transfer.status' "$manifest") == verified ]] ||
+    die "staged image is not verified"
+  if [[ $(jq -r '.promotion.status' "$manifest") == promoted ]]; then
+    note "Already promoted: $(jq -r '.promotion.snapshot' "$manifest")"
+    return
+  fi
+  zvol=$(jq -r '.promotion.zvol' "$manifest")
+  bytes=$(jq -r '.source.bytes' "$manifest")
+  expected_hash=$(jq -r '.transfer.sha256' "$manifest")
+  created_by_migration=$(jq -r '.promotion.zvolCreatedByMigration // false' "$manifest")
+  validate_dataset "$zvol"
+
+  if zfs list -H "$zvol" >/dev/null 2>&1; then
+    [[ $created_by_migration == true ]] ||
+      die "destination zvol already existed before this migration; refusing to overwrite"
+    [[ $(zfs get -Hp -o value volsize "$zvol") == "$bytes" ]] ||
+      die "existing zvol has the wrong size; refusing to overwrite"
+  else
+    zfs create -V "$bytes" -b 8K -o refreservation=none "$zvol"
+    manifest_owner=$(stat -c '%u:%g' "$manifest")
+    tmp=$(mktemp "$dir/.migration.json.XXXXXX")
+    jq --arg now "$(date --iso-8601=seconds)" '
+      .promotion.status="copying" |
+      .promotion.zvolCreatedByMigration=true |
+      .updatedAt=$now
+    ' "$manifest" >"$tmp"
+    mv "$tmp" "$manifest"
+    chown "$manifest_owner" "$manifest"
+    chmod 0660 "$manifest"
+  fi
+  device="/dev/zvol/$zvol"
+  [[ -b $device ]] || die "zvol device missing: $device"
+  rsync --archive --write-devices --inplace --sparse --info=progress2 "$image" "$device"
+  actual_hash=$(sha256sum "$device" | awk '{print $1}')
+  [[ $actual_hash == "$expected_hash" ]] ||
+    die "promoted zvol hash mismatch; staged image retained"
+  snapshot="$zvol@physical-migration-$(date -u +%Y%m%dT%H%M%SZ)"
+  zfs snapshot "$snapshot"
+  manifest_owner=$(stat -c '%u:%g' "$manifest")
+  tmp=$(mktemp "$dir/.migration.json.XXXXXX")
+  jq --arg snapshot "$snapshot" --arg now "$(date --iso-8601=seconds)" '
+    .promotion.status="promoted" |
+    .promotion.snapshot=$snapshot |
+    .updatedAt=$now
+  ' "$manifest" >"$tmp"
+  mv "$tmp" "$manifest"
+  chown "$manifest_owner" "$manifest"
+  chmod 0660 "$manifest"
+  note "Promoted and snapshotted: $snapshot"
+}
+
+main() {
+  global_args=()
+  parse_global "$@"
+  ((${#global_args[@]})) || {
+    usage
+    exit 1
+  }
+  local command=${global_args[0]}
+  local -a args=("${global_args[@]:1}")
+  case "$command" in
+    init) cmd_init "${args[@]}" ;;
+    source-ready) cmd_source_ready "${args[@]}" ;;
+    preflight) cmd_preflight "${args[@]}" ;;
+    push) cmd_push "${args[@]}" ;;
+    resume) cmd_push "${args[@]}" ;;
+    status) cmd_status "${args[@]}" ;;
+    logs) cmd_logs "${args[@]}" ;;
+    stop) cmd_stop "${args[@]}" ;;
+    verify-transfer) cmd_verify_transfer "${args[@]}" ;;
+    promote) cmd_promote "${args[@]}" ;;
+    validate) cmd_validate "${args[@]}" ;;
+    console) cmd_console "${args[@]}" ;;
+    rdp) cmd_rdp "${args[@]}" ;;
+    validate-complete) cmd_validate_complete "${args[@]}" ;;
+    publish) cmd_publish "${args[@]}" ;;
+    switch) cmd_switch "${args[@]}" ;;
+    manifest-sync) cmd_manifest_sync "${args[@]}" ;;
+    _push) cmd_push_internal "${args[@]}" ;;
+    receiver-preflight) cmd_receiver_preflight "${args[@]}" ;;
+    receiver-init) cmd_receiver_init "${args[@]}" ;;
+    receiver-seal) cmd_receiver_seal "${args[@]}" ;;
+    receiver-promote) cmd_receiver_promote "${args[@]}" ;;
+    help) usage ;;
+    *) die "unknown command: $command" ;;
+  esac
+}
+
+main "$@"

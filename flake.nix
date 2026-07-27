@@ -310,7 +310,11 @@
             zesh
             ;
           pi = inputs.llm-agents.packages.x86_64-linux.pi;
-          inherit (pkgs) mcp-language-server devbox;
+          inherit (pkgs)
+            devbox
+            keystone-physical-migration
+            mcp-language-server
+            ;
 
           # Portable per-user devbox container image (spike).
           "devbox-image-${adminUser.username}" = devboxNcrmroImage;

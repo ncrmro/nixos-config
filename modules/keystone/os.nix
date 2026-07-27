@@ -31,6 +31,7 @@
     ./os/keys.nix
     ./os/hardware-key.nix
     ./os/journal-remote-listenstream.nix
+    ./os/physical-migration.nix
     inputs.keystone.nixosModules.binaryCacheClient
     ../keys.nix
     ../../hosts/common/global/openssh.nix
