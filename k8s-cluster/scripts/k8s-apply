@@ -30,7 +30,7 @@ fi
 
 : "${DEVENV_ROOT:?Run k8s-apply from the repository devenv}"
 cluster_dir="$DEVENV_ROOT/k8s-cluster"
-export KUBECONFIG="${KUBECONFIG:-$HOME/.kube/config.ocean.yml}"
+export KUBECONFIG="${KUBECONFIG:-$HOME/.kube/config}"
 expected_server="${K8S_EXPECTED_SERVER:-https://100.64.0.6:6443}"
 field_manager="k8s-cluster"
 timeout="${K8S_APPLY_TIMEOUT:-10m}"

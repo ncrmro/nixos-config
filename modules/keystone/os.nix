@@ -18,9 +18,11 @@
   # by `operating-system`'s own imports list (see keystone flake.nix), so
   # they don't need to be repeated either.
   # TODO(upstream-keystone): vendored copies replace these upstream modules
-  # until the milestone-only fixes land on keystone main: zfs-backup
-  # (same-host backups), keys + hardware-key (SK key handle deployment).
+  # until the fleet finishes its current Keystone migration: journal-remote
+  # (current nixpkgs journald options), zfs-backup (same-host backups), and
+  # keys + hardware-key (SK key handle deployment).
   disabledModules = [
+    "${inputs.keystone}/modules/os/journal-remote.nix"
     "${inputs.keystone}/modules/os/zfs-backup.nix"
     "${inputs.keystone}/modules/keys.nix"
     "${inputs.keystone}/modules/os/hardware-key.nix"
@@ -30,7 +32,7 @@
     ./os/zfs-backup.nix
     ./os/keys.nix
     ./os/hardware-key.nix
-    ./os/journal-remote-listenstream.nix
+    ./os/journal-remote.nix
     inputs.keystone.nixosModules.binaryCacheClient
     ../keys.nix
     ../../hosts/common/global/openssh.nix

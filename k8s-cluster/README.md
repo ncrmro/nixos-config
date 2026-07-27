@@ -17,7 +17,7 @@ devenv shell -- k8s-apply-secrets
 devenv shell -- k8s-apply
 ```
 
-Both commands default to `~/.kube/config.ocean.yml`. Set `KUBECONFIG` to use
+Both commands default to `~/.kube/config`. Set `KUBECONFIG` to use
 another Ocean admin kubeconfig. The commands refuse to run when the selected
 context does not point at `https://100.64.0.6:6443`; set
 `K8S_EXPECTED_SERVER` only when Ocean's API endpoint intentionally changes.
@@ -31,20 +31,17 @@ The apply commands intentionally do not prune resources that disappear from
 this directory. Remove obsolete resources explicitly after reviewing the live
 object and its dependents.
 
-## Link Operator and Vega
+## Link Operator
 
-The standalone Vega resident agent has a separate, digest-gated installer
-because its Organization must pin the committed ks-config catalog revision and
-its public controller/agent images:
+The release-grade Link Operator installation remains shared cluster
+infrastructure and uses immutable public controller/agent image digests:
 
 ```bash
 export LINK_OPERATOR_IMAGE=ghcr.io/ai-outfitter/link-operator@sha256:…
 export LINK_AGENT_IMAGE=ghcr.io/ai-outfitter/link-agent@sha256:…
 devenv shell -- k8s-apply-link
-devenv shell -- k8s-apply-secrets
-devenv shell -- vega-pi-sync
-devenv shell -- k8s-apply-link
 ```
 
-See [`link-operator/README.md`](link-operator/README.md) for Stalwart and Slack
-credential requirements and verification.
+Agent profiles, Agent/Organization resources, credentials, Pi state, and
+development image deployment belong to their private application repositories.
+See [`link-operator/README.md`](link-operator/README.md).
