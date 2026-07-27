@@ -1,0 +1,58 @@
+# Forgejo v15 issues name-based Actions subjects. Keep every emitted identity
+# component in this group until Forgejo can migrate this repository to numeric
+# owner and repository IDs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vega-forgejo-deployer
+rules:
+  - apiGroups: ["link.aioutfitter.com"]
+    resources: ["agents"]
+    resourceNames: ["vega"]
+    verbs: ["get", "patch", "update"]
+  - apiGroups: ["link.aioutfitter.com"]
+    resources: ["organizations"]
+    resourceNames: ["ncrmro"]
+    verbs: ["get", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vega-forgejo-deployer
+subjects:
+  - kind: Group
+    apiGroup: rbac.authorization.k8s.io
+    name: oidc:forgejo:repo:ncrmro/vega:subject:repo:ncrmro/vega:ref:refs/heads/main:event:push:workflow:ncrmro/vega/.forgejo/workflows/deploy-link.yaml@refs/heads/main
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: vega-forgejo-deployer
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: vega-forgejo-deployer
+  namespace: agent-vega
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["vega-runtime"]
+    verbs: ["get", "patch", "update"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["agent-runtime"]
+    verbs: ["get", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: vega-forgejo-deployer
+  namespace: agent-vega
+subjects:
+  - kind: Group
+    apiGroup: rbac.authorization.k8s.io
+    name: oidc:forgejo:repo:ncrmro/vega:subject:repo:ncrmro/vega:ref:refs/heads/main:event:push:workflow:ncrmro/vega/.forgejo/workflows/deploy-link.yaml@refs/heads/main
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: vega-forgejo-deployer

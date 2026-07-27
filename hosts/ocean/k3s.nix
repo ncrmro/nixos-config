@@ -4,6 +4,54 @@
   inputs,
   ...
 }:
+let
+  authenticationConfig = (pkgs.formats.yaml { }).generate "k3s-authentication-config.yaml" {
+    apiVersion = "apiserver.config.k8s.io/v1";
+    kind = "AuthenticationConfiguration";
+    jwt = [
+      {
+        issuer = {
+          url = "https://git.ncrmro.com/api/actions";
+          audiences = [ "kubernetes-ocean" ];
+        };
+        claimValidationRules = [
+          {
+            expression = ''
+              has(claims.sub) &&
+              has(claims.repository) &&
+              has(claims.event_name) &&
+              has(claims.workflow_ref)
+            '';
+            message = "required Forgejo Actions deployment claims are missing";
+          }
+          {
+            expression = "claims.exp - claims.nbf <= 3600";
+            message = "token lifetime must not exceed one hour";
+          }
+        ];
+        claimMappings = {
+          username.expression = "'oidc:forgejo:' + claims.sub";
+          groups.expression = ''
+            ['oidc:forgejo:repo:' + claims.repository +
+            ':subject:' + claims.sub +
+            ':event:' + claims.event_name +
+            ':workflow:' + claims.workflow_ref]
+          '';
+        };
+        userValidationRules = [
+          {
+            expression = "!user.username.startsWith('system:')";
+            message = "username must not use the reserved system prefix";
+          }
+          {
+            expression = "user.groups.all(group, !group.startsWith('system:'))";
+            message = "groups must not use the reserved system prefix";
+          }
+        ];
+      }
+    ];
+  };
+in
 {
   # Define the K3s server token secret
   age.secrets.k3s-server-token = {
@@ -80,6 +128,7 @@
   services.k3s.enable = true;
   services.k3s.role = "server";
   services.k3s.tokenFile = config.age.secrets.k3s-server-token.path;
+  environment.etc."rancher/k3s/authentication-config.yaml".source = authenticationConfig;
   services.k3s.extraFlags = toString [
     "--disable=traefik" # Disable traefik to use ingress nginx instead
     "--disable=local-storage"
@@ -89,6 +138,8 @@
     "--tls-san=100.64.0.6"
     "--node-ip=100.64.0.6"
     "--flannel-iface=tailscale0"
+    "--kube-apiserver-arg=authentication-config=/etc/rancher/k3s/authentication-config.yaml"
     # "--debug" # Optionally add additional args to k3s
   ];
+  systemd.services.k3s.restartTriggers = [ authenticationConfig ];
 }
