@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: toggle-bluetooth [toggle|on|off|status]
+
+Toggle Bluetooth power, explicitly turn it on or off, or print its status.
+The default action is "toggle".
+EOF
+}
+
+action="${1:-toggle}"
+
+if (( $# > 1 )); then
+  usage >&2
+  exit 2
+fi
+
+case "$action" in
+  toggle | on | off | status) ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    echo "Unknown action: $action" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
+
+if ! command -v bluetoothctl >/dev/null 2>&1; then
+  echo "bluetoothctl is not installed or is not in PATH." >&2
+  exit 1
+fi
+
+controller_info="$(LC_ALL=C bluetoothctl show 2>&1)" || {
+  echo "$controller_info" >&2
+  exit 1
+}
+
+powered="$(
+  awk '$1 == "Powered:" { print $2; exit }' <<<"$controller_info"
+)"
+
+case "$powered" in
+  yes) current_state="on" ;;
+  no) current_state="off" ;;
+  *)
+    echo "No Bluetooth controller is available." >&2
+    exit 1
+    ;;
+esac
+
+if [[ "$action" == "status" ]]; then
+  echo "Bluetooth is $current_state."
+  exit 0
+fi
+
+if [[ "$action" == "toggle" ]]; then
+  if [[ "$current_state" == "on" ]]; then
+    target_state="off"
+  else
+    target_state="on"
+  fi
+else
+  target_state="$action"
+fi
+
+if [[ "$current_state" == "$target_state" ]]; then
+  echo "Bluetooth is already $target_state."
+  exit 0
+fi
+
+power_output="$(LC_ALL=C bluetoothctl power "$target_state" 2>&1)" || {
+  echo "$power_output" >&2
+  exit 1
+}
+
+updated_info="$(LC_ALL=C bluetoothctl show 2>&1)"
+updated_powered="$(
+  awk '$1 == "Powered:" { print $2; exit }' <<<"$updated_info"
+)"
+
+if [[ "$updated_powered" == "yes" ]]; then
+  updated_state="on"
+elif [[ "$updated_powered" == "no" ]]; then
+  updated_state="off"
+else
+  echo "Bluetooth power changed, but its new state could not be verified." >&2
+  exit 1
+fi
+
+if [[ "$updated_state" != "$target_state" ]]; then
+  echo "Failed to turn Bluetooth $target_state; it is still $updated_state." >&2
+  exit 1
+fi
+
+echo "Bluetooth turned $updated_state."

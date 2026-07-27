@@ -1,0 +1,229 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+readonly FLAKE_URL="${LLM_AGENTS_FLAKE:-github:numtide/llm-agents.nix}"
+readonly PROFILE_PATH="${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/llm-agents"
+readonly USER_BIN_DIR="${XDG_BIN_HOME:-$HOME/.local/bin}"
+
+readonly -a PACKAGES=(
+  "claude-code"
+  "codex"
+  "gemini-cli"
+  "opencode"
+)
+
+readonly -a EXECUTABLES=(
+  "claude"
+  "codex"
+  "gemini"
+  "opencode"
+)
+
+usage() {
+  cat <<'EOF'
+Usage: update-llm-agents [update|status|rollback|use-system]
+
+Maintain fast-moving AI CLI packages in an isolated Nix user profile.
+
+  update      Install missing packages and upgrade existing packages (default)
+  status      Show installed versions and command resolution
+  rollback    Roll the fast profile back one generation
+  use-system  Remove fast-profile links and use Home Manager's packages
+
+Environment:
+  LLM_AGENTS_FLAKE  Override the source flake
+EOF
+}
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Required command is not available: $1" >&2
+    exit 1
+  fi
+}
+
+profile_exists() {
+  [[ -e "$PROFILE_PATH" || -L "$PROFILE_PATH" ]]
+}
+
+profile_json() {
+  nix profile list --profile "$PROFILE_PATH" --json
+}
+
+profile_has_elements() {
+  profile_json | jq -e '.elements | length > 0' >/dev/null
+}
+
+package_is_installed() {
+  local package="$1"
+
+  profile_json | jq -e --arg package "$package" \
+    '.elements | has($package)' >/dev/null
+}
+
+add_missing_packages() {
+  local package
+  local -a installables=()
+
+  for package in "${PACKAGES[@]}"; do
+    if ! profile_exists || ! package_is_installed "$package"; then
+      installables+=("${FLAKE_URL}#${package}")
+    fi
+  done
+
+  if (( ${#installables[@]} == 0 )); then
+    return
+  fi
+
+  echo "Installing missing llm-agents packages..."
+  nix profile add \
+    --profile "$PROFILE_PATH" \
+    --accept-flake-config \
+    "${installables[@]}"
+}
+
+ensure_links() {
+  local index executable target link current_target
+
+  mkdir -p "$USER_BIN_DIR"
+
+  for index in "${!EXECUTABLES[@]}"; do
+    executable="${EXECUTABLES[$index]}"
+    target="$PROFILE_PATH/bin/$executable"
+    link="$USER_BIN_DIR/$executable"
+
+    if [[ ! -x "$target" ]]; then
+      echo "Expected executable is missing from the profile: $target" >&2
+      exit 1
+    fi
+
+    if [[ -L "$link" ]]; then
+      current_target="$(readlink "$link")"
+      if [[ "$current_target" != "$target" ]]; then
+        echo "Refusing to replace unrelated symlink: $link -> $current_target" >&2
+        exit 1
+      fi
+    elif [[ -e "$link" ]]; then
+      echo "Refusing to replace existing path: $link" >&2
+      exit 1
+    else
+      ln -s "$target" "$link"
+    fi
+  done
+}
+
+remove_links() {
+  local executable target link current_target
+
+  for executable in "${EXECUTABLES[@]}"; do
+    target="$PROFILE_PATH/bin/$executable"
+    link="$USER_BIN_DIR/$executable"
+
+    if [[ ! -L "$link" ]]; then
+      continue
+    fi
+
+    current_target="$(readlink "$link")"
+    if [[ "$current_target" == "$target" ]]; then
+      rm "$link"
+    else
+      echo "Leaving unrelated symlink untouched: $link -> $current_target" >&2
+    fi
+  done
+}
+
+show_shell_refresh_hint() {
+  cat <<'EOF'
+
+Existing terminals may still have the old command paths cached.
+Run `rehash` in each existing terminal, or start a new shell.
+EOF
+}
+
+show_status() {
+  local executable target version resolved
+
+  if ! profile_exists || ! profile_has_elements; then
+    echo "The fast llm-agents profile is not installed."
+    return
+  fi
+
+  printf '%-12s %-22s %s\n' "COMMAND" "VERSION" "RESOLVES TO"
+  for executable in "${EXECUTABLES[@]}"; do
+    target="$PROFILE_PATH/bin/$executable"
+    if [[ -x "$target" ]]; then
+      version="$("$target" --version 2>&1)"
+      version="${version%%$'\n'*}"
+    else
+      version="missing"
+    fi
+    resolved="$(PATH="$USER_BIN_DIR:$PATH" command -v "$executable" || true)"
+    printf '%-12s %-22s %s\n' "$executable" "$version" "${resolved:-not on PATH}"
+  done
+}
+
+update_profile() {
+  mkdir -p "$(dirname "$PROFILE_PATH")"
+
+  if profile_exists && profile_has_elements; then
+    echo "Updating llm-agents profile..."
+    nix profile upgrade \
+      --profile "$PROFILE_PATH" \
+      --all \
+      --refresh \
+      --accept-flake-config
+  fi
+
+  add_missing_packages
+  ensure_links
+  show_status
+  show_shell_refresh_hint
+}
+
+rollback_profile() {
+  if ! profile_exists || ! profile_has_elements; then
+    echo "The fast llm-agents profile is not installed." >&2
+    exit 1
+  fi
+
+  nix profile rollback --profile "$PROFILE_PATH"
+  ensure_links
+  show_status
+  show_shell_refresh_hint
+}
+
+action="${1:-update}"
+
+if (( $# > 1 )); then
+  usage >&2
+  exit 2
+fi
+
+require_command nix
+require_command jq
+
+case "$action" in
+  update)
+    update_profile
+    ;;
+  status)
+    show_status
+    ;;
+  rollback)
+    rollback_profile
+    ;;
+  use-system)
+    remove_links
+    echo "Fast-profile links removed; new shells will use Home Manager's packages."
+    show_shell_refresh_hint
+    ;;
+  -h | --help)
+    usage
+    ;;
+  *)
+    echo "Unknown action: $action" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
