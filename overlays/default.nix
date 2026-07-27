@@ -13,4 +13,7 @@
 
   # TODO(upstream-keystone): ks TCP reachability probe (milestone 8830b560).
   (import ./keystone/ks-tcp-probe.nix)
+
+  # Temporary nixpkgs compatibility for the sabnzbd dependency closure.
+  (import ./cheetah3-metadata.nix)
 ]
