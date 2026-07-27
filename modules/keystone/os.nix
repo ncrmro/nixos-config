@@ -24,13 +24,14 @@
     "${inputs.keystone}/modules/os/zfs-backup.nix"
     "${inputs.keystone}/modules/keys.nix"
     "${inputs.keystone}/modules/os/hardware-key.nix"
+    "${inputs.keystone}/modules/os/journal-remote.nix"
   ];
 
   imports = [
     ./os/zfs-backup.nix
     ./os/keys.nix
     ./os/hardware-key.nix
-    ./os/journal-remote-listenstream.nix
+    ./os/journal-remote.nix
     ./os/physical-migration.nix
     inputs.keystone.nixosModules.binaryCacheClient
     ../keys.nix

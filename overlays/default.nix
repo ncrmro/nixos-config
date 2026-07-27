@@ -7,6 +7,12 @@
   # Local packages
   (final: prev: import ../packages/default.nix { pkgs = final; })
 
+  # Pinned nixpkgs bug: Cheetah3 publishes metadata under the `ct3` name.
+  (import ./cheetah3-metadata.nix)
+
+  # Pinned nixpkgs bug: satty 0.20.0 no longer has the requested ci-release feature.
+  (import ./satty-build-features.nix)
+
   # keystone-bound overlay holding area (see modules/keystone/AGENTS.md):
   # skip weasyprint's macOS-flaky pixel tests so it builds on aarch64-darwin.
   (import ./keystone/weasyprint-darwin-tests.nix)
