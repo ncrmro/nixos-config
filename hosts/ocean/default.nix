@@ -29,6 +29,7 @@
     ./k3s.nix
     ./k3s-host-services.nix
     ./nfs.nix
+    ./optical-media.nix
     ../common/optional/smb-backup-shares.nix
     ./vaultwarden.nix
     ./rsshub.nix

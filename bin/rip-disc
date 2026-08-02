@@ -1,0 +1,384 @@
+#!/usr/bin/env python3
+"""Rip a DVD or Blu-ray into Ocean's Jellyfin media library."""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from dataclasses import dataclass
+from pathlib import Path
+
+
+DEFAULT_MEDIA_ROOT = Path("/ocean/media")
+INVALID_PATH_CHARS = re.compile(r"[/\x00]")
+
+
+@dataclass
+class DiscTitle:
+    number: int
+    name: str = ""
+    duration: int = 0
+    size: int = 0
+    source: str = ""
+
+
+def positive_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("must be at least 1")
+    return parsed
+
+
+def nonnegative_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 0:
+        raise argparse.ArgumentTypeError("must be at least 0")
+    return parsed
+
+
+def safe_component(value: str) -> str:
+    value = value.strip()
+    if not value or value in {".", ".."} or INVALID_PATH_CHARS.search(value):
+        raise ValueError(f"invalid path component: {value!r}")
+    return value
+
+
+def duration_seconds(value: str) -> int:
+    parts = value.split(":")
+    if len(parts) != 3:
+        return 0
+    try:
+        hours, minutes, seconds = (int(part) for part in parts)
+    except ValueError:
+        return 0
+    return hours * 3600 + minutes * 60 + seconds
+
+
+def format_duration(seconds: int) -> str:
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{hours}:{minutes:02d}:{seconds:02d}"
+
+
+def format_size(size: int) -> str:
+    if not size:
+        return "unknown"
+    units = ["B", "KiB", "MiB", "GiB", "TiB"]
+    amount = float(size)
+    for unit in units:
+        if amount < 1024 or unit == units[-1]:
+            return f"{amount:.1f} {unit}"
+        amount /= 1024
+    return str(size)
+
+
+def makemkv_command() -> str:
+    return os.environ.get("MAKEMKVCON", "makemkvcon")
+
+
+def run_makemkv(*arguments: str, capture: bool = False) -> subprocess.CompletedProcess[str]:
+    command = [makemkv_command(), "--robot", "--cache=1", *arguments]
+    try:
+        return subprocess.run(
+            command,
+            check=True,
+            text=True,
+            stdout=subprocess.PIPE if capture else None,
+            stderr=subprocess.STDOUT if capture else None,
+        )
+    except FileNotFoundError:
+        raise RuntimeError(
+            "makemkvcon is not installed; deploy the Ocean configuration first"
+        ) from None
+    except subprocess.CalledProcessError as error:
+        if capture and error.stdout:
+            print(error.stdout, file=sys.stderr, end="")
+        raise RuntimeError(
+            "MakeMKV failed. Check that the disc is readable and that your "
+            "MakeMKV registration or current beta key is configured."
+        ) from error
+
+
+def inspect_disc(disc_index: int) -> tuple[str, list[DiscTitle]]:
+    result = run_makemkv("info", f"disc:{disc_index}", capture=True)
+    disc_name = ""
+    messages: list[str] = []
+    titles: dict[int, DiscTitle] = {}
+
+    for raw_line in result.stdout.splitlines():
+        prefix, separator, payload = raw_line.partition(":")
+        if not separator or prefix not in {"CINFO", "MSG", "TINFO"}:
+            continue
+        try:
+            fields = next(csv.reader([payload]))
+        except csv.Error:
+            continue
+
+        if prefix == "MSG" and len(fields) >= 4:
+            messages.append(fields[3])
+            continue
+        if prefix == "CINFO" and len(fields) >= 3 and fields[0] == "2":
+            disc_name = fields[2]
+            continue
+        if prefix != "TINFO" or len(fields) < 4:
+            continue
+
+        try:
+            title_number = int(fields[0])
+            code = int(fields[1])
+        except ValueError:
+            continue
+        title = titles.setdefault(title_number, DiscTitle(number=title_number))
+        value = fields[3]
+        if code == 2:
+            title.name = value
+        elif code == 9:
+            title.duration = duration_seconds(value)
+        elif code == 11:
+            try:
+                title.size = int(value)
+            except ValueError:
+                pass
+        elif code == 16:
+            title.source = value
+
+    if not titles:
+        detail = next(
+            (
+                message
+                for message in reversed(messages)
+                if "Failed to open disc" not in message
+            ),
+            "MakeMKV returned no title information",
+        )
+        if "usable optical drives" in detail:
+            detail += (
+                " Deploy the Ocean configuration, then start a fresh login "
+                "so the cdrom group and sg kernel module are active."
+            )
+        raise RuntimeError(f"could not inspect disc {disc_index}: {detail}")
+    return disc_name, sorted(titles.values(), key=lambda title: title.number)
+
+
+def print_titles(disc_name: str, titles: list[DiscTitle]) -> None:
+    print(f"Disc: {disc_name or '(unnamed)'}")
+    print(f"{'Title':>5}  {'Duration':>8}  {'Size':>10}  Source / name")
+    for title in titles:
+        description = title.source or title.name or "-"
+        print(
+            f"{title.number:>5}  {format_duration(title.duration):>8}  "
+            f"{format_size(title.size):>10}  {description}"
+        )
+
+
+def select_titles(
+    available: list[DiscTitle],
+    requested: list[int] | None,
+    minimum_length: int,
+) -> list[DiscTitle]:
+    by_number = {title.number: title for title in available}
+    if requested:
+        missing = [number for number in requested if number not in by_number]
+        if missing:
+            missing_text = ", ".join(str(number) for number in missing)
+            raise ValueError(f"disc does not contain title(s): {missing_text}")
+        if len(set(requested)) != len(requested):
+            raise ValueError("each --title may only be specified once")
+        return [by_number[number] for number in requested]
+
+    selected = [title for title in available if title.duration >= minimum_length]
+    if not selected:
+        raise ValueError(
+            f"no titles are at least {format_duration(minimum_length)} long; "
+            "use --min-length or explicitly pass --title"
+        )
+    return selected
+
+
+def confirm(
+    disc_name: str,
+    selected: list[DiscTitle],
+    destinations: list[Path],
+    assume_yes: bool,
+) -> None:
+    print(f"Disc: {disc_name or '(unnamed)'}")
+    for title, destination in zip(selected, destinations, strict=True):
+        print(
+            f"  title {title.number} ({format_duration(title.duration)})"
+            f" -> {destination}"
+        )
+
+    if assume_yes:
+        return
+    if not sys.stdin.isatty():
+        raise RuntimeError("confirmation requires a terminal; pass --yes to proceed")
+    response = input("Start ripping? [y/N] ").strip().lower()
+    if response not in {"y", "yes"}:
+        raise RuntimeError("cancelled")
+
+
+def ensure_destinations(destinations: list[Path], media_root: Path) -> None:
+    if not media_root.is_dir():
+        raise RuntimeError(f"media root is not mounted: {media_root}")
+    for destination in destinations:
+        if destination.exists():
+            raise RuntimeError(f"refusing to overwrite existing file: {destination}")
+
+
+def rip_title(disc_index: int, title_number: int, work_root: Path) -> Path:
+    work_dir = Path(tempfile.mkdtemp(prefix=f"title-{title_number}-", dir=work_root))
+    try:
+        run_makemkv("mkv", f"disc:{disc_index}", str(title_number), str(work_dir))
+        outputs = list(work_dir.glob("*.mkv"))
+        if len(outputs) != 1:
+            raise RuntimeError(
+                f"expected one MKV for title {title_number}, found {len(outputs)}"
+            )
+        return outputs[0]
+    except Exception:
+        shutil.rmtree(work_dir, ignore_errors=True)
+        raise
+
+
+def publish(source: Path, destination: Path) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.parent.chmod(0o2775)
+    source.chmod(0o664)
+    source.replace(destination)
+    source.parent.rmdir()
+
+
+def eject_disc(disc_index: int) -> None:
+    try:
+        subprocess.run(
+            [os.environ.get("EJECT", "eject"), f"/dev/sr{disc_index}"],
+            check=True,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        print("Warning: could not eject the disc", file=sys.stderr)
+
+
+def add_common_rip_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--title",
+        type=nonnegative_int,
+        action="append",
+        help="MakeMKV title number; repeat to select and order TV episodes",
+    )
+    parser.add_argument(
+        "--min-length",
+        type=positive_int,
+        default=1200,
+        metavar="SECONDS",
+        help="minimum title length when --title is omitted (default: 1200)",
+    )
+    parser.add_argument("--yes", action="store_true", help="skip confirmation")
+    parser.add_argument(
+        "--no-eject", action="store_true", help="leave the disc in the drive"
+    )
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="rip-disc",
+        description="Rip a DVD or Blu-ray into Ocean's Jellyfin library.",
+        epilog=(
+            "Examples:\n"
+            "  rip-disc scan\n"
+            '  rip-disc movie "The Matrix" 1999\n'
+            '  rip-disc tv "Star Trek - The Next Generation" 2 1\n'
+            '  rip-disc tv "Some Show" 1 5 --title 3 --title 7'
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--disc-index",
+        type=nonnegative_int,
+        default=0,
+        help="MakeMKV disc index (default: 0)",
+    )
+    parser.add_argument(
+        "--media-root",
+        type=Path,
+        default=Path(os.environ.get("OCEAN_MEDIA_ROOT", DEFAULT_MEDIA_ROOT)),
+        help=argparse.SUPPRESS,
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    subparsers.add_parser("scan", help="list titles without ripping")
+
+    movie = subparsers.add_parser(
+        "movie", help="rip the longest title into the movies library"
+    )
+    movie.add_argument("name", help="movie name")
+    movie.add_argument("year", type=positive_int, help="release year")
+    add_common_rip_arguments(movie)
+
+    tv = subparsers.add_parser("tv", help="rip titles into a TV season")
+    tv.add_argument("show", help="series name")
+    tv.add_argument("season", type=positive_int, help="season number")
+    tv.add_argument("episode", type=positive_int, help="first episode number")
+    add_common_rip_arguments(tv)
+
+    return parser
+
+
+def main() -> int:
+    parser = build_parser()
+    args = parser.parse_args()
+
+    try:
+        disc_name, available = inspect_disc(args.disc_index)
+        if args.command == "scan":
+            print_titles(disc_name, available)
+            return 0
+
+        media_root = args.media_root.resolve()
+        selected = select_titles(available, args.title, args.min_length)
+        if args.command == "movie":
+            if args.title and len(args.title) != 1:
+                raise ValueError("movie accepts exactly one explicit --title")
+            selected = [max(selected, key=lambda title: title.duration)]
+            movie_name = f"{safe_component(args.name)} ({args.year})"
+            destinations = [
+                media_root / "movies" / movie_name / f"{movie_name}.mkv"
+            ]
+        else:
+            show = safe_component(args.show)
+            destinations = [
+                media_root
+                / "tv"
+                / show
+                / f"Season {args.season:02d}"
+                / f"{show} - S{args.season:02d}E{episode:02d}.mkv"
+                for episode in range(args.episode, args.episode + len(selected))
+            ]
+
+        ensure_destinations(destinations, media_root)
+        confirm(disc_name, selected, destinations, args.yes)
+
+        work_root = media_root / ".rip-disc-work"
+        work_root.mkdir(mode=0o2770, exist_ok=True)
+        for title, destination in zip(selected, destinations, strict=True):
+            print(f"Ripping title {title.number}...")
+            output = rip_title(args.disc_index, title.number, work_root)
+            publish(output, destination)
+            print(f"Published {destination}")
+
+        if not args.no_eject:
+            eject_disc(args.disc_index)
+        print("Done. Jellyfin will discover the new media from its library path.")
+        return 0
+    except (OSError, RuntimeError, ValueError) as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
